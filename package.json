@@ -1,0 +1,71 @@
+{
+  "name": "@meerkapp/wms-frontend",
+  "version": "0.1.0",
+  "description": "Meerk warehouse management system frontend",
+  "private": false,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "author": "meerkapp <github.com/meerkapp>",
+  "homepage": "https://meerk.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meerkapp/wms-frontend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/meerkapp/wms-frontend/issues"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "lint": "run-s lint:*",
+    "lint:oxlint": "oxlint . --fix",
+    "lint:eslint": "eslint . --fix --cache",
+    "format": "prettier --write --experimental-cli src/",
+    "postinstall": "electron-rebuild -f -w better-sqlite3"
+  },
+  "dependencies": {
+    "@meerkapp/electron-bridge": "^0.1.2",
+    "@pinia/colada": "^1.0.0",
+    "@primeuix/themes": "^2.0.3",
+    "jwt-decode": "^4.0.0",
+    "ofetch": "^1.5.1",
+    "pinia": "^3.0.4",
+    "primevue": "^4.5.4",
+    "vue": "^3.5.29",
+    "vue-i18n": "^11.3.0",
+    "vue-router": "^5.0.3"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.3",
+    "@iconify-json/tabler": "^1.2.31",
+    "@iconify/tailwind4": "^1.2.3",
+    "@tailwindcss/vite": "^4.2.1",
+    "@tsconfig/node24": "^24.0.4",
+    "@types/node": "^24.11.0",
+    "@vitejs/plugin-vue": "^6.0.4",
+    "@vue/eslint-config-typescript": "^14.7.0",
+    "@vue/tsconfig": "^0.8.1",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-oxlint": "~1.50.0",
+    "eslint-plugin-vue": "~10.8.0",
+    "jiti": "^2.6.1",
+    "lightningcss": "^1.32.0",
+    "npm-run-all2": "^8.0.4",
+    "oxlint": "~1.50.0",
+    "prettier": "3.8.1",
+    "tailwindcss": "^4.2.1",
+    "tailwindcss-primeui": "^0.6.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-pwa": "^1.2.0",
+    "vite-plugin-vue-devtools": "^8.0.6",
+    "vue-tsc": "^3.2.5"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}

@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+@import 'tailwindcss-primeui';
+
+@custom-variant dark (&:where([class~="app-dark"], [class~="app-dark"] *));
+
+@plugin "@iconify/tailwind4" {
+  prefix: 'iconify';
+  prefixes: tabler;
+  scale: 1.25;
+}
+
+@font-face {
+  font-family: 'Noto Color Emoji';
+  src: url('/fonts/NotoColorEmoji.ttf') format('truetype');
+}
+
+:root {
+  font-size: 14px;
+  font-family:
+    ui-sans-serif, system-ui, sans-serif, 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', sans-serif;
+  @apply bg-surface-200 dark:bg-surface-800;
+}
+
+h1 {
+  @apply font-semibold uppercase;
+}
+
+h2 {
+  @apply text-sm font-light uppercase;
+}
+
+h3 {
+  @apply text-sm font-semibold uppercase;
+}
+
+h4 {
+  @apply text-xs text-muted-color;
+}
+
+.p-dialog-title {
+  @apply uppercase;
+}
