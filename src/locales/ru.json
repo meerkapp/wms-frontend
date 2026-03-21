@@ -39,6 +39,9 @@
       "retry": "Попробовать снова"
     }
   },
+  "sync": {
+    "greeting": "Привет, {firstName} {lastName}!"
+  },
   "common": {
     "error": {
       "network": "Ошибка сети. Попробуйте позже."
