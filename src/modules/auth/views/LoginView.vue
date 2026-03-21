@@ -40,7 +40,7 @@ const { mutate: login, isLoading } = useMutation({
       const { code } = await authApi.getLauncherCode()
       launcherCode.value = code
     } else {
-      router.push({ name: 'dashboard' })
+      router.push({ name: 'sync' })
     }
   },
 })
@@ -72,7 +72,7 @@ function handleSubmit() {
     <BaseCard class="m-3 flex-1">
       <template #body>
         <div class="flex flex-col items-center justify-center h-full">
-          <div class="w-72 md:w-96">
+          <div class="w-72 sm:w-96">
             <Logo class="mb-10" />
 
             <!-- Launcher redirect screen -->

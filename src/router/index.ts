@@ -16,6 +16,12 @@ const router = createRouter({
       component: () => import('@/modules/auth/views/LoginView.vue'),
     },
     {
+      path: '/sync',
+      name: 'sync',
+      meta: { requiresAuth: true },
+      component: () => import('@/modules/signaldb/views/SyncView.vue'),
+    },
+    {
       path: '/',
       name: 'dashboard',
       meta: { requiresAuth: true },
@@ -26,7 +32,7 @@ const router = createRouter({
 
 let sessionRestored = false
 
-router.beforeEach(async (to) => {
+router.beforeEach(async (to, from) => {
   const auth = useAuthStore()
 
   // On first navigation, try to restore session via httpOnly cookie
@@ -49,9 +55,9 @@ router.beforeEach(async (to) => {
     return { name: 'login' }
   }
 
-  // Redirect authenticated users away from login/setup
-  if ((to.name === 'login' || to.name === 'setup') && auth.isAuthenticated) {
-    return { name: 'dashboard' }
+  // Redirect authenticated users to sync before dashboard
+  if (auth.isAuthenticated && to.name !== 'sync' && from.name !== 'sync') {
+    return { name: 'sync' }
   }
 })
 
