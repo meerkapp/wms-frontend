@@ -27,13 +27,18 @@
     "postinstall": "electron-rebuild -f -w better-sqlite3"
   },
   "dependencies": {
-    "@meerkapp/electron-bridge": "^0.1.2",
+    "@meerkapp/electron-bridge": "^0.1.5",
     "@pinia/colada": "^1.0.0",
     "@primeuix/themes": "^2.0.3",
+    "@signaldb/core": "2.0.0-beta.6",
+    "@signaldb/indexeddb": "2.0.0-beta.6",
+    "@signaldb/sync": "2.0.0-beta.6",
+    "@signaldb/vue": "2.0.0-beta.6",
     "jwt-decode": "^4.0.0",
     "ofetch": "^1.5.1",
     "pinia": "^3.0.4",
     "primevue": "^4.5.4",
+    "socket.io-client": "^4.8.3",
     "vue": "^3.5.29",
     "vue-i18n": "^11.3.0",
     "vue-router": "^5.0.3"
@@ -67,5 +72,6 @@
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
-  }
+  },
+  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be"
 }
