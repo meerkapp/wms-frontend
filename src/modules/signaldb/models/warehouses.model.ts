@@ -2,12 +2,12 @@ import { Collection } from '@signaldb/core'
 import vueReactivityAdapter from '@signaldb/vue'
 import { dataAdapter } from '../sync/manager'
 
-const collectionName = 'stocks'
-const tableName = 'stock'
+const collectionName = 'warehouses'
+const tableName = 'warehouse'
 
-export const Stocks = new Collection(collectionName, dataAdapter, {
+export const Warehouses = new Collection(collectionName, dataAdapter, {
   reactivity: vueReactivityAdapter,
   indices: ['updated_at'],
 })
 
-export default { collection: Stocks, collectionName, tableName }
+export default { collection: Warehouses, collectionName, tableName }

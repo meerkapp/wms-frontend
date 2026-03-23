@@ -8,7 +8,7 @@ const storage = prepareIndexedDB({
     countries: [],
     cities: [],
     organizations: [],
-    stocks: [],
+    warehouses: [],
     'sync-manager-changes': ['collectionName'],
     'sync-manager-snapshots': ['collectionName'],
     'sync-manager-sync-operations': ['collectionName', 'status'],
