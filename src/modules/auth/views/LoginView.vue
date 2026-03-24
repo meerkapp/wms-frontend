@@ -70,7 +70,7 @@ function handleSubmit() {
 <template>
   <div class="h-screen flex flex-col">
     <BaseCard class="m-3 flex-1">
-      <template #body>
+      <template #main>
         <div class="flex flex-col items-center justify-center h-full">
           <div class="w-72 sm:w-96">
             <Logo class="mb-10" />
