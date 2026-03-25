@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 import { Button, Fieldset, FloatLabel, InputText, Password } from 'primevue'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import { z } from 'zod'
 
 import BaseCard from '@/core/components/BaseCard.vue'
 import Logo from '@/core/components/Logo.vue'
@@ -18,13 +21,27 @@ const route = useRoute()
 const toast = useToast()
 const auth = useAuthStore()
 
-const email = ref('')
-const password = ref('')
-const errors = ref({ email: '', password: '' })
 const launcherCode = ref<string | null>(null)
 
+const validationSchema = computed(() =>
+  toTypedSchema(
+    z.object({
+      email: z
+        .string()
+        .min(1, t('auth.login.validation.emailRequired'))
+        .email(t('auth.login.validation.emailInvalid')),
+      password: z.string().min(1, t('auth.login.validation.passwordRequired')),
+    }),
+  ),
+)
+
+const { handleSubmit, errors, defineField } = useForm({ validationSchema })
+
+const [email, emailAttrs] = defineField('email')
+const [password, passwordAttrs] = defineField('password')
+
 const { mutate: login, isLoading } = useMutation({
-  mutation: () => authApi.login({ email: email.value, password: password.value }),
+  mutation: () => authApi.login({ email: email.value!, password: password.value! }),
   onError(error: unknown) {
     const status = (error as { response?: { status?: number } })?.response?.status
     if (status === 401) {
@@ -45,26 +62,7 @@ const { mutate: login, isLoading } = useMutation({
   },
 })
 
-function validate(): boolean {
-  errors.value = { email: '', password: '' }
-
-  if (!email.value) {
-    errors.value.email = t('auth.login.validation.emailRequired')
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-    errors.value.email = t('auth.login.validation.emailInvalid')
-  }
-
-  if (!password.value) {
-    errors.value.password = t('auth.login.validation.passwordRequired')
-  }
-
-  return !errors.value.email && !errors.value.password
-}
-
-function handleSubmit() {
-  if (!validate()) return
-  login()
-}
+const onSubmit = handleSubmit(() => login())
 </script>
 
 <template>
@@ -80,17 +78,17 @@ function handleSubmit() {
 
             <!-- Login form -->
             <Fieldset v-else :legend="t('auth.login.title')">
-              <form class="space-y-5 px-2 py-2" @submit.prevent="handleSubmit">
+              <form class="space-y-5 px-2 py-2" @submit.prevent="onSubmit">
                 <div>
                   <FloatLabel variant="on">
                     <InputText
                       id="login_email"
                       v-model="email"
+                      v-bind="emailAttrs"
                       type="email"
                       autocomplete="email"
                       :invalid="!!errors.email"
                       fluid
-                      @input="errors.email = ''"
                     />
                     <label for="login_email">{{ t('auth.login.email') }}</label>
                   </FloatLabel>
@@ -103,11 +101,11 @@ function handleSubmit() {
                     <Password
                       id="login_password"
                       v-model="password"
+                      v-bind="passwordAttrs"
                       :feedback="false"
                       :invalid="!!errors.password"
                       toggle-mask
                       fluid
-                      @input="errors.password = ''"
                     />
                     <label for="login_password">{{ t('auth.login.password') }}</label>
                   </FloatLabel>

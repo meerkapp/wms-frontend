@@ -13,18 +13,6 @@ export interface AuthTokens {
   // refresh_token is set as httpOnly cookie by the backend
 }
 
-export interface LoginDto {
-  email: string
-  password: string
-}
-
-export interface SetupInitDto {
-  email: string
-  password: string
-  firstName: string
-  lastName: string
-}
-
 export interface SetupStatusResponse {
   setupRequired: boolean
 }

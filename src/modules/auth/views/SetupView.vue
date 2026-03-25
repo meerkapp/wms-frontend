@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 import { Button, Fieldset, FloatLabel, InputText, Password } from 'primevue'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import { z } from 'zod'
 
 import BaseCard from '@/core/components/BaseCard.vue'
 import Logo from '@/core/components/Logo.vue'
@@ -18,21 +21,46 @@ const route = useRoute()
 const toast = useToast()
 const auth = useAuthStore()
 
-const firstName = ref('')
-const lastName = ref('')
-const email = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const errors = ref({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' })
 const launcherCode = ref<string | null>(null)
+
+const validationSchema = computed(() =>
+  toTypedSchema(
+    z
+      .object({
+        firstName: z.string().min(1, t('auth.setup.validation.firstNameRequired')),
+        lastName: z.string().min(1, t('auth.setup.validation.lastNameRequired')),
+        email: z
+          .string()
+          .min(1, t('auth.setup.validation.emailRequired'))
+          .email(t('auth.setup.validation.emailInvalid')),
+        password: z
+          .string()
+          .min(1, t('auth.setup.validation.passwordRequired'))
+          .min(8, t('auth.setup.validation.passwordTooShort')),
+        confirmPassword: z.string().min(1, t('auth.setup.validation.confirmPasswordRequired')),
+      })
+      .refine((data) => data.password === data.confirmPassword, {
+        message: t('auth.setup.validation.passwordMismatch'),
+        path: ['confirmPassword'],
+      }),
+  ),
+)
+
+const { handleSubmit, errors, defineField } = useForm({ validationSchema })
+
+const [firstName, firstNameAttrs] = defineField('firstName')
+const [lastName, lastNameAttrs] = defineField('lastName')
+const [email, emailAttrs] = defineField('email')
+const [password, passwordAttrs] = defineField('password')
+const [confirmPassword, confirmPasswordAttrs] = defineField('confirmPassword')
 
 const { mutate: setup, isLoading } = useMutation({
   mutation: () =>
     authApi.setupInit({
-      email: email.value,
-      password: password.value,
-      firstName: firstName.value,
-      lastName: lastName.value,
+      email: email.value!,
+      password: password.value!,
+      firstName: firstName.value!,
+      lastName: lastName.value!,
     }),
   onError() {
     toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
@@ -49,37 +77,7 @@ const { mutate: setup, isLoading } = useMutation({
   },
 })
 
-function validate(): boolean {
-  errors.value = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' }
-
-  if (!firstName.value) errors.value.firstName = t('auth.setup.validation.firstNameRequired')
-  if (!lastName.value) errors.value.lastName = t('auth.setup.validation.lastNameRequired')
-
-  if (!email.value) {
-    errors.value.email = t('auth.setup.validation.emailRequired')
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-    errors.value.email = t('auth.setup.validation.emailInvalid')
-  }
-
-  if (!password.value) {
-    errors.value.password = t('auth.setup.validation.passwordRequired')
-  } else if (password.value.length < 8) {
-    errors.value.password = t('auth.setup.validation.passwordTooShort')
-  }
-
-  if (!confirmPassword.value) {
-    errors.value.confirmPassword = t('auth.setup.validation.confirmPasswordRequired')
-  } else if (confirmPassword.value !== password.value) {
-    errors.value.confirmPassword = t('auth.setup.validation.passwordMismatch')
-  }
-
-  return Object.values(errors.value).every((e) => !e)
-}
-
-function handleSubmit() {
-  if (!validate()) return
-  setup()
-}
+const onSubmit = handleSubmit(() => setup())
 </script>
 
 <template>
@@ -96,16 +94,16 @@ function handleSubmit() {
             <!-- Setup form -->
             <Fieldset v-else :legend="t('auth.setup.title')">
               <p class="text-sm text-muted-color p-2">{{ t('auth.setup.subtitle') }}</p>
-              <form class="space-y-5 p-2" @submit.prevent="handleSubmit">
+              <form class="space-y-5 p-2" @submit.prevent="onSubmit">
                 <div>
                   <FloatLabel variant="on">
                     <InputText
                       id="setup_first_name"
                       v-model="firstName"
+                      v-bind="firstNameAttrs"
                       autocomplete="given-name"
                       :invalid="!!errors.firstName"
                       fluid
-                      @input="errors.firstName = ''"
                     />
                     <label for="setup_first_name">{{ t('auth.setup.firstName') }}</label>
                   </FloatLabel>
@@ -118,10 +116,10 @@ function handleSubmit() {
                     <InputText
                       id="setup_last_name"
                       v-model="lastName"
+                      v-bind="lastNameAttrs"
                       autocomplete="family-name"
                       :invalid="!!errors.lastName"
                       fluid
-                      @input="errors.lastName = ''"
                     />
                     <label for="setup_last_name">{{ t('auth.setup.lastName') }}</label>
                   </FloatLabel>
@@ -134,11 +132,11 @@ function handleSubmit() {
                     <InputText
                       id="setup_email"
                       v-model="email"
+                      v-bind="emailAttrs"
                       type="email"
                       autocomplete="email"
                       :invalid="!!errors.email"
                       fluid
-                      @input="errors.email = ''"
                     />
                     <label for="setup_email">{{ t('auth.setup.email') }}</label>
                   </FloatLabel>
@@ -151,11 +149,11 @@ function handleSubmit() {
                     <Password
                       id="setup_password"
                       v-model="password"
+                      v-bind="passwordAttrs"
                       :feedback="true"
                       :invalid="!!errors.password"
                       toggle-mask
                       fluid
-                      @input="errors.password = ''"
                     />
                     <label for="setup_password">{{ t('auth.setup.password') }}</label>
                   </FloatLabel>
@@ -171,11 +169,11 @@ function handleSubmit() {
                     <Password
                       id="setup_confirm_password"
                       v-model="confirmPassword"
+                      v-bind="confirmPasswordAttrs"
                       :feedback="false"
                       :invalid="!!errors.confirmPassword"
                       toggle-mask
                       fluid
-                      @input="errors.confirmPassword = ''"
                     />
                     <label for="setup_confirm_password">{{
                       t('auth.setup.confirmPassword')
