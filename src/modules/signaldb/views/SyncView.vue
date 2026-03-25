@@ -21,7 +21,7 @@ onMounted(async () => {
     await syncManager.sync(collectionName)
   }
 
-  router.push('/')
+  router.push({ name: 'workspace' })
 })
 </script>
 
