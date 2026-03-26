@@ -6,7 +6,7 @@ const storage = prepareIndexedDB({
   databaseName: 'meerk-server-db',
   schema: {
     countries: [],
-    cities: [],
+    localities: [],
     organizations: [],
     warehouses: [],
     'sync-manager-changes': ['collectionName'],
