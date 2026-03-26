@@ -42,7 +42,33 @@
   "sync": {
     "greeting": "Hello, {firstName} {lastName}!"
   },
+  "organization": {
+    "manager": {
+      "title": "Organizations"
+    },
+    "card": {
+      "visitWebsite": "Visit website"
+    },
+    "stats": {
+      "warehouses": "Warehouses",
+      "employees": "Employees"
+    },
+    "form": {
+      "titleCreate": "Create organization",
+      "titleEdit": "Edit organization",
+      "name": "Name",
+      "website": "Website",
+      "validation": {
+        "nameRequired": "Name is required",
+        "websiteInvalid": "Invalid URL"
+      }
+    }
+  },
   "common": {
+    "create": "Create",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
     "error": {
       "network": "Network error. Please try again."
     }

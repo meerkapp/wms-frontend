@@ -22,10 +22,10 @@ const router = createRouter({
       component: () => import('@/modules/signaldb/views/SyncView.vue'),
     },
     {
-      path: '/',
-      name: 'dashboard',
+      path: '/workspace',
+      name: 'workspace',
       meta: { requiresAuth: true },
-      component: () => import('@/core/views/DashboardView.vue'),
+      component: () => import('@/core/views/WorkspaceView.vue'),
     },
   ],
 })
@@ -55,7 +55,7 @@ router.beforeEach(async (to, from) => {
     return { name: 'login' }
   }
 
-  // Redirect authenticated users to sync before dashboard
+  // Redirect authenticated users to sync before workspace
   if (auth.isAuthenticated && to.name !== 'sync' && from.name !== 'sync') {
     return { name: 'sync' }
   }

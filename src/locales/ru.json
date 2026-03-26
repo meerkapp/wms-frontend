@@ -42,7 +42,33 @@
   "sync": {
     "greeting": "Привет, {firstName} {lastName}!"
   },
+  "organization": {
+    "manager": {
+      "title": "Организации"
+    },
+    "card": {
+      "visitWebsite": "Перейти на сайт"
+    },
+    "stats": {
+      "warehouses": "Склады",
+      "employees": "Сотрудники"
+    },
+    "form": {
+      "titleCreate": "Создать организацию",
+      "titleEdit": "Изменить организацию",
+      "name": "Название",
+      "website": "Веб-сайт",
+      "validation": {
+        "nameRequired": "Введите название",
+        "websiteInvalid": "Некорректный URL"
+      }
+    }
+  },
   "common": {
+    "create": "Создать",
+    "edit": "Изменить",
+    "save": "Сохранить",
+    "cancel": "Отмена",
     "error": {
       "network": "Ошибка сети. Попробуйте позже."
     }
