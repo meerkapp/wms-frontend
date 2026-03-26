@@ -1,6 +1,10 @@
 import { io } from 'socket.io-client'
 
-export const socket = io(import.meta.env.VITE_API_URL, {
+// In production VITE_API_URL is /api (relative), use window.location.origin
+// In development VITE_SOCKET_URL points to the backend root
+const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin
+
+export const socket = io(socketUrl, {
   autoConnect: false,
 })
 
