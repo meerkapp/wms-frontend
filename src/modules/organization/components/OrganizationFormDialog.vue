@@ -21,8 +21,7 @@ const validationSchema = computed(() =>
         .string()
         .url(t('organization.form.validation.websiteInvalid'))
         .optional()
-        .or(z.literal(''))
-        .transform((v) => v || null),
+        .or(z.literal('')),
     }),
   ),
 )
@@ -39,7 +38,7 @@ const [name, nameAttrs] = defineField('name')
 const [website, websiteAttrs] = defineField('website')
 
 const onSubmit = handleSubmit((values) => {
-  dialogRef?.value.close(values)
+  dialogRef?.value.close({ ...values, website: values.website || null })
 })
 </script>
 
