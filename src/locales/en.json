@@ -64,6 +64,22 @@
       }
     }
   },
+  "warehouse": {
+    "manager": {
+      "title": "Warehouses"
+    }
+  },
+  "locality": {
+    "form": {
+      "titleCreate": "Add locality",
+      "name": "Name",
+      "country": "Country",
+      "validation": {
+        "nameRequired": "Name is required",
+        "countryRequired": "Country is required"
+      }
+    }
+  },
   "common": {
     "create": "Create",
     "edit": "Edit",
@@ -106,8 +122,34 @@
     "dayNames": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
     "dayNamesShort": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
     "dayNamesMin": ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-    "monthNames": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-    "monthNamesShort": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "monthNames": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "monthNamesShort": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
     "chooseYear": "Choose Year",
     "chooseMonth": "Choose Month",
     "chooseDate": "Choose Date",

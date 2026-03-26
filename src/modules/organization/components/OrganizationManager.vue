@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { Button } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useI18n } from 'vue-i18n'
@@ -36,6 +36,12 @@ watchEffect((onCleanup) => {
   })
 })
 
+const title = computed(() =>
+  organizations.value.length > 0
+    ? `${t('organization.manager.title')} (${organizations.value.length})`
+    : t('organization.manager.title'),
+)
+
 function openCreateDialog() {
   dialog.open(OrganizationFormDialog, {
     props: {
@@ -51,7 +57,7 @@ function openCreateDialog() {
 </script>
 
 <template>
-  <BaseCard :title="t('organization.manager.title')">
+  <BaseCard :title="title">
     <template #header>
       <Button
         v-if="checkUserPermissions('organization:create')"

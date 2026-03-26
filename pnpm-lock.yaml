@@ -12,8 +12,8 @@ importers:
         specifier: ^0.1.5
         version: 0.1.5(@signaldb/core@2.0.0-beta.6)(electron@37.10.3)
       '@meerkapp/wms-contracts':
-        specifier: 0.2.0-beta.4
-        version: 0.2.0-beta.4
+        specifier: 0.2.0-beta.5
+        version: 0.2.0-beta.5
       '@pinia/colada':
         specifier: ^1.0.0
         version: 1.0.0(pinia@3.0.4(typescript@5.9.3)(vue@3.5.29(typescript@5.9.3)))(vue@3.5.29(typescript@5.9.3))
@@ -971,8 +971,8 @@ packages:
       '@signaldb/core': 2.0.0-beta.6
       electron: ^37.5.0
 
-  '@meerkapp/wms-contracts@0.2.0-beta.4':
-    resolution: {integrity: sha512-pDQeT4vnyA1FIBqJEETb8dTXRgd3V+z1XA00bOIuIaRhOuTHbpXGrCf6IwqzV/PTR+103lzTbNgPHVQr5gLirQ==}
+  '@meerkapp/wms-contracts@0.2.0-beta.5':
+    resolution: {integrity: sha512-FqrfqCWwF2cnlJxe8Uist5o1Ox5wZRz7b+1cJkI0YVefyMahku9WwIhMFNui6poNPBhzObPjn5jLygEidjwYXg==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -5096,7 +5096,7 @@ snapshots:
       better-sqlite3: 11.10.0
       electron: 37.10.3
 
-  '@meerkapp/wms-contracts@0.2.0-beta.4':
+  '@meerkapp/wms-contracts@0.2.0-beta.5':
     dependencies:
       zod: 3.25.76
 
