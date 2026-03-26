@@ -48,5 +48,10 @@ export const useAuthStore = defineStore('auth', () => {
     clearTokens()
   }
 
-  return { accessToken, user, isAuthenticated, setTokens, clearTokens, refresh, logout }
+  function checkUserPermissions(...requiredPermissions: string[]): boolean {
+    if (!user.value) return false
+    return requiredPermissions.every(permission => user.value?.permissions?.includes(permission))
+  }
+
+  return { accessToken, user, isAuthenticated, setTokens, clearTokens, refresh, logout, checkUserPermissions }
 })
