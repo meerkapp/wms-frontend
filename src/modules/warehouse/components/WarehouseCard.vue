@@ -35,18 +35,7 @@ const locality = computed(() => {
         <span class="text-xs">{{ locality?.name }}</span>
       </div>
     </div>
-    <div class="space-y-2 mt-5">
-      <div v-if="organization">
-        <Tag :value="organization.name" severity="info">
-          <template #icon>
-            <OrganizationIcon :website="organization.website" class="mr-1" />
-          </template>
-        </Tag>
-      </div>
-      <Tag v-if="props.warehouse.note" :value="props.warehouse.note" />
-    </div>
     <Button
-      v-if="checkUserPermissions('warehouse:edit')"
       class="mt-5"
       :label="t('common.edit')"
       icon="iconify tabler--edit"

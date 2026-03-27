@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { ref, watchEffect, computed } from 'vue'
-import { Button, Tag } from 'primevue'
+import { Button } from 'primevue'
+import { useDialog } from 'primevue/usedialog'
+import { useMutation } from '@pinia/colada'
+import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import BaseCard from '@/core/components/BaseCard.vue'
 import WarehouseCard from './WarehouseCard.vue'
+import WarehouseFormDialog from './WarehouseFormDialog.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { warehouseApi } from '../api/warehouse.api'
 import { Warehouses } from '@/modules/signaldb/models/warehouses.model'
-import type { Warehouse } from '@meerkapp/wms-contracts'
+import type { Warehouse, CreateWarehouseDto } from '@meerkapp/wms-contracts'
 
 const { t } = useI18n()
+const dialog = useDialog()
+const toast = useToast()
 
 const authStore = useAuthStore()
 const { checkUserPermissions } = authStore
@@ -30,7 +37,23 @@ const title = computed(() =>
     : t('warehouse.manager.title'),
 )
 
-function openCreateDialog() {}
+const { mutate: createWarehouse } = useMutation({
+  mutation: (dto: CreateWarehouseDto) => warehouseApi.create(dto),
+  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+})
+
+function openCreateDialog() {
+  dialog.open(WarehouseFormDialog, {
+    props: {
+      header: t('warehouse.form.titleCreate'),
+      modal: true,
+      style: { width: '26rem' },
+    },
+    onClose: (options) => {
+      if (options?.data) createWarehouse(options.data)
+    },
+  })
+}
 </script>
 
 <template>

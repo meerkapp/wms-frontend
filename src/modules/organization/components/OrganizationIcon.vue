@@ -8,13 +8,11 @@ const faviconError = ref(false)
 </script>
 
 <template>
-  <div>
-    <img
-      v-if="props.website && !faviconError"
-      :src="props.website + '/favicon.ico'"
-      class="w-5 h-5"
-      @error="faviconError = true"
-    />
-    <i v-else class="iconify tabler--building-store"></i>
-  </div>
+  <img
+    v-if="props.website && !faviconError"
+    :src="props.website + '/favicon.ico'"
+    class="w-5 h-5"
+    @error="faviconError = true"
+  />
+  <i v-else class="iconify tabler--building-store"></i>
 </template>
