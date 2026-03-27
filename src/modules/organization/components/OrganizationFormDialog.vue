@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, inject, type Ref } from 'vue'
-import { Button, FloatLabel, InputText } from 'primevue'
+import { Button, FloatLabel, InputText, Message } from 'primevue'
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -49,9 +49,7 @@ const onSubmit = handleSubmit((values) => {
         <InputText id="org_name" v-model="name" v-bind="nameAttrs" :invalid="!!errors.name" fluid />
         <label for="org_name">{{ t('organization.form.name') }}</label>
       </FloatLabel>
-      <small v-if="errors.name" class="text-red-500 text-xs mt-1 block">
-        {{ errors.name }}
-      </small>
+      <Message v-if="errors.name" size="small" severity="error" variant="simple">{{ errors.name }}</Message>
     </div>
     <div>
       <FloatLabel variant="on">
@@ -62,11 +60,11 @@ const onSubmit = handleSubmit((values) => {
           :invalid="!!errors.website"
           fluid
         />
-        <label for="org_website">{{ t('organization.form.website') }}</label>
+        <label for="org_website">{{
+          t('common.optionalField', { label: t('organization.form.website') })
+        }}</label>
       </FloatLabel>
-      <small v-if="errors.website" class="text-red-500 text-xs mt-1 block">
-        {{ errors.website }}
-      </small>
+      <Message v-if="errors.website" size="small" severity="error" variant="simple">{{ errors.website }}</Message>
     </div>
     <Button type="submit" :label="t('common.save')" rounded fluid />
   </form>

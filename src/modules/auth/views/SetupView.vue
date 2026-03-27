@@ -4,7 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
-import { Button, Fieldset, FloatLabel, InputText, Password } from 'primevue'
+import { Button, Fieldset, FloatLabel, InputText, Message, Password } from 'primevue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
@@ -107,9 +107,7 @@ const onSubmit = handleSubmit(() => setup())
                     />
                     <label for="setup_first_name">{{ t('auth.setup.firstName') }}</label>
                   </FloatLabel>
-                  <small v-if="errors.firstName" class="text-red-500 text-xs mt-1 block">
-                    {{ errors.firstName }}
-                  </small>
+                  <Message v-if="errors.firstName" size="small" severity="error" variant="simple">{{ errors.firstName }}</Message>
                 </div>
                 <div>
                   <FloatLabel variant="on">
@@ -123,9 +121,7 @@ const onSubmit = handleSubmit(() => setup())
                     />
                     <label for="setup_last_name">{{ t('auth.setup.lastName') }}</label>
                   </FloatLabel>
-                  <small v-if="errors.lastName" class="text-red-500 text-xs mt-1 block">
-                    {{ errors.lastName }}
-                  </small>
+                  <Message v-if="errors.lastName" size="small" severity="error" variant="simple">{{ errors.lastName }}</Message>
                 </div>
                 <div>
                   <FloatLabel variant="on">
@@ -140,9 +136,7 @@ const onSubmit = handleSubmit(() => setup())
                     />
                     <label for="setup_email">{{ t('auth.setup.email') }}</label>
                   </FloatLabel>
-                  <small v-if="errors.email" class="text-red-500 text-xs mt-1 block">
-                    {{ errors.email }}
-                  </small>
+                  <Message v-if="errors.email" size="small" severity="error" variant="simple">{{ errors.email }}</Message>
                 </div>
                 <div>
                   <FloatLabel variant="on">
@@ -157,12 +151,8 @@ const onSubmit = handleSubmit(() => setup())
                     />
                     <label for="setup_password">{{ t('auth.setup.password') }}</label>
                   </FloatLabel>
-                  <small v-if="errors.password" class="text-red-500 text-xs mt-1 block">
-                    {{ errors.password }}
-                  </small>
-                  <small v-else class="text-surface-500 text-xs mt-1 block">
-                    {{ t('auth.setup.passwordHint') }}
-                  </small>
+                  <Message v-if="errors.password" size="small" severity="error" variant="simple">{{ errors.password }}</Message>
+                  <Message v-else size="small" severity="secondary" variant="simple">{{ t('auth.setup.passwordHint') }}</Message>
                 </div>
                 <div>
                   <FloatLabel variant="on">
@@ -179,9 +169,7 @@ const onSubmit = handleSubmit(() => setup())
                       t('auth.setup.confirmPassword')
                     }}</label>
                   </FloatLabel>
-                  <small v-if="errors.confirmPassword" class="text-red-500 text-xs mt-1 block">
-                    {{ errors.confirmPassword }}
-                  </small>
+                  <Message v-if="errors.confirmPassword" size="small" severity="error" variant="simple">{{ errors.confirmPassword }}</Message>
                 </div>
                 <Button
                   type="submit"

@@ -4,7 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
-import { Button, Fieldset, FloatLabel, InputText, Password } from 'primevue'
+import { Button, Fieldset, FloatLabel, InputText, Message, Password } from 'primevue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
@@ -92,9 +92,7 @@ const onSubmit = handleSubmit(() => login())
                     />
                     <label for="login_email">{{ t('auth.login.email') }}</label>
                   </FloatLabel>
-                  <small v-if="errors.email" class="text-red-500 text-xs mt-1 block">
-                    {{ errors.email }}
-                  </small>
+                  <Message v-if="errors.email" size="small" severity="error" variant="simple">{{ errors.email }}</Message>
                 </div>
                 <div>
                   <FloatLabel variant="on">
@@ -109,9 +107,7 @@ const onSubmit = handleSubmit(() => login())
                     />
                     <label for="login_password">{{ t('auth.login.password') }}</label>
                   </FloatLabel>
-                  <small v-if="errors.password" class="text-red-500 text-xs mt-1 block">
-                    {{ errors.password }}
-                  </small>
+                  <Message v-if="errors.password" size="small" severity="error" variant="simple">{{ errors.password }}</Message>
                 </div>
                 <Button
                   type="submit"

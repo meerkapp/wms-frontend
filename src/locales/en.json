@@ -67,6 +67,21 @@
   "warehouse": {
     "manager": {
       "title": "Warehouses"
+    },
+    "form": {
+      "titleCreate": "Create warehouse",
+      "titleEdit": "Edit warehouse",
+      "code": "Code",
+      "address": "Address",
+      "note": "Note",
+      "organization": "Organization",
+      "locality": "Locality",
+      "validation": {
+        "codeRequired": "Code is required",
+        "addressRequired": "Address is required",
+        "organizationRequired": "Organization is required",
+        "localityRequired": "Locality is required"
+      }
     }
   },
   "locality": {
@@ -81,6 +96,7 @@
     }
   },
   "common": {
+    "optionalField": "{label} (optional)",
     "create": "Create",
     "edit": "Edit",
     "save": "Save",

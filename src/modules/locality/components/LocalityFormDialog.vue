@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, inject, ref, type Ref } from 'vue'
-import { Button, FloatLabel, InputText } from 'primevue'
+import { Button, FloatLabel, InputText, Message } from 'primevue'
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -44,7 +44,7 @@ const onSubmit = handleSubmit((values) => {
         />
         <label for="locality_name">{{ t('locality.form.name') }}</label>
       </FloatLabel>
-      <small v-if="errors.name" class="text-red-500 text-xs mt-1 block">{{ errors.name }}</small>
+      <Message v-if="errors.name" size="small" severity="error" variant="simple">{{ errors.name }}</Message>
     </div>
     <div>
       <CountrySelect
@@ -52,7 +52,7 @@ const onSubmit = handleSubmit((values) => {
         :label="t('locality.form.country')"
         @update:countryId="setFieldValue('countryId', $event)"
       />
-      <small v-if="errors.countryId" class="text-red-500 text-xs mt-1 block">{{ errors.countryId }}</small>
+      <Message v-if="errors.countryId" size="small" severity="error" variant="simple">{{ errors.countryId }}</Message>
     </div>
     <Button type="submit" :label="t('common.save')" rounded fluid />
   </form>

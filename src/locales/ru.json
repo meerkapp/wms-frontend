@@ -67,6 +67,21 @@
   "warehouse": {
     "manager": {
       "title": "Склады"
+    },
+    "form": {
+      "titleCreate": "Создать склад",
+      "titleEdit": "Изменить склад",
+      "code": "Код",
+      "address": "Адрес",
+      "note": "Примечание",
+      "organization": "Организация",
+      "locality": "Населённый пункт",
+      "validation": {
+        "codeRequired": "Введите код",
+        "addressRequired": "Введите адрес",
+        "organizationRequired": "Выберите организацию",
+        "localityRequired": "Выберите населённый пункт"
+      }
     }
   },
   "locality": {
@@ -81,6 +96,7 @@
     }
   },
   "common": {
+    "optionalField": "{label} (необязательно)",
     "create": "Создать",
     "edit": "Изменить",
     "save": "Сохранить",
