@@ -39,6 +39,14 @@ watchEffect((onCleanup) => {
   })
 })
 
+const selectedDisplay = computed(() => {
+  const locality = localities.value.find((l) => l.id === props.localityId)
+  if (!locality) return ''
+  const country = countries.value.find((c) => c.id === locality.countryId)
+  const countryLabel = country ? getCountryName(country.code, country.name) : ''
+  return countryLabel ? `${locality.name}, ${countryLabel}` : locality.name
+})
+
 const localityOptions = computed(() => {
   const countryMap = new Map(countries.value.map((c) => [c.id, c]))
   const groups = new Map<number, { label: string; items: Locality[] }>()
@@ -96,6 +104,9 @@ function openCreateDialog() {
       :filter="localities.length > 5"
       @update:model-value="(value) => emit('update:localityId', value)"
     >
+      <template #value="{ value }">
+        <span v-if="value">{{ selectedDisplay }}</span>
+      </template>
       <template #footer>
         <div v-if="checkUserPermissions('locality:create')" class="p-3">
           <Button
