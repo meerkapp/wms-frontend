@@ -1,15 +1,17 @@
 <script lang="ts" setup>
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect, computed } from 'vue'
 import { FloatLabel, Select, Button } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useMutation } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import { Localities } from '@/modules/signaldb/models/localities.model'
+import { Countries } from '@/modules/signaldb/models/countries.model'
+import { getCountryFlag, getCountryName } from '@/modules/country/utils/country.utils'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { localityApi } from '../api/locality.api'
 import LocalityFormDialog from './LocalityFormDialog.vue'
-import type { Locality, CreateLocalityDto } from '@meerkapp/wms-contracts'
+import type { Locality, Country, CreateLocalityDto } from '@meerkapp/wms-contracts'
 
 const props = defineProps<{ localityId: Locality['id'] | null; label: string }>()
 const emit = defineEmits<{
@@ -23,14 +25,36 @@ const authStore = useAuthStore()
 const { checkUserPermissions } = authStore
 
 const localities = ref<Locality[]>([])
+const countries = ref<Country[]>([])
 
 watchEffect((onCleanup) => {
-  const cursor = Localities.find({}, { sort: { name: 1 } })
-  localities.value = cursor.fetch()
+  const localityCursor = Localities.find({}, { sort: { name: 1 } })
+  const countryCursor = Countries.find({}, { sort: { code: 1 } })
+  localities.value = localityCursor.fetch()
+  countries.value = countryCursor.fetch()
 
   onCleanup(() => {
-    cursor.cleanup()
+    localityCursor.cleanup()
+    countryCursor.cleanup()
   })
+})
+
+const localityOptions = computed(() => {
+  const countryMap = new Map(countries.value.map((c) => [c.id, c]))
+  const groups = new Map<number, { label: string; items: Locality[] }>()
+
+  for (const locality of localities.value) {
+    if (!groups.has(locality.countryId)) {
+      const country = countryMap.get(locality.countryId)
+      const label = country
+        ? `${getCountryFlag(country.code)} ${getCountryName(country.code, country.name)}`
+        : String(locality.countryId)
+      groups.set(locality.countryId, { label, items: [] })
+    }
+    groups.get(locality.countryId)!.items.push(locality)
+  }
+
+  return [...groups.values()]
 })
 
 const { mutate: createLocality } = useMutation({
@@ -62,10 +86,12 @@ function openCreateDialog() {
   <FloatLabel variant="on">
     <Select
       :model-value="props.localityId"
-      :options="localities"
+      :options="localityOptions"
       class="w-full"
       optionLabel="name"
       optionValue="id"
+      optionGroupLabel="label"
+      optionGroupChildren="items"
       labelId="on_locality"
       :filter="localities.length > 5"
       @update:model-value="(value) => emit('update:localityId', value)"
