@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref, type Ref } from 'vue'
+import { computed, inject, type Ref } from 'vue'
 import { Button, FloatLabel, InputText, Message } from 'primevue'
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
 import { useForm } from 'vee-validate'
@@ -8,10 +8,12 @@ import { z } from 'zod'
 import { useI18n } from 'vue-i18n'
 import LocalitySelect from '@/modules/locality/components/LocalitySelect.vue'
 import OrganizationSelect from '@/modules/organization/components/OrganizationSelect.vue'
+import type { Warehouse } from '@meerkapp/wms-contracts'
 
 const { t } = useI18n()
 
 const dialogRef = inject<Ref<DynamicDialogInstance>>('dialogRef')
+const warehouse = computed<Warehouse | undefined>(() => dialogRef?.value.data?.warehouse)
 
 const validationSchema = computed(() =>
   toTypedSchema(
@@ -31,7 +33,16 @@ const validationSchema = computed(() =>
   ),
 )
 
-const { handleSubmit, errors, defineField, setFieldValue } = useForm({ validationSchema })
+const { handleSubmit, errors, defineField, setFieldValue } = useForm({
+  validationSchema,
+  initialValues: {
+    code: warehouse.value?.code ?? '',
+    address: warehouse.value?.address ?? '',
+    note: warehouse.value?.note ?? '',
+    organizationId: warehouse.value?.organizationId,
+    localityId: warehouse.value?.localityId,
+  },
+})
 
 const [code, codeAttrs] = defineField('code')
 const [address, addressAttrs] = defineField('address')
