@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watchEffect, computed } from 'vue'
-import { Button } from 'primevue'
+import { Button, Accordion, AccordionPanel, AccordionHeader, AccordionContent } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useMutation } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
@@ -8,10 +8,12 @@ import { useI18n } from 'vue-i18n'
 import BaseCard from '@/core/components/BaseCard.vue'
 import WarehouseCard from './WarehouseCard.vue'
 import WarehouseFormDialog from './WarehouseFormDialog.vue'
+import OrganizationIcon from '@/modules/organization/components/OrganizationIcon.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { warehouseApi } from '../api/warehouse.api'
 import { Warehouses } from '@/modules/signaldb/models/warehouses.model'
-import type { Warehouse, CreateWarehouseDto } from '@meerkapp/wms-contracts'
+import { Organizations } from '@/modules/signaldb/models/organizations.model'
+import type { Warehouse, Organization, CreateWarehouseDto } from '@meerkapp/wms-contracts'
 
 const { t } = useI18n()
 const dialog = useDialog()
@@ -21,14 +23,34 @@ const authStore = useAuthStore()
 const { checkUserPermissions } = authStore
 
 const warehouses = ref<Warehouse[]>([])
+const organizations = ref<Organization[]>([])
 
 watchEffect((onCleanup) => {
-  const cursor = Warehouses.find({})
-  warehouses.value = cursor.fetch()
+  const warehouseCursor = Warehouses.find({})
+  const organizationCursor = Organizations.find({}, { sort: { name: 1 } })
+  warehouses.value = warehouseCursor.fetch()
+  organizations.value = organizationCursor.fetch()
 
   onCleanup(() => {
-    cursor.cleanup()
+    warehouseCursor.cleanup()
+    organizationCursor.cleanup()
   })
+})
+
+const warehouseGroups = computed(() => {
+  const orgMap = new Map(organizations.value.map((o) => [o.id, o]))
+  const groups = new Map<number, { organization: Organization; warehouses: Warehouse[] }>()
+
+  for (const warehouse of warehouses.value) {
+    const org = orgMap.get(warehouse.organizationId)
+    if (!org) continue
+    if (!groups.has(org.id)) {
+      groups.set(org.id, { organization: org, warehouses: [] })
+    }
+    groups.get(org.id)!.warehouses.push(warehouse)
+  }
+
+  return [...groups.values()]
 })
 
 const title = computed(() =>
@@ -70,15 +92,31 @@ function openCreateDialog() {
       />
     </template>
     <template #main>
-      <div class="px-3 @container">
-        <div class="grid gap-3 grid-cols-1 @md:grid-cols-2">
-          <WarehouseCard
-            v-for="warehouse in warehouses"
-            :key="warehouse.id"
-            :warehouse="warehouse"
-          />
-        </div>
-      </div>
+      <Accordion :value="warehouseGroups.map((g) => g.organization.id.toString())" multiple>
+        <AccordionPanel
+          v-for="group in warehouseGroups"
+          :key="group.organization.id"
+          :value="group.organization.id.toString()"
+        >
+          <AccordionHeader>
+            <div class="flex items-center">
+              <OrganizationIcon :website="group.organization.website" class="mr-2" />
+              <span class="truncate">{{ group.organization.name }}</span>
+            </div>
+          </AccordionHeader>
+          <AccordionContent pt:content="px-3!">
+            <div class="@container">
+              <div class="grid gap-3 grid-cols-1 @md:grid-cols-2">
+                <WarehouseCard
+                  v-for="warehouse in group.warehouses"
+                  :key="warehouse.id"
+                  :warehouse="warehouse"
+                />
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionPanel>
+      </Accordion>
     </template>
   </BaseCard>
 </template>
