@@ -41,3 +41,7 @@ h4 {
 .p-dialog-title {
   @apply uppercase;
 }
+
+.p-button-sm.p-button-icon-only {
+  padding: 0.425rem;
+}
