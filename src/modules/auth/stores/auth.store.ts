@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { jwtDecode } from 'jwt-decode'
 import { authApi } from '@/modules/auth/api/auth.api'
 import type { JwtPayload } from '@/modules/auth/types/auth.types'
+import type { Permission } from '@meerkapp/wms-contracts'
 
 export const useAuthStore = defineStore('auth', () => {
   // access_token stored in memory only — never in localStorage (XSS protection)
@@ -48,10 +49,19 @@ export const useAuthStore = defineStore('auth', () => {
     clearTokens()
   }
 
-  function checkUserPermissions(...requiredPermissions: string[]): boolean {
+  function checkUserPermissions(...requiredPermissions: Permission[]): boolean {
     if (!user.value) return false
-    return requiredPermissions.every(permission => user.value?.permissions?.includes(permission))
+    return requiredPermissions.every((permission) => user.value?.permissions?.includes(permission))
   }
 
-  return { accessToken, user, isAuthenticated, setTokens, clearTokens, refresh, logout, checkUserPermissions }
+  return {
+    accessToken,
+    user,
+    isAuthenticated,
+    setTokens,
+    clearTokens,
+    refresh,
+    logout,
+    checkUserPermissions,
+  }
 })
