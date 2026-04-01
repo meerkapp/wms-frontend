@@ -17,7 +17,10 @@ watchEffect((onCleanup) => {
   const countries = cursor.fetch()
   countryOptions.value = countries.map((country) => ({
     ...country,
-    name: getCountryFlag(country.code) + ' ' + (country.name ?? getCountryName(country.code)),
+    name:
+      getCountryFlag(country.code) +
+      ' ' +
+      getCountryName(country.code),
   }))
 
   onCleanup(() => {

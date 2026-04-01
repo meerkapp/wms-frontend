@@ -43,7 +43,7 @@ const selectedDisplay = computed(() => {
   const locality = localities.value.find((l) => l.id === props.localityId)
   if (!locality) return ''
   const country = countries.value.find((c) => c.id === locality.countryId)
-  const countryLabel = country ? getCountryName(country.code, country.name) : ''
+  const countryLabel = country ? getCountryName(country.code) : ''
   return countryLabel ? `${locality.name}, ${countryLabel}` : locality.name
 })
 
@@ -55,7 +55,7 @@ const localityOptions = computed(() => {
     if (!groups.has(locality.countryId)) {
       const country = countryMap.get(locality.countryId)
       const label = country
-        ? `${getCountryFlag(country.code)} ${getCountryName(country.code, country.name)}`
+        ? `${getCountryFlag(country.code)} ${getCountryName(country.code)}`
         : String(locality.countryId)
       groups.set(locality.countryId, { label, items: [] })
     }
