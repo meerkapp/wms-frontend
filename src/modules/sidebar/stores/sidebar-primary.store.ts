@@ -4,6 +4,7 @@ import { i18n } from '@/plugins/i18n'
 import type { SidebarItem } from '@/modules/sidebar/types/sidebar.types'
 import OrganizationManager from '@/modules/organization/components/OrganizationManager.vue'
 import WarehouseManager from '@/modules/warehouse/components/WarehouseManager.vue'
+import EmployeeManager from '@/modules/employee/components/EmployeeManager.vue'
 
 export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
   const sideBarPrimaryItems = markRaw([
@@ -20,6 +21,14 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       key: 'warehouse',
       iconClass: 'iconify tabler--building-warehouse',
       content: markRaw(WarehouseManager),
+      position: 'bottom',
+      hideTitle: true,
+    },
+    {
+      title: 'Сотрудники',
+      key: 'employees',
+      iconClass: 'iconify tabler--users',
+      content: markRaw(EmployeeManager),
       position: 'bottom',
       hideTitle: true,
     },

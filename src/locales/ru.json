@@ -1,4 +1,31 @@
 {
+  "permissions": {
+    "groups": {
+      "organization": "Организация",
+      "warehouse": "Склад",
+      "locality": "Населённый пункт",
+      "employee": "Сотрудник",
+      "role": "Роль"
+    },
+    "organization_create": "Создание организаций",
+    "organization_update": "Редактирование организаций",
+    "warehouse_create": "Создание складов",
+    "warehouse_update": "Редактирование складов",
+    "locality_create": "Создание населённых пунктов",
+    "employee_read": "Просмотр сотрудников",
+    "employee_create": "Создание сотрудников",
+    "employee_update": "Редактирование сотрудников",
+    "employee_deactivate": "Деактивация сотрудников",
+    "employee_assign_role": "Назначение ролей",
+    "employee_assign_warehouse": "Назначение складов",
+    "employee_read_own": "Просмотр своего профиля",
+    "employee_update_own_email": "Изменение своего email",
+    "employee_update_own_password": "Изменение своего пароля",
+    "employee_update_own_avatar": "Изменение своего аватара",
+    "role_read": "Просмотр ролей",
+    "role_create": "Создание ролей",
+    "role_update": "Редактирование ролей"
+  },
   "auth": {
     "login": {
       "title": "Вход в систему",
@@ -68,6 +95,9 @@
     "manager": {
       "title": "Склады"
     },
+    "select": {
+      "label": "Склад"
+    },
     "form": {
       "titleCreate": "Создать склад",
       "titleEdit": "Изменить склад",
@@ -101,6 +131,7 @@
     "edit": "Изменить",
     "save": "Сохранить",
     "cancel": "Отмена",
+    "close": "Закрыть",
     "error": {
       "network": "Ошибка сети. Попробуйте позже."
     }
@@ -245,6 +276,46 @@
       "zoomOut": "Уменьшить",
       "rotateRight": "Повернуть вправо",
       "rotateLeft": "Повернуть влево"
+    }
+  },
+  "employee": {
+    "manager": {
+      "title": "Сотрудники"
+    },
+    "card": {
+      "openProfile": "Открыть профиль"
+    },
+    "profile": {
+      "contacts": "Контакты"
+    },
+    "form": {
+      "titleCreate": "Добавить сотрудника",
+      "titleView": "Профиль сотрудника",
+      "titleEdit": "Изменить сотрудника",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "email": "Email",
+      "password": "Пароль",
+      "roles": "Роли",
+      "permissionsTitle": "Разрешения",
+      "noPermissions": "Нет доступных разрешений",
+      "warehouse": "Склад",
+      "validation": {
+        "firstNameRequired": "Имя обязательно",
+        "lastNameRequired": "Фамилия обязательна",
+        "emailRequired": "Email обязателен",
+        "emailInvalid": "Неверный формат email",
+        "passwordRequired": "Пароль обязателен",
+        "passwordTooShort": "Пароль должен быть не менее 8 символов",
+        "emailInUse": "Этот email уже используется"
+      },
+      "generatePassword": "Сгенерировать пароль"
+    },
+    "created": {
+      "title": "Сотрудник создан",
+      "subtitle": "Сохраните данные для входа. Пароль больше не будет показан.",
+      "copyCredentials": "Копировать данные для входа",
+      "copied": "Скопировано!"
     }
   }
 }

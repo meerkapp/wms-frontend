@@ -1,4 +1,31 @@
 {
+  "permissions": {
+    "groups": {
+      "organization": "Organization",
+      "warehouse": "Warehouse",
+      "locality": "Locality",
+      "employee": "Employee",
+      "role": "Role"
+    },
+    "organization_create": "Create organizations",
+    "organization_update": "Edit organizations",
+    "warehouse_create": "Create warehouses",
+    "warehouse_update": "Edit warehouses",
+    "locality_create": "Create localities",
+    "employee_read": "View employees",
+    "employee_create": "Create employees",
+    "employee_update": "Edit employees",
+    "employee_deactivate": "Deactivate employees",
+    "employee_assign_role": "Assign roles",
+    "employee_assign_warehouse": "Assign warehouses",
+    "employee_read_own": "View own profile",
+    "employee_update_own_email": "Change own email",
+    "employee_update_own_password": "Change own password",
+    "employee_update_own_avatar": "Change own avatar",
+    "role_read": "View roles",
+    "role_create": "Create roles",
+    "role_update": "Edit roles"
+  },
   "auth": {
     "login": {
       "title": "Sign in",
@@ -68,6 +95,9 @@
     "manager": {
       "title": "Warehouses"
     },
+    "select": {
+      "label": "Warehouse"
+    },
     "form": {
       "titleCreate": "Create warehouse",
       "titleEdit": "Edit warehouse",
@@ -101,6 +131,7 @@
     "edit": "Edit",
     "save": "Save",
     "cancel": "Cancel",
+    "close": "Close",
     "error": {
       "network": "Network error. Please try again."
     }
@@ -245,6 +276,46 @@
       "zoomOut": "Zoom Out",
       "rotateRight": "Rotate Right",
       "rotateLeft": "Rotate Left"
+    }
+  },
+  "employee": {
+    "manager": {
+      "title": "Employees"
+    },
+    "card": {
+      "openProfile": "Open profile"
+    },
+    "profile": {
+      "contacts": "Contacts"
+    },
+    "form": {
+      "titleCreate": "Add employee",
+      "titleView": "Employee profile",
+      "titleEdit": "Edit employee",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "roles": "Roles",
+      "permissionsTitle": "Permissions",
+      "noPermissions": "No permissions assigned",
+      "warehouse": "Warehouse",
+      "validation": {
+        "firstNameRequired": "First name is required",
+        "lastNameRequired": "Last name is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email address",
+        "passwordRequired": "Password is required",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "emailInUse": "This email is already in use"
+      },
+      "generatePassword": "Generate password"
+    },
+    "created": {
+      "title": "Employee created",
+      "subtitle": "Save the login credentials. The password won't be shown again.",
+      "copyCredentials": "Copy login credentials",
+      "copied": "Copied!"
     }
   }
 }

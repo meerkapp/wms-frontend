@@ -70,7 +70,7 @@ function openEditDialog() {
       severity="secondary"
       fluid
       rounded
-      class="mt-4"
+      class="mt-3"
       @click="openEditDialog"
     />
   </BaseTile>
