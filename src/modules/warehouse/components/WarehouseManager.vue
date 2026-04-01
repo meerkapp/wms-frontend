@@ -99,9 +99,9 @@ function openCreateDialog() {
           :value="group.organization.id.toString()"
         >
           <AccordionHeader>
-            <div class="flex items-center">
+            <div class="flex items-center text-xs">
               <OrganizationIcon :website="group.organization.website" class="mr-2" />
-              <span class="truncate">
+              <span class="truncate uppercase">
                 {{ group.organization.name }}
               </span>
               <span class="ml-1.5 font-normal"> ({{ group.warehouses.length }}) </span>

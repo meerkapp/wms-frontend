@@ -9,11 +9,15 @@ import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useSideBarPrimaryStore } from '@/modules/sidebar/stores/sidebar-primary.store'
 import BaseCard from '../components/BaseCard.vue'
 
+import WarehouseSelect from '@/modules/warehouse/components/WarehouseSelect.vue'
+
 const authStore = useAuthStore()
 const { user } = authStore
 
 const sideBarPrimaryStore = useSideBarPrimaryStore()
 const { selectedSideBarPrimaryItemKey } = storeToRefs(sideBarPrimaryStore)
+
+const warehouseId = ref<number | null>(null)
 
 // const countries = ref<any[]>([])
 
@@ -44,7 +48,12 @@ const { selectedSideBarPrimaryItemKey } = storeToRefs(sideBarPrimaryStore)
         <SideBarPrimary />
       </SplitterPanel>
       <SplitterPanel :size="80" :minSize="70" pt:root="py-1.5">
-        <BaseCard title="test" class="h-full" />
+        <div class="h-full">
+          <WarehouseSelect v-model:warehouseId="warehouseId" class="w-fit min-w-3xs" />
+          <BaseCard title="test" class="h-full mt-2">
+            <template #main> </template>
+          </BaseCard>
+        </div>
       </SplitterPanel>
     </Splitter>
     <!-- <h1>{{ user?.firstName }} {{ user?.lastName }}</h1>

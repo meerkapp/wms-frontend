@@ -6,6 +6,7 @@ import { useDialog } from 'primevue/usedialog'
 import { useMutation } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 import BaseTile from '@/core/components/BaseTile.vue'
+import WarehouseInfo from './WarehouseInfo.vue'
 import WarehouseFormDialog from './WarehouseFormDialog.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { Organizations } from '@/modules/signaldb/models/organizations.model'
@@ -35,7 +36,7 @@ const locality = computed(() => {
 const countryName = computed(() => {
   if (!locality.value) return undefined
   const c = Countries.findOne({ id: locality.value.countryId })
-  return c ? getCountryName(c.code, c.name) : undefined
+  return c ? getCountryName(c.code) : undefined
 })
 
 const { mutate: updateWarehouse } = useMutation({
@@ -60,14 +61,17 @@ function openEditDialog() {
 
 <template>
   <BaseTile>
-    <div class="flex gap-3 items-center">
-      <Tag :value="props.warehouse.code" severity="contrast" />
-      <div class="leading-none">
-        <h3>{{ props.warehouse.address }}</h3>
-        <span class="text-xs"> {{ locality?.name }}, {{ countryName }} </span>
-      </div>
-    </div>
-    <Tag v-if="props.warehouse.note" :value="props.warehouse.note" class="mt-3" />
+    <WarehouseInfo
+      :code="props.warehouse.code"
+      :localityId="props.warehouse.localityId"
+      :address="props.warehouse.address"
+      :note="props.warehouse.note"
+    />
+    <Tag
+      v-if="props.warehouse.note"
+      :value="props.warehouse.note"
+      class="mt-3 h-5 font-medium! text-xs!"
+    />
     <Button
       v-if="checkUserPermissions('warehouse:update')"
       class="mt-5"
