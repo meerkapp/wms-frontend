@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { authApi } from '@/modules/auth/api/auth.api'
+import { connectSocket } from '@/core/api/socket'
+import { usePresenceStore } from '@/modules/employee/stores/presence.store'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -39,7 +41,11 @@ router.beforeEach(async (to, from) => {
   if (!sessionRestored) {
     sessionRestored = true
     if (!auth.isAuthenticated) {
-      await auth.refresh() // silently fails if no cookie
+      const restored = await auth.refresh()
+      if (restored) {
+        connectSocket(auth.accessToken!)
+        usePresenceStore().setup()
+      }
     }
   }
 

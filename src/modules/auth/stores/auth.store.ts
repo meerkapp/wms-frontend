@@ -43,10 +43,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     try {
-      // backend clears the httpOnly cookie
       await authApi.logout()
     } catch {}
     clearTokens()
+    const { usePresenceStore } = await import('@/modules/employee/stores/presence.store')
+    usePresenceStore().teardown()
   }
 
   function checkUserPermissions(...requiredPermissions: Permission[]): boolean {

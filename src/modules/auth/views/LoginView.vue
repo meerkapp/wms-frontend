@@ -14,12 +14,15 @@ import Logo from '@/core/components/Logo.vue'
 import LauncherRedirectMessage from '@/modules/auth/components/LauncherRedirectMessage.vue'
 import { authApi } from '@/modules/auth/api/auth.api'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { connectSocket } from '@/core/api/socket'
+import { usePresenceStore } from '@/modules/employee/stores/presence.store'
 
 const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
 const auth = useAuthStore()
+const presence = usePresenceStore()
 
 const launcherCode = ref<string | null>(null)
 
@@ -52,6 +55,8 @@ const { mutate: login, isLoading } = useMutation({
   },
   async onSuccess(tokens) {
     auth.setTokens(tokens.access_token)
+    connectSocket(tokens.access_token)
+    presence.setup()
 
     if (route.query.redirect === 'launcher') {
       const { code } = await authApi.getLauncherCode()
