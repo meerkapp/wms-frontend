@@ -8,6 +8,7 @@ import { Warehouses } from '@/modules/signaldb/models/warehouses.model'
 import type { Warehouse } from '@meerkapp/wms-contracts'
 import EmployeeRoleTag from './EmployeeRoleTag.vue'
 import EmployeeAvatar from './EmployeeAvatar.vue'
+import EmployeePresenceLabel from './EmployeePresenceLabel.vue'
 import WarehouseInfo from '@/modules/warehouse/components/WarehouseInfo.vue'
 import { roleApi } from '@/modules/employee/api/role.api'
 
@@ -38,7 +39,8 @@ const warehouse = computed(() =>
     <div class="flex items-center flex-col">
       <EmployeeAvatar :first-name="employee.firstName" size="xlarge" />
       <span class="mt-2 text-lg font-light">{{ employee.firstName }} {{ employee.lastName }}</span>
-      <div v-if="employee.roleAssignments.length > 0" class="mt-2">
+      <EmployeePresenceLabel :employee="employee" />
+      <div v-if="employee.roleAssignments.length > 0" class="mt-3">
         <div class="flex flex-wrap gap-2">
           <EmployeeRoleTag
             v-for="{ employeeRole } in employee.roleAssignments"

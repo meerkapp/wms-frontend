@@ -8,12 +8,13 @@ import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import BaseTile from '@/core/components/BaseTile.vue'
 import EmployeeRoleTag from '@/modules/employee/components/EmployeeRoleTag.vue'
 import EmployeeAvatar from '@/modules/employee/components/EmployeeAvatar.vue'
+import EmployeePresenceLabel from '@/modules/employee/components/EmployeePresenceLabel.vue'
 import EmployeeFormDialog from '@/modules/employee/components/EmployeeFormDialog.vue'
 import EmployeeProfileDialog from '@/modules/employee/components/EmployeeProfileDialog.vue'
 import { employeeApi } from '@/modules/employee/api/employee.api'
 import type { Employee } from '@meerkapp/wms-contracts'
 
-const props = defineProps<{ employee: Employee }>()
+const props = defineProps<{ employee: Employee; tick?: number }>()
 const emit = defineEmits<{ updated: [employee: Employee] }>()
 
 const { t } = useI18n()
@@ -85,7 +86,7 @@ function openEditDialog() {
           {{ props.employee.firstName }} {{ props.employee.lastName }}
         </span>
         <div>
-          <span class="text-xs text-green-500">в сети</span>
+          <EmployeePresenceLabel :employee="props.employee" :tick="tick" />
         </div>
       </div>
     </div>

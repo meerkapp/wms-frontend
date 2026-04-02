@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, nextTick } from 'vue'
+import { computed, ref, nextTick, onMounted, onUnmounted } from 'vue'
 import { Button, Skeleton } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useI18n } from 'vue-i18n'
@@ -9,6 +9,7 @@ import EmployeeFormDialog from '@/modules/employee/components/EmployeeFormDialog
 import EmployeeCreatedSuccessDialog from '@/modules/employee/components/EmployeeCreatedSuccessDialog.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { employeeApi } from '@/modules/employee/api/employee.api'
+import { socket } from '@/core/api/socket'
 import type { Employee } from '@meerkapp/wms-contracts'
 
 const { t } = useI18n()
@@ -23,6 +24,21 @@ const total = ref(0)
 const isLoading = ref(false)
 const page = ref(1)
 const scrollEl = ref<HTMLElement | null>(null)
+const tick = ref(0)
+let tickInterval: ReturnType<typeof setInterval>
+
+onMounted(() => {
+  tickInterval = setInterval(() => tick.value++, 60_000)
+  socket.on('employee:status', ({ employeeId, lastSeen }) => {
+    if (!lastSeen) return
+    const emp = employees.value.find((e) => e.id === employeeId)
+    if (emp) emp.lastSeen = lastSeen
+  })
+})
+onUnmounted(() => {
+  clearInterval(tickInterval)
+  socket.off('employee:status')
+})
 
 const hasMore = computed(() => employees.value.length < total.value)
 
@@ -111,6 +127,7 @@ function openCreateDialog() {
           v-for="employee in employees"
           :key="employee.id"
           :employee="employee"
+          :tick="tick"
           @updated="
             (emp) => {
               const idx = employees.findIndex((e) => e.id === emp.id)
