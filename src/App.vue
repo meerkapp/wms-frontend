@@ -5,16 +5,18 @@ import { usePrimeVue } from 'primevue/config'
 import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/core/stores/theme.store'
 import BaseCard from '@/core/components/BaseCard.vue'
+import { dayjs } from '@/plugins/dayjs'
 
 const themeStore = useThemeStore()
 const primevue = usePrimeVue()
 const { locale, tm } = useI18n()
 
-function syncPrimeVueLocale() {
+function syncLocale(l: string) {
   Object.assign(primevue.config.locale ?? {}, tm('primevue'))
+  dayjs.locale(l)
 }
 
-watch(locale, syncPrimeVueLocale, { immediate: true })
+watch(locale, syncLocale, { immediate: true })
 
 onMounted(() => {
   themeStore.loadTheme()
