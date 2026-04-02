@@ -10,6 +10,7 @@ import router from './router'
 import { i18n } from './plugins/i18n'
 import { primevue } from './plugins/primevue'
 import './assets/main.css'
+import './plugins/dayjs'
 
 const app = createApp(App)
 

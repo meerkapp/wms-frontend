@@ -278,6 +278,11 @@
       "rotateLeft": "Rotate Left"
     }
   },
+  "presence": {
+    "online": "online",
+    "justNow": "just now",
+    "lastSeen": "last seen {time}"
+  },
   "employee": {
     "manager": {
       "title": "Employees"

@@ -278,6 +278,11 @@
       "rotateLeft": "Повернуть влево"
     }
   },
+  "presence": {
+    "online": "в сети",
+    "justNow": "был(а) только что",
+    "lastSeen": "был(а) {time}"
+  },
   "employee": {
     "manager": {
       "title": "Сотрудники"
