@@ -36,7 +36,7 @@ export const useThemeStore = defineStore('theme', () => {
   })
 
   async function applyTheme(theme: Theme) {
-    let isDark = theme == 'system' ? isSystemThemeDark.value : theme === 'dark'
+    const isDark = theme == 'system' ? isSystemThemeDark.value : theme === 'dark'
 
     document.documentElement.classList.toggle('app-dark', isDark)
     document.body.dataset.agThemeMode = isDark ? 'app-dark' : 'app-light'

@@ -29,12 +29,12 @@ const syncManager = new SyncManager({
       onChange({ changes })
     })
   },
-  async pull({ name, tableName }, { lastFinishedSyncStart }) {
+  async pull({ tableName }, { lastFinishedSyncStart }) {
     const since = lastFinishedSyncStart
     const res = await apiClient(`/sync/${tableName}`, { params: { since } })
     return { items: res.items }
   },
-  async push({ name }, { changes }) {},
+  async push() {},
 })
 
 export { dataAdapter, syncManager }

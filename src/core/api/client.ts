@@ -13,7 +13,7 @@ export const apiClient = $fetch.create({
       options.headers = headers
     }
   },
-  async onResponseError({ response, options, request }) {
+  async onResponseError({ response, request }) {
     if (response.status === 401) {
       const auth = useAuthStore()
       const url = typeof request === 'string' ? request : request.url
