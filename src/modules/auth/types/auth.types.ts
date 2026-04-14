@@ -1,11 +1,13 @@
 export interface JwtPayload {
   sub: string
   email: string
-  firstName: string | null
-  lastName: string | null
-  stockId: number | null
+  firstName: string
+  lastName: string
+  warehouseId: number | null
   isActive: boolean
   permissions: string[]
+  lastSeen: string | null
+  avatarUrl: string | null
 }
 
 export interface AuthTokens {

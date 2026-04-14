@@ -30,10 +30,12 @@ const validationSchema = computed(() =>
   toTypedSchema(
     z.object({
       email: z
-        .string()
+        .string({ required_error: t('auth.login.validation.emailRequired') })
         .min(1, t('auth.login.validation.emailRequired'))
         .email(t('auth.login.validation.emailInvalid')),
-      password: z.string().min(1, t('auth.login.validation.passwordRequired')),
+      password: z
+        .string({ required_error: t('auth.login.validation.passwordRequired') })
+        .min(1, t('auth.login.validation.passwordRequired')),
     }),
   ),
 )
@@ -43,7 +45,7 @@ const { handleSubmit, errors, defineField } = useForm({ validationSchema })
 const [email, emailAttrs] = defineField('email')
 const [password, passwordAttrs] = defineField('password')
 
-const { mutate: login, isLoading } = useMutation({
+const { mutate: login, asyncStatus } = useMutation({
   mutation: () => authApi.login({ email: email.value!, password: password.value! }),
   onError(error: unknown) {
     const status = (error as { response?: { status?: number } })?.response?.status
@@ -118,7 +120,7 @@ const onSubmit = handleSubmit(() => login())
                   type="submit"
                   :label="t('auth.login.submit')"
                   icon="iconify tabler--login-2"
-                  :loading="isLoading"
+                  :loading="asyncStatus === 'loading'"
                   fluid
                   rounded
                 />

@@ -27,17 +27,22 @@ const validationSchema = computed(() =>
   toTypedSchema(
     z
       .object({
-        firstName: z.string().min(1, t('auth.setup.validation.firstNameRequired')),
-        lastName: z.string().min(1, t('auth.setup.validation.lastNameRequired')),
+        firstName: z
+          .string({ required_error: t('auth.setup.validation.firstNameRequired') })
+          .min(1, t('auth.setup.validation.firstNameRequired')),
+        lastName: z
+          .string({ required_error: t('auth.setup.validation.lastNameRequired') })
+          .min(1, t('auth.setup.validation.lastNameRequired')),
         email: z
-          .string()
+          .string({ required_error: t('auth.setup.validation.emailRequired') })
           .min(1, t('auth.setup.validation.emailRequired'))
           .email(t('auth.setup.validation.emailInvalid')),
         password: z
-          .string()
-          .min(1, t('auth.setup.validation.passwordRequired'))
+          .string({ required_error: t('auth.setup.validation.passwordRequired') })
           .min(8, t('auth.setup.validation.passwordTooShort')),
-        confirmPassword: z.string().min(1, t('auth.setup.validation.confirmPasswordRequired')),
+        confirmPassword: z
+          .string({ required_error: t('auth.setup.validation.confirmPasswordRequired') })
+          .min(1, t('auth.setup.validation.confirmPasswordRequired')),
       })
       .refine((data) => data.password === data.confirmPassword, {
         message: t('auth.setup.validation.passwordMismatch'),
@@ -54,7 +59,7 @@ const [email, emailAttrs] = defineField('email')
 const [password, passwordAttrs] = defineField('password')
 const [confirmPassword, confirmPasswordAttrs] = defineField('confirmPassword')
 
-const { mutate: setup, isLoading } = useMutation({
+const { mutate: setup, asyncStatus } = useMutation({
   mutation: () =>
     authApi.setupInit({
       email: email.value!,
@@ -175,7 +180,7 @@ const onSubmit = handleSubmit(() => setup())
                   type="submit"
                   :label="t('auth.setup.submit')"
                   icon="iconify tabler--user-check"
-                  :loading="isLoading"
+                  :loading="asyncStatus === 'loading'"
                   fluid
                   rounded
                 />
