@@ -12,21 +12,23 @@
     "warehouse_create": "Create warehouses",
     "warehouse_update": "Edit warehouses",
     "locality_create": "Create localities",
-    "employee_read": "View employees",
     "employee_create": "Create employees",
-    "employee_update": "Edit employees",
-    "employee_deactivate": "Deactivate employees",
-    "employee_assign_role": "Assign roles",
-    "employee_assign_warehouse": "Assign warehouses",
-    "employee_read_own": "View own profile",
+    "employee_update_info": "Edit employee info",
+    "employee_update_warehouse": "Assign warehouse",
+    "employee_update_roles": "Assign roles",
+    "employee_update_email": "Change employee email",
+    "employee_update_password": "Change employee password",
+    "employee_toggle_active": "Activate / deactivate employees",
+    "employee_update_own_info": "Edit own profile info",
     "employee_update_own_email": "Change own email",
     "employee_update_own_password": "Change own password",
     "employee_update_own_avatar": "Change own avatar",
-    "role_read": "View roles",
+    "employee_update_avatar": "Change employee avatar",
     "role_create": "Create roles",
     "role_update": "Edit roles"
   },
   "auth": {
+    "logout": "Sign out",
     "login": {
       "title": "Sign in",
       "email": "Email",
@@ -128,12 +130,31 @@
   "common": {
     "optionalField": "{label} (optional)",
     "create": "Create",
+    "add": "Add",
     "edit": "Edit",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
     "error": {
-      "network": "Network error. Please try again."
+      "network": "Network error. Please try again.",
+      "forbidden": "You don't have permission to perform this action."
+    }
+  },
+  "role": {
+    "manager": {
+      "title": "Roles",
+      "createRole": "Create role",
+      "selectRole": "Select a role from the list"
+    },
+    "form": {
+      "titleCreate": "Create role",
+      "titleEdit": "Edit role",
+      "name": "Name",
+      "color": "Color",
+      "validation": {
+        "nameRequired": "Name is required",
+        "colorRequired": "Please select a color"
+      }
     }
   },
   "primevue": {
@@ -287,6 +308,12 @@
     "manager": {
       "title": "Employees"
     },
+    "permission": {
+      "list": {
+        "title": "Permissions",
+        "notAvailable": "No permissions available"
+      }
+    },
     "card": {
       "openProfile": "Open profile"
     },
@@ -294,6 +321,7 @@
       "contacts": "Contacts"
     },
     "form": {
+      "title": "Editor",
       "titleCreate": "Add employee",
       "titleView": "Employee profile",
       "titleEdit": "Edit employee",
@@ -301,9 +329,8 @@
       "lastName": "Last name",
       "email": "Email",
       "password": "Password",
+      "phone": "Phone",
       "roles": "Roles",
-      "permissionsTitle": "Permissions",
-      "noPermissions": "No permissions assigned",
       "warehouse": "Warehouse",
       "validation": {
         "firstNameRequired": "First name is required",
@@ -312,9 +339,29 @@
         "emailInvalid": "Invalid email address",
         "passwordRequired": "Password is required",
         "passwordTooShort": "Password must be at least 8 characters",
-        "emailInUse": "This email is already in use"
+        "emailInUse": "This email is already in use",
+        "phoneTooShort": "Phone number is too short",
+        "phoneTooLong": "Phone number is too long"
       },
-      "generatePassword": "Generate password"
+      "generatePassword": "Generate password",
+      "avatar": "Profile image",
+      "uploadAvatar": "Upload image",
+      "deleteAvatar": "Delete image",
+      "deleteAvatarConfirm": "Are you sure you want to delete the profile image?",
+      "avatarUploaded": "Image updated",
+      "avatarDeleted": "Image deleted"
+    },
+    "changePassword": {
+      "title": "Change password",
+      "button": "Change password",
+      "success": "Password changed successfully",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "validation": {
+        "currentPasswordRequired": "Current password is required",
+        "newPasswordRequired": "New password is required",
+        "incorrectPassword": "Incorrect password"
+      }
     },
     "created": {
       "title": "Employee created",

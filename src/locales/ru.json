@@ -12,21 +12,23 @@
     "warehouse_create": "Создание складов",
     "warehouse_update": "Редактирование складов",
     "locality_create": "Создание населённых пунктов",
-    "employee_read": "Просмотр сотрудников",
     "employee_create": "Создание сотрудников",
-    "employee_update": "Редактирование сотрудников",
-    "employee_deactivate": "Деактивация сотрудников",
-    "employee_assign_role": "Назначение ролей",
-    "employee_assign_warehouse": "Назначение складов",
-    "employee_read_own": "Просмотр своего профиля",
+    "employee_update_info": "Редактирование данных сотрудника",
+    "employee_update_warehouse": "Назначение склада",
+    "employee_update_roles": "Назначение ролей",
+    "employee_update_email": "Изменение email сотрудника",
+    "employee_update_password": "Изменение пароля сотрудника",
+    "employee_toggle_active": "Активация / деактивация сотрудников",
+    "employee_update_own_info": "Редактирование своего профиля",
     "employee_update_own_email": "Изменение своего email",
     "employee_update_own_password": "Изменение своего пароля",
     "employee_update_own_avatar": "Изменение своего аватара",
-    "role_read": "Просмотр ролей",
+    "employee_update_avatar": "Изменение аватара сотрудника",
     "role_create": "Создание ролей",
     "role_update": "Редактирование ролей"
   },
   "auth": {
+    "logout": "Выйти",
     "login": {
       "title": "Вход в систему",
       "email": "Email",
@@ -128,12 +130,31 @@
   "common": {
     "optionalField": "{label} (необязательно)",
     "create": "Создать",
+    "add": "Добавить",
     "edit": "Изменить",
     "save": "Сохранить",
     "cancel": "Отмена",
     "close": "Закрыть",
     "error": {
-      "network": "Ошибка сети. Попробуйте позже."
+      "network": "Ошибка сети. Попробуйте позже.",
+      "forbidden": "У вас нет прав для выполнения этого действия."
+    }
+  },
+  "role": {
+    "manager": {
+      "title": "Роли",
+      "createRole": "Создать роль",
+      "selectRole": "Выберите роль из списка"
+    },
+    "form": {
+      "titleCreate": "Создать роль",
+      "titleEdit": "Изменить роль",
+      "name": "Название",
+      "color": "Цвет",
+      "validation": {
+        "nameRequired": "Введите название",
+        "colorRequired": "Выберите цвет"
+      }
     }
   },
   "primevue": {
@@ -293,7 +314,14 @@
     "profile": {
       "contacts": "Контакты"
     },
+    "permission": {
+      "list": {
+        "title": "Разрешения",
+        "notAvailable": "Нет доступных разрешений"
+      }
+    },
     "form": {
+      "title": "Редактор",
       "titleCreate": "Добавить сотрудника",
       "titleView": "Профиль сотрудника",
       "titleEdit": "Изменить сотрудника",
@@ -301,9 +329,8 @@
       "lastName": "Фамилия",
       "email": "Email",
       "password": "Пароль",
+      "phone": "Телефон",
       "roles": "Роли",
-      "permissionsTitle": "Разрешения",
-      "noPermissions": "Нет доступных разрешений",
       "warehouse": "Склад",
       "validation": {
         "firstNameRequired": "Имя обязательно",
@@ -312,9 +339,29 @@
         "emailInvalid": "Неверный формат email",
         "passwordRequired": "Пароль обязателен",
         "passwordTooShort": "Пароль должен быть не менее 8 символов",
-        "emailInUse": "Этот email уже используется"
+        "emailInUse": "Этот email уже используется",
+        "phoneTooShort": "Номер телефона слишком короткий",
+        "phoneTooLong": "Номер телефона слишком длинный"
       },
-      "generatePassword": "Сгенерировать пароль"
+      "generatePassword": "Сгенерировать пароль",
+      "avatar": "Изображение профиля",
+      "uploadAvatar": "Загрузить изображение",
+      "deleteAvatar": "Удалить изображение",
+      "deleteAvatarConfirm": "Вы уверены, что хотите удалить изображение профиля?",
+      "avatarUploaded": "Изображение обновлено",
+      "avatarDeleted": "Изображение удалено"
+    },
+    "changePassword": {
+      "title": "Изменить пароль",
+      "button": "Изменить пароль",
+      "success": "Пароль успешно изменён",
+      "currentPassword": "Текущий пароль",
+      "newPassword": "Новый пароль",
+      "validation": {
+        "currentPasswordRequired": "Введите текущий пароль",
+        "newPasswordRequired": "Введите новый пароль",
+        "incorrectPassword": "Неверный пароль"
+      }
     },
     "created": {
       "title": "Сотрудник создан",
