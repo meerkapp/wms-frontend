@@ -46,7 +46,7 @@ function openEditDialog() {
   <BaseTile>
     <div class="flex items-center gap-2">
       <OrganizationIcon :website="props.organization.website" />
-      <h3>{{ props.organization.name }}</h3>
+      <span class="font-medium truncate text-sm">{{ props.organization.name }}</span>
     </div>
     <OrganizationStats :organizationId="props.organization.id" />
     <Button

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { ProgressBar, Avatar } from 'primevue'
+import { ProgressBar } from 'primevue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import EmployeeAvatar from '@/modules/employee/components/EmployeeAvatar.vue'
 import { syncManager } from '../sync/manager'
 import { collectionsRegistry } from '../sync/collections'
 import { useRouter } from 'vue-router'
@@ -28,7 +29,7 @@ onMounted(async () => {
 <template>
   <div class="h-screen flex flex-col justify-center">
     <div class="text-center">
-      <Avatar :label="user?.firstName?.charAt(0)" class="mr-2" size="xlarge" shape="circle" />
+      <EmployeeAvatar :first-name="user?.firstName" :image="user?.avatarUrl" size="xlarge" class="mr-2" />
       <p class="text-2xl m-5 font-light">
         {{ $t('sync.greeting', { firstName: user?.firstName, lastName: user?.lastName }) }}
       </p>

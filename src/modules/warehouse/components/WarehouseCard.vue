@@ -67,11 +67,6 @@ function openEditDialog() {
       :address="props.warehouse.address"
       :note="props.warehouse.note"
     />
-    <Tag
-      v-if="props.warehouse.note"
-      :value="props.warehouse.note"
-      class="mt-3 h-5 font-medium! text-xs!"
-    />
     <Button
       v-if="checkUserPermissions('warehouse:update')"
       class="mt-5"

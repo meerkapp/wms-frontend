@@ -32,7 +32,7 @@ const countryName = computed(() => {
         <span class="font-semibold">{{ props.address }}</span>
         <i
           v-if="props.note"
-          class="iconify tabler--info-circle text-muted-color"
+          class="iconify tabler--info-circle text-(--p-tag-info-color)"
           v-tooltip="props.note"
         ></i>
       </div>
