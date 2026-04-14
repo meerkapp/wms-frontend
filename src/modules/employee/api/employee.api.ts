@@ -1,5 +1,5 @@
 import { apiClient } from '@/core/api/client'
-import type { CreateEmployeeDto, Employee, UpdateEmployeeDto } from '@meerkapp/wms-contracts'
+import type { CreateEmployeeDto, Employee, UpdateEmployeeDto, UpdateOwnPasswordDto, UpdateOwnProfileDto } from '@meerkapp/wms-contracts'
 
 export interface PaginatedResponse<T> {
   items: T[]
@@ -21,9 +21,27 @@ export const employeeApi = {
   update: (id: Employee['id'], dto: UpdateEmployeeDto) =>
     apiClient<Employee>(`/employee/${id}`, { method: 'PATCH', body: dto }),
 
-  assignRole: (employeeId: Employee['id'], roleId: number) =>
-    apiClient(`/employee/${employeeId}/roles/${roleId}`, { method: 'POST' }),
+  updateMe: (dto: UpdateOwnProfileDto) =>
+    apiClient<Employee>('/employee/me', { method: 'PATCH', body: dto }),
 
-  removeRole: (employeeId: Employee['id'], roleId: number) =>
-    apiClient(`/employee/${employeeId}/roles/${roleId}`, { method: 'DELETE' }),
+  updateMePassword: (dto: UpdateOwnPasswordDto) =>
+    apiClient<Employee>('/employee/me/password', { method: 'PATCH', body: dto }),
+
+  uploadAvatar: (id: string, file: File) => {
+    const body = new FormData()
+    body.append('file', file)
+    return apiClient<{ avatarUrl: string }>(`/employee/${id}/avatar`, { method: 'POST', body })
+  },
+
+  uploadOwnAvatar: (file: File) => {
+    const body = new FormData()
+    body.append('file', file)
+    return apiClient<{ avatarUrl: string }>('/employee/me/avatar', { method: 'POST', body })
+  },
+
+  deleteAvatar: (id: string) =>
+    apiClient<{ avatarUrl: null }>(`/employee/${id}/avatar`, { method: 'DELETE' }),
+
+  deleteOwnAvatar: () =>
+    apiClient<{ avatarUrl: null }>('/employee/me/avatar', { method: 'DELETE' }),
 }

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { FloatLabel, MultiSelect, Tag } from 'primevue'
+import { computed } from 'vue'
+import { FloatLabel, MultiSelect } from 'primevue'
 import { useQuery } from '@pinia/colada'
-import { useI18n } from 'vue-i18n'
 import { roleApi } from '@/modules/employee/api/role.api'
 import EmployeeRoleTag from '@/modules/employee/components/EmployeeRoleTag.vue'
 import type { Role } from '@meerkapp/wms-contracts'
@@ -11,12 +11,12 @@ const emit = defineEmits<{
   'update:roles': [value: Role[]]
 }>()
 
-const { t } = useI18n()
-
 const { data: roles } = useQuery({
   key: ['roles'],
   query: () => roleApi.getAll(),
 })
+
+const rolesMap = computed(() => new Map(roles.value?.map((r) => [r.id, r]) ?? []))
 </script>
 
 <template>
@@ -41,14 +41,14 @@ const { data: roles } = useQuery({
       "
     >
       <template #option="{ option }: { option: Role }">
-        <span :style="option.color ? `color: ${option.color}` : ''">
+        <span :style="`color: ${option.color}`">
           {{ option.name }}
         </span>
       </template>
       <template #chip="{ value: id }">
         <EmployeeRoleTag
-          :name="roles?.find((r) => r.id === id)?.name ?? String(id)"
-          :color="roles?.find((r) => r.id === id)?.color"
+          :name="rolesMap.get(id)?.name ?? String(id)"
+          :color="rolesMap.get(id)?.color"
         />
       </template>
     </MultiSelect>

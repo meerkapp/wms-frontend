@@ -3,25 +3,48 @@ import { computed } from 'vue'
 import { Checkbox, Panel } from 'primevue'
 import { useI18n } from 'vue-i18n'
 import { ALL_PERMISSIONS, type Permission } from '@meerkapp/wms-contracts'
+import BaseCard from '@/core/components/BaseCard.vue'
+
+const props = withDefaults(
+  defineProps<{
+    permissions: Permission[]
+    hideUnchecked?: boolean
+    editable?: boolean
+    roleColors?: { color: string | null; permissions: Permission[] }[]
+    emptyMessage?: string
+  }>(),
+  {
+    hideUnchecked: false,
+    editable: false,
+    roleColors: () => [],
+  },
+)
+
+const emit = defineEmits<{ 'update:permissions': [Permission[]] }>()
+
+const { t } = useI18n()
+
+const title = computed(() =>
+  props.permissions.length > 0
+    ? `${t('employee.permission.list.title')} (${props.permissions.length})`
+    : t('employee.permission.list.title'),
+)
 
 function getPermissionGroup(name: Permission): string {
   const [group] = name.split(':')
   return group ?? name
 }
 
-const props = withDefaults(
-  defineProps<{
-    permissions: Permission[]
-    hideUnchecked?: boolean
-    roleColors?: { color: string | null; permissions: Permission[] }[]
-  }>(),
-  {
-    hideUnchecked: false,
-    roleColors: () => [],
-  },
-)
-
-const { t } = useI18n()
+function togglePermission(name: Permission, checked: boolean) {
+  if (checked) {
+    emit('update:permissions', [...props.permissions, name])
+  } else {
+    emit(
+      'update:permissions',
+      props.permissions.filter((p) => p !== name),
+    )
+  }
+}
 
 const activeSet = computed(() => new Set(props.permissions))
 
@@ -54,51 +77,56 @@ const permissionGroups = computed(() => {
 
   return [...groups.entries()].map(([group, items]) => ({ group, items }))
 })
-
-const activeCount = computed(() => props.permissions.length)
 </script>
 
 <template>
-  <div class="h-full flex flex-col">
-    <h2>
-      {{ t('employee.form.permissionsTitle') }}
-      <span v-if="activeCount > 0">({{ activeCount }})</span>
-    </h2>
-    <div
-      v-if="permissionGroups.length === 0"
-      class="flex-1 flex flex-col gap-3 justify-center items-center"
-    >
-      <i class="iconify tabler--shield-question text-4xl text-muted-color"></i>
-      <span class="text-muted-color">{{ t('employee.form.noPermissions') }}</span>
-    </div>
-    <div v-else class="mt-5 flex-1 space-y-3 pr-7">
-      <Panel
-        v-for="{ group, items } in permissionGroups"
-        :key="group"
-        :header="t(`permissions.groups.${group}`)"
-        toggleable
+  <BaseCard class="w-full h-full" :title="title">
+    <template #header v-if="$slots.header">
+      <slot name="header" />
+    </template>
+    <template #main>
+      <div
+        v-if="props.permissions.length === 0"
+        class="flex flex-col h-full justify-center items-center"
       >
-        <div class="space-y-1.5">
-          <div v-for="perm in items" :key="perm.name" class="flex items-center gap-2">
-            <Checkbox
-              :input-id="`perm-${perm.name}`"
-              :model-value="perm.active"
-              :disabled="true"
-              :pt="{
-                icon: { style: perm.active && perm.color ? { color: perm.color } : undefined },
-              }"
-              binary
-            />
-            <label
-              :for="`perm-${perm.name}`"
-              class="text-sm cursor-default"
-              :class="!perm.active ? 'text-muted-color' : ''"
-            >
-              {{ t('permissions.' + (perm.name as string).replace(/:/g, '_')) }}
-            </label>
+        <i class="iconify tabler--shield-question text-4xl text-muted-color"></i>
+        <span class="text-muted-color mt-3">
+          {{ props.emptyMessage ?? t('employee.permission.list.notAvailable') }}
+        </span>
+      </div>
+      <div v-else class="h-full overflow-y-auto px-3 pb-3 space-y-3">
+        <Panel
+          v-for="{ group, items } in permissionGroups"
+          :key="group"
+          :header="t(`permissions.groups.${group}`)"
+          toggleable
+        >
+          <div class="space-y-1.5">
+            <div v-for="perm in items" :key="perm.name" class="flex items-center gap-2">
+              <Checkbox
+                :input-id="`perm-${perm.name}`"
+                :model-value="perm.active"
+                :disabled="!props.editable"
+                :pt="{
+                  icon: { style: perm.active && perm.color ? { color: perm.color } : undefined },
+                }"
+                binary
+                @update:model-value="(v: boolean) => togglePermission(perm.name, v)"
+              />
+              <label
+                :for="`perm-${perm.name}`"
+                class="text-sm"
+                :class="[
+                  !perm.active ? 'text-muted-color' : '',
+                  props.editable ? 'cursor-pointer' : 'cursor-default',
+                ]"
+              >
+                {{ t('permissions.' + (perm.name as string).replace(/:/g, '_')) }}
+              </label>
+            </div>
           </div>
-        </div>
-      </Panel>
-    </div>
-  </div>
+        </Panel>
+      </div>
+    </template>
+  </BaseCard>
 </template>

@@ -8,6 +8,8 @@ import type { CreateEmployeeDto, Employee, UpdateEmployeeDto } from '@meerkapp/w
 import EmployeeDialog from './EmployeeDialog.vue'
 import EmployeeForm from './EmployeeForm.vue'
 import { employeeApi } from '@/modules/employee/api/employee.api'
+import { useEmployeeUpdate } from '@/modules/employee/composables/useEmployeeUpdate'
+import { parseApiError } from '@/core/api/errors'
 
 const dialogRef = inject<Ref<DynamicDialogInstance>>('dialogRef')
 
@@ -24,20 +26,31 @@ const { mutate: createEmployee } = useMutation({
   onSuccess: (_, dto) => {
     dialogRef?.value.close({ email: dto.email, password: dto.password })
   },
-  onError: (error: any) => {
-    if (error?.statusCode === 409 || error?.response?.status === 409) {
-      formRef.value?.setFieldError('email', t('employee.form.validation.emailInUse'))
-    } else {
-      toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
-    }
-  },
+  onError: (error) => handleEmployeeError(error),
 })
+
+function handleEmployeeError(error: unknown) {
+  const apiError = parseApiError(error)
+  if (apiError?.status === 409) {
+    formRef.value?.setFieldError('email', t('employee.form.validation.emailInUse'))
+  } else if (apiError?.status === 403) {
+    toast.add({ severity: 'error', summary: t('common.error.forbidden'), life: 3000 })
+  } else {
+    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+  }
+}
+
+const { mutate: updateEmployee } = useEmployeeUpdate(
+  () => employee.value!,
+  () => dialogRef?.value.close(),
+  (error) => handleEmployeeError(error),
+)
 
 function onSubmit(data: CreateEmployeeDto | (UpdateEmployeeDto & { roleIds: number[] })) {
   if (mode.value === 'create') {
     createEmployee(data as CreateEmployeeDto)
   } else {
-    dialogRef?.value.close(data)
+    updateEmployee(data as UpdateEmployeeDto & { roleIds: number[] })
   }
 }
 </script>

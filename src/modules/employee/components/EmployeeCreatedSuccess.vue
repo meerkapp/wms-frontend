@@ -4,7 +4,6 @@ import { Button } from 'primevue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{ email: string; password: string }>()
-const emit = defineEmits<{ close: [] }>()
 
 const { t } = useI18n()
 

@@ -7,11 +7,11 @@ import EmployeeProfile from './EmployeeProfile.vue'
 
 const dialogRef = inject<Ref<DynamicDialogInstance>>('dialogRef')
 
-const employee = computed<Employee>(() => dialogRef?.value.data?.employee)
+const employee = computed<Employee | undefined>(() => dialogRef?.value.data?.employee)
 </script>
 
 <template>
   <EmployeeDialog>
-    <EmployeeProfile :employee="employee" />
+    <EmployeeProfile v-if="employee" :employee="employee" />
   </EmployeeDialog>
 </template>

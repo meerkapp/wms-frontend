@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 import { usePresenceStore } from '@/modules/employee/stores/presence.store'
 import type { Employee } from '@meerkapp/wms-contracts'
 
 const props = defineProps<{ employee: Employee; tick?: number }>()
 
-const { t } = useI18n()
 const presence = usePresenceStore()
+
+const label = computed(() => {
+  void props.tick // reactive dependency for periodic updates
+  return presence.getPresenceLabel(props.employee.id, props.employee.lastSeen ?? null)
+})
 </script>
 
 <template>
@@ -14,6 +18,6 @@ const presence = usePresenceStore()
     class="text-xs"
     :class="presence.isOnline(props.employee.id) ? 'text-green-500' : 'text-muted-color'"
   >
-    {{ presence.getPresenceLabel(props.employee.id, props.employee.lastSeen ?? null, t) }}
+    {{ label }}
   </span>
 </template>
