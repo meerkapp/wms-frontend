@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { markRaw, ref } from 'vue'
 import { i18n } from '@/plugins/i18n'
-import type { SidebarItem } from '@/modules/sidebar/types/sidebar.types'
+import type { SidebarEntry } from '@/modules/sidebar/types/sidebar.types'
 import OrganizationManager from '@/modules/organization/components/OrganizationManager.vue'
 import WarehouseManager from '@/modules/warehouse/components/WarehouseManager.vue'
 import EmployeeManager from '@/modules/employee/components/EmployeeManager.vue'
@@ -17,7 +17,7 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       hideTitle: true,
     },
     {
-      title: 'Склады',
+      title: i18n.global.t('warehouse.manager.title'),
       key: 'warehouse',
       iconClass: 'iconify tabler--building-warehouse',
       content: markRaw(WarehouseManager),
@@ -25,14 +25,15 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       hideTitle: true,
     },
     {
-      title: 'Сотрудники',
+      title: i18n.global.t('employee.manager.title'),
       key: 'employees',
       iconClass: 'iconify tabler--users',
       content: markRaw(EmployeeManager),
       position: 'bottom',
       hideTitle: true,
     },
-  ] as SidebarItem[])
+    { type: 'separator', key: 'sep-1', position: 'bottom' },
+  ] as SidebarEntry[])
   const selectedSideBarPrimaryItemKey = ref<string | null>('organizations')
 
   function setSelectedSideBarPrimaryItemKey(value: string | null) {

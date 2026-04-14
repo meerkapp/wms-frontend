@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { useTemplateRef } from 'vue'
-import { Badge, Menu } from 'primevue'
+import { Badge } from 'primevue'
 import type { SidebarItem } from '@/modules/sidebar/types/sidebar.types'
 
 const props = defineProps<{
@@ -10,8 +9,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:selectedKey'])
-
-const buttonMenu = useTemplateRef('buttonMenu')
 
 function setPanel(key: SidebarItem['key'] | null) {
   if (props.selectedKey !== key) {

@@ -1,17 +1,20 @@
 <script lang="ts" setup>
-import { computed, nextTick } from 'vue'
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSideBarPrimaryStore } from '../stores/sidebar-primary.store'
+import type { SidebarItem } from '../types/sidebar.types'
 
 const sideBarPrimaryStore = useSideBarPrimaryStore()
 const { sideBarPrimaryItems } = sideBarPrimaryStore
 const { selectedSideBarPrimaryItemKey } = storeToRefs(sideBarPrimaryStore)
 
-const selectedSideBarItem = computed(() =>
-  selectedSideBarPrimaryItemKey.value !== null
-    ? sideBarPrimaryItems.find((i) => i.key === selectedSideBarPrimaryItemKey.value) || null
-    : null,
-)
+const selectedSideBarItem = computed<SidebarItem | null>(() => {
+  if (selectedSideBarPrimaryItemKey.value === null) return null
+  const found = sideBarPrimaryItems.find(
+    (i) => i.type !== 'separator' && i.key === selectedSideBarPrimaryItemKey.value,
+  )
+  return (found as SidebarItem) ?? null
+})
 </script>
 
 <template>
