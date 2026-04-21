@@ -1,20 +1,26 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { Button } from 'primevue'
+import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{ email: string; password: string }>()
 
 const { t } = useI18n()
+const toast = useToast()
 
 const copied = ref(false)
 const showPassword = ref(false)
 
 async function copyCredentials() {
   const text = `${t('employee.form.email')}: ${props.email}\n${t('employee.form.password')}: ${props.password}`
-  await navigator.clipboard.writeText(text)
-  copied.value = true
-  setTimeout(() => (copied.value = false), 2000)
+  try {
+    await navigator.clipboard.writeText(text)
+    copied.value = true
+    setTimeout(() => (copied.value = false), 2000)
+  } catch {
+    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+  }
 }
 </script>
 

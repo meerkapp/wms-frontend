@@ -170,7 +170,7 @@ function openCreateDialog() {
         <Button
           v-else
           :label="t('common.edit')"
-          :disabled="selectedRole?.name === SUPERADMIN_ROLE"
+          :disabled="!selectedRole || selectedRole.name === SUPERADMIN_ROLE"
           severity="secondary"
           icon="iconify tabler--edit"
           size="small"

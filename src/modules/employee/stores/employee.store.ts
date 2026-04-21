@@ -60,7 +60,6 @@ export const useEmployeeStore = defineStore('employee', () => {
   function reset() {
     employees.value = []
     total.value = 0
-    page.value = 1
     isError.value = false
     loadPage(1)
   }

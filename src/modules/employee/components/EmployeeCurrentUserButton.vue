@@ -4,6 +4,7 @@ import { Menu } from 'primevue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useToast } from 'primevue/usetoast'
 import type { MenuItem } from 'primevue/menuitem'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useAppDialog } from '@/core/composables/useAppDialog'
@@ -16,6 +17,7 @@ import EmployeeFormDialogFooter from './EmployeeFormDialogFooter.vue'
 const router = useRouter()
 const { t } = useI18n()
 const dialog = useAppDialog()
+const toast = useToast()
 
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
@@ -36,39 +38,47 @@ const employeeFullName = computed(() => `${user.value?.firstName} ${user.value?.
 
 async function openProfileDialog() {
   if (!user.value) return
-  const employee = await employeeApi.getOne(user.value.sub)
-  dialog.open(
-    EmployeeProfileDialog,
-    {
-      props: {
-        header: t('employee.form.titleView'),
-        modal: true,
-        style: { width: '54rem' },
+  try {
+    const employee = await employeeApi.getOne(user.value.sub)
+    dialog.open(
+      EmployeeProfileDialog,
+      {
+        props: {
+          header: t('employee.form.titleView'),
+          modal: true,
+          style: { width: '54rem' },
+        },
+        data: { employee },
       },
-      data: { employee },
-    },
-    { type: 'extended', disableContentBackground: true },
-  )
+      { type: 'extended', disableContentBackground: true },
+    )
+  } catch {
+    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+  }
 }
 
 async function openEditDialog() {
   if (!user.value) return
-  const employee = await employeeApi.getOne(user.value.sub)
-  dialog.open(
-    EmployeeFormDialog,
-    {
-      props: {
-        header: t('employee.form.titleEdit'),
-        modal: true,
-        style: { width: '54rem' },
+  try {
+    const employee = await employeeApi.getOne(user.value.sub)
+    dialog.open(
+      EmployeeFormDialog,
+      {
+        props: {
+          header: t('employee.form.titleEdit'),
+          modal: true,
+          style: { width: '54rem' },
+        },
+        data: { employee, mode: 'edit' },
+        templates: {
+          footer: markRaw(EmployeeFormDialogFooter),
+        },
       },
-      data: { employee, mode: 'edit' },
-      templates: {
-        footer: markRaw(EmployeeFormDialogFooter),
-      },
-    },
-    { type: 'extended', disableContentBackground: true },
-  )
+      { type: 'extended', disableContentBackground: true },
+    )
+  } catch {
+    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+  }
 }
 
 async function logout() {
