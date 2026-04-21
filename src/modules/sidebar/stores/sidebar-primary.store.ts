@@ -5,9 +5,19 @@ import type { SidebarEntry } from '@/modules/sidebar/types/sidebar.types'
 import OrganizationManager from '@/modules/organization/components/OrganizationManager.vue'
 import WarehouseManager from '@/modules/warehouse/components/WarehouseManager.vue'
 import EmployeeManager from '@/modules/employee/components/EmployeeManager.vue'
+import ProductTypeManager from '@/modules/product-type/components/ProductTypeManager.vue'
 
 export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
   const sideBarPrimaryItems = markRaw([
+    {
+      title: i18n.global.t('product.type.manager.title'),
+      key: 'product_types',
+      iconClass: 'iconify tabler--category',
+      content: markRaw(ProductTypeManager),
+      position: 'bottom',
+      hideTitle: true,
+    },
+    { type: 'separator', key: 'sep-1', position: 'bottom' },
     {
       title: i18n.global.t('organization.manager.title'),
       key: 'organizations',
@@ -18,7 +28,7 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
     },
     {
       title: i18n.global.t('warehouse.manager.title'),
-      key: 'warehouse',
+      key: 'warehouses',
       iconClass: 'iconify tabler--building-warehouse',
       content: markRaw(WarehouseManager),
       position: 'bottom',
@@ -32,7 +42,7 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       position: 'bottom',
       hideTitle: true,
     },
-    { type: 'separator', key: 'sep-1', position: 'bottom' },
+    { type: 'separator', key: 'sep-2', position: 'bottom' },
   ] as SidebarEntry[])
   const selectedSideBarPrimaryItemKey = ref<string | null>('organizations')
 

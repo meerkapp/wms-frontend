@@ -131,6 +131,7 @@
     "optionalField": "{label} (optional)",
     "create": "Create",
     "add": "Add",
+    "delete": "Delete",
     "edit": "Edit",
     "save": "Save",
     "cancel": "Cancel",
@@ -303,6 +304,110 @@
     "online": "online",
     "justNow": "just now",
     "lastSeen": "last seen {time}"
+  },
+  "product": {
+    "type": {
+      "manager": {
+        "title": "Product Types"
+      },
+      "form": {
+        "titleCreate": "Create Product Type",
+        "titleEdit": "Edit Product Type",
+        "sections": {
+          "editor": "Editor",
+          "sku": "SKU",
+          "characteristics": "Characteristics"
+        },
+        "skuExample": "SKU Example",
+        "name": "Name",
+        "code": "Code",
+        "withdrawalStrategy": "Withdrawal Strategy",
+        "withdrawalStrategies": {
+          "fifo": {
+            "label": "FIFO",
+            "description": "First In, First Out — oldest items are written off first"
+          },
+          "lifo": {
+            "label": "LIFO",
+            "description": "Last In, First Out — newest items are written off first"
+          },
+          "fefo": {
+            "label": "FEFO",
+            "description": "First Expired, First Out — items closest to expiry are written off first"
+          },
+          "manual": {
+            "label": "Manual",
+            "description": "Items for write-off are selected manually"
+          }
+        },
+        "skuMode": "SKU Generation Mode",
+        "skuModes": {
+          "global": "Global",
+          "custom": "Custom"
+        },
+        "skuModeDescriptions": {
+          "global": "Global sequential numbering of products",
+          "custom": "Custom SKU template for this product type"
+        },
+        "skuTemplate": "SKU Template",
+        "skuTemplateHint": "Use {brand}, {counter}, and characteristic keys. Append :{N} to limit length.",
+        "skuTemplateInfo": "Build the SKU template by clicking the components below",
+        "skuTokens": {
+          "brand": "Brand",
+          "counter": "Counter"
+        },
+        "skuTokenDialog": {
+          "title": "Add \"{label}\" to template",
+          "lengthLabel": "Max characters",
+          "lengthHint": "Leave empty to not limit the length",
+          "lengthInvalid": "Enter a number greater than 0"
+        },
+        "characteristicTypes": {
+          "number": "Number",
+          "select": "List",
+          "toggle": "Toggle",
+          "checkbox": "Checkbox"
+        },
+        "schema": "Characteristics",
+        "addCharacteristic": "Add Characteristic",
+        "characteristic": {
+          "label": "Label",
+          "key": "Key",
+          "type": "Type",
+          "required": "Required",
+          "options": "Options",
+          "addOption": "Add Option",
+          "optionLabel": "Label",
+          "optionValue": "Value",
+          "addTitle": "Add characteristic",
+          "empty": "No characteristics added",
+          "min": "Min",
+          "max": "Max",
+          "suffix": "Suffix",
+          "trueLabel": "True label",
+          "falseLabel": "False label",
+          "deleteTitle": "Delete characteristic",
+          "deleteConfirm": "Are you sure you want to delete this characteristic?"
+        },
+        "validation": {
+          "nameRequired": "Name is required",
+          "codeRequired": "Code is required",
+          "withdrawalStrategyRequired": "Select strategy",
+          "skuModeRequired": "Select SKU mode",
+          "skuTemplateRequired": "SKU template is required",
+          "skuTemplateInvalid": "Invalid SKU template format",
+          "skuTemplateCharacteristicsMismatch": "All characteristic keys in the SKU template must belong to required characteristics",
+          "characteristicLabelRequired": "Label is required",
+          "characteristicKeyRequired": "Key is required",
+          "optionLabelRequired": "Option label is required",
+          "optionValueRequired": "Option value is required",
+          "atLeastOneOptionRequired": "At least one option is required",
+          "characteristicKeyInvalid": "Only lowercase letters, digits, and _",
+          "toggleTrueLabelRequired": "True label is required",
+          "toggleFalseLabelRequired": "False label is required"
+        }
+      }
+    }
   },
   "employee": {
     "manager": {

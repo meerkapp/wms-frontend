@@ -131,6 +131,7 @@
     "optionalField": "{label} (необязательно)",
     "create": "Создать",
     "add": "Добавить",
+    "delete": "Удалить",
     "edit": "Изменить",
     "save": "Сохранить",
     "cancel": "Отмена",
@@ -303,6 +304,110 @@
     "online": "в сети",
     "justNow": "был(а) только что",
     "lastSeen": "был(а) {time}"
+  },
+  "product": {
+    "type": {
+      "manager": {
+        "title": "Типы товаров"
+      },
+      "form": {
+        "titleCreate": "Создать тип товара",
+        "titleEdit": "Изменить тип товара",
+        "sections": {
+          "editor": "Редактор",
+          "sku": "Артикул",
+          "characteristics": "Характеристики"
+        },
+        "skuExample": "Пример артикула",
+        "name": "Название",
+        "code": "Код",
+        "withdrawalStrategy": "Стратегия списания",
+        "withdrawalStrategies": {
+          "fifo": {
+            "label": "FIFO",
+            "description": "Первым поступил — первым списан"
+          },
+          "lifo": {
+            "label": "LIFO",
+            "description": "Последним поступил — первым списан"
+          },
+          "fefo": {
+            "label": "FEFO",
+            "description": "С ближайшим сроком годности — первым списан"
+          },
+          "manual": {
+            "label": "Вручную",
+            "description": "Позиции для списания выбираются самостоятельно"
+          }
+        },
+        "skuMode": "Тип артикула",
+        "skuModes": {
+          "global": "Глобальный",
+          "custom": "Настраиваемый"
+        },
+        "skuModeDescriptions": {
+          "global": "Общая числовая нумерация товаров",
+          "custom": "Индивидуальный шаблон артикула для этого типа товара"
+        },
+        "skuTemplate": "Шаблон артикула",
+        "skuTemplateHint": "Используйте {brand}, {counter} и ключи характеристик. Добавьте :{N} для ограничения длины.",
+        "skuTemplateInfo": "Составьте шаблон артикула, выбирая из компонентов представленных ниже.",
+        "skuTokens": {
+          "brand": "Бренд",
+          "counter": "Счётчик"
+        },
+        "skuTokenDialog": {
+          "title": "Добавить «{label}» в шаблон",
+          "lengthLabel": "Макс. символов",
+          "lengthHint": "Оставьте пустым, чтобы не ограничивать длину",
+          "lengthInvalid": "Введите число больше 0"
+        },
+        "characteristicTypes": {
+          "number": "Число",
+          "select": "Список",
+          "toggle": "Переключатель",
+          "checkbox": "Флажок"
+        },
+        "schema": "Характеристики",
+        "addCharacteristic": "Добавить характеристику",
+        "characteristic": {
+          "label": "Название",
+          "key": "Ключ",
+          "type": "Тип",
+          "required": "Обязательное поле",
+          "options": "Опции",
+          "addOption": "Добавить опцию",
+          "optionLabel": "Заголовок",
+          "optionValue": "Значение",
+          "addTitle": "Добавить характеристику",
+          "empty": "Характеристики не добавлены",
+          "min": "Мин",
+          "max": "Макс",
+          "suffix": "Суффикс",
+          "trueLabel": "Метка «Истина»",
+          "falseLabel": "Метка «Ложь»",
+          "deleteTitle": "Удалить характеристику",
+          "deleteConfirm": "Вы уверены, что хотите удалить эту характеристику?"
+        },
+        "validation": {
+          "nameRequired": "Введите название",
+          "codeRequired": "Введите код",
+          "withdrawalStrategyRequired": "Выберите стратегию",
+          "skuModeRequired": "Выберите тип артикула",
+          "skuTemplateRequired": "Введите шаблон артикула",
+          "skuTemplateInvalid": "Неверный формат шаблона артикула",
+          "skuTemplateCharacteristicsMismatch": "Все ключи характеристик в шаблоне должны быть обязательными",
+          "characteristicLabelRequired": "Заголовок обязателен",
+          "characteristicKeyRequired": "Ключ обязателен",
+          "optionLabelRequired": "Заголовок опции обязателен",
+          "optionValueRequired": "Значение опции обязательное",
+          "atLeastOneOptionRequired": "Добавьте хотя бы одну опцию",
+          "characteristicKeyInvalid": "Только строчные буквы, цифры и _",
+          "toggleTrueLabelRequired": "Введите метку для «Да»",
+          "toggleFalseLabelRequired": "Введите метку для «Нет»"
+        }
+      }
+    }
   },
   "employee": {
     "manager": {
