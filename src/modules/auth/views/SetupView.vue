@@ -10,7 +10,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 
 import BaseCard from '@/core/components/BaseCard.vue'
-import Logo from '@/core/components/Logo.vue'
+import AppLogo from '@/core/components/AppLogo.vue'
 import LauncherRedirectMessage from '@/modules/auth/components/LauncherRedirectMessage.vue'
 import { authApi } from '@/modules/auth/api/auth.api'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
@@ -91,7 +91,7 @@ const onSubmit = handleSubmit(() => setup())
       <template #main>
         <div class="flex flex-col items-center justify-center h-full">
           <div class="w-72 lg:w-96">
-            <Logo class="mb-10" />
+            <AppLogo class="mb-10" />
 
             <!-- Launcher redirect screen -->
             <LauncherRedirectMessage v-if="launcherCode" :code="launcherCode" />

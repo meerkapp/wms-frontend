@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { watchEffect, ref } from 'vue'
+import { ref } from 'vue'
 import { Splitter, SplitterPanel } from 'primevue'
 import { storeToRefs } from 'pinia'
 
 import ActivityBarPrimary from '@/modules/sidebar/components/ActivityBarPrimary.vue'
 import SideBarPrimary from '@/modules/sidebar/components/SideBarPrimary.vue'
-import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useSideBarPrimaryStore } from '@/modules/sidebar/stores/sidebar-primary.store'
 import BaseCard from '../components/BaseCard.vue'
 
 import WarehouseSelect from '@/modules/warehouse/components/WarehouseSelect.vue'
-
-const authStore = useAuthStore()
-const { user } = authStore
 
 const sideBarPrimaryStore = useSideBarPrimaryStore()
 const { selectedSideBarPrimaryItemKey } = storeToRefs(sideBarPrimaryStore)

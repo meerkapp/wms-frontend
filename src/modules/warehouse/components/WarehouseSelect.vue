@@ -1,14 +1,9 @@
 <script lang="ts" setup>
 import { ref, watchEffect, computed } from 'vue'
 import { FloatLabel, Select, Tag } from 'primevue'
-import { useDialog } from 'primevue/usedialog'
-import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import { Warehouses } from '@/modules/signaldb/models/warehouses.model'
 import { Organizations } from '@/modules/signaldb/models/organizations.model'
-import { Localities } from '@/modules/signaldb/models/localities.model'
-import { useAuthStore } from '@/modules/auth/stores/auth.store'
 
 import WarehouseInfo from './WarehouseInfo.vue'
 import type { Organization, Warehouse } from '@meerkapp/wms-contracts'
@@ -19,10 +14,6 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const dialog = useDialog()
-const toast = useToast()
-const authStore = useAuthStore()
-const { checkUserPermissions } = authStore
 
 const warehouses = ref<Warehouse[]>([])
 const organizations = ref<Organization[]>([])

@@ -4,7 +4,6 @@ import { onMounted, watch } from 'vue'
 import { usePrimeVue } from 'primevue/config'
 import { useI18n } from 'vue-i18n'
 import { useThemeStore } from '@/core/stores/theme.store'
-import BaseCard from '@/core/components/BaseCard.vue'
 import { dayjs } from '@/plugins/dayjs'
 
 const themeStore = useThemeStore()
