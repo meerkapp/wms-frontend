@@ -3,17 +3,20 @@ import { ref } from 'vue'
 import { Splitter, SplitterPanel } from 'primevue'
 import { storeToRefs } from 'pinia'
 
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { useSideBarPrimaryStore } from '@/modules/sidebar/stores/sidebar-primary.store'
 import ActivityBarPrimary from '@/modules/sidebar/components/ActivityBarPrimary.vue'
 import SideBarPrimary from '@/modules/sidebar/components/SideBarPrimary.vue'
-import { useSideBarPrimaryStore } from '@/modules/sidebar/stores/sidebar-primary.store'
-import BaseCard from '../components/BaseCard.vue'
-
+import WorkspaceCard from '@/modules/workspace/components/WorkspaceCard.vue'
 import WarehouseSelect from '@/modules/warehouse/components/WarehouseSelect.vue'
+
+const authStore = useAuthStore()
+const { user } = storeToRefs(authStore)
 
 const sideBarPrimaryStore = useSideBarPrimaryStore()
 const { selectedSideBarPrimaryItemKey } = storeToRefs(sideBarPrimaryStore)
 
-const warehouseId = ref<number | null>(null)
+const warehouseId = ref<number | null>(user.value?.warehouseId ?? null)
 
 // const countries = ref<any[]>([])
 
@@ -43,12 +46,12 @@ const warehouseId = ref<number | null>(null)
       >
         <SideBarPrimary />
       </SplitterPanel>
-      <SplitterPanel :size="80" :minSize="70" pt:root="py-1.5">
-        <div class="h-full">
+      <SplitterPanel :size="80" :minSize="70" pt:root="py-1.5 pr-1.5">
+        <div class="h-full flex flex-col gap-1.5">
           <WarehouseSelect v-model:warehouseId="warehouseId" class="w-fit min-w-3xs" />
-          <BaseCard title="test" class="h-full mt-2">
-            <template #main> </template>
-          </BaseCard>
+          <WorkspaceCard>
+            <template #main> test </template>
+          </WorkspaceCard>
         </div>
       </SplitterPanel>
     </Splitter>

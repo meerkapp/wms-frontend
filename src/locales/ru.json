@@ -310,6 +310,9 @@
       "manager": {
         "title": "Типы товаров"
       },
+      "select": {
+        "label": "Тип товара"
+      },
       "form": {
         "titleCreate": "Создать тип товара",
         "titleEdit": "Изменить тип товара",
@@ -473,6 +476,47 @@
       "subtitle": "Сохраните данные для входа. Пароль больше не будет показан.",
       "copyCredentials": "Копировать данные для входа",
       "copied": "Скопировано!"
+    }
+  },
+  "navigation": {
+    "manager": {
+      "title": "Навигация"
+    },
+    "archive": "Архив",
+    "favorites": "Избранное",
+    "folder": {
+      "label": "Папка",
+      "root": "Корневая папка",
+      "form": {
+        "titleCreate": "Создать папку",
+        "titleEdit": "Изменить папку",
+        "name": "Название",
+        "location": "Расположение",
+        "validation": {
+          "nameRequired": "Введите название"
+        }
+      }
+    },
+    "collection": {
+      "label": "Коллекция",
+      "form": {
+        "titleCreate": "Создать коллекцию",
+        "titleEdit": "Изменить коллекцию",
+        "name": "Название",
+        "location": "Расположение",
+        "defaultProductType": "Тип товара по умолчанию",
+        "validation": {
+          "nameRequired": "Введите название"
+        }
+      }
+    },
+    "contextMenu": {
+      "folder": "Папка",
+      "collection": "Коллекция",
+      "pin": "Закрепить",
+      "unpin": "Открепить",
+      "moveUp": "Переместить вверх",
+      "moveDown": "Переместить вниз"
     }
   }
 }

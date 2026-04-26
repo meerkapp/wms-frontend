@@ -8,7 +8,7 @@ const tableName = 'product_type'
 
 export const ProductTypes = new Collection<ProductType>(collectionName, dataAdapter, {
   reactivity: vueReactivityAdapter,
-  indices: ['updated_at'],
+  indices: ['updatedAt'],
 })
 
 export default { collection: ProductTypes, collectionName, tableName }

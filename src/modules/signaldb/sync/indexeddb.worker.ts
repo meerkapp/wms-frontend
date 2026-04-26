@@ -2,14 +2,16 @@ import { WorkerDataAdapterHost } from '@signaldb/core'
 import prepareIndexedDB from '@signaldb/indexeddb'
 
 const storage = prepareIndexedDB({
-  version: 2,
+  version: 3,
   databaseName: 'meerk-server-db',
   schema: {
     countries: [],
     localities: [],
     organizations: [],
     warehouses: [],
+    folders: [],
     product_types: [],
+    product_collections: [],
     'sync-manager-changes': ['collectionName'],
     'sync-manager-snapshots': ['collectionName'],
     'sync-manager-sync-operations': ['collectionName', 'status'],

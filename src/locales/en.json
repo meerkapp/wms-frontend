@@ -310,6 +310,9 @@
       "manager": {
         "title": "Product Types"
       },
+      "select": {
+        "label": "Product Type"
+      },
       "form": {
         "titleCreate": "Create Product Type",
         "titleEdit": "Edit Product Type",
@@ -473,6 +476,47 @@
       "subtitle": "Save the login credentials. The password won't be shown again.",
       "copyCredentials": "Copy login credentials",
       "copied": "Copied!"
+    }
+  },
+  "navigation": {
+    "manager": {
+      "title": "Navigation"
+    },
+    "archive": "Archive",
+    "favorites": "Favorites",
+    "folder": {
+      "label": "Folder",
+      "root": "Root folder",
+      "form": {
+        "titleCreate": "Create folder",
+        "titleEdit": "Edit folder",
+        "name": "Name",
+        "location": "Location",
+        "validation": {
+          "nameRequired": "Name is required"
+        }
+      }
+    },
+    "collection": {
+      "label": "Collection",
+      "form": {
+        "titleCreate": "Create collection",
+        "titleEdit": "Edit collection",
+        "name": "Name",
+        "location": "Location",
+        "defaultProductType": "Default product type",
+        "validation": {
+          "nameRequired": "Name is required"
+        }
+      }
+    },
+    "contextMenu": {
+      "folder": "Folder",
+      "collection": "Collection",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     }
   }
 }

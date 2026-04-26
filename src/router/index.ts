@@ -27,7 +27,7 @@ const router = createRouter({
       path: '/workspace',
       name: 'workspace',
       meta: { requiresAuth: true },
-      component: () => import('@/core/views/WorkspaceView.vue'),
+      component: () => import('@/modules/workspace/views/WorkspaceView.vue'),
     },
   ],
 })
