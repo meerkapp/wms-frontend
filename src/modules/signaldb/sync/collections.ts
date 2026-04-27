@@ -6,6 +6,12 @@ import Warehouses from '../models/warehouses.model'
 import Folders from '../models/folders.model'
 import ProductTypes from '../models/product-types.model'
 import ProductCollections from '../models/product-collections.model'
+import ProductItems from '../models/product-items.model'
+import ProductBrands from '../models/product-brands.model'
+import ProductMeasures from '../models/product-measures.model'
+import ProductBarcodes from '../models/product-barcodes.model'
+import ProductPackages from '../models/product-packages.model'
+import ProductShipments from '../models/product-shipments.model'
 
 export interface CollectionRegistryEntry {
   collection: Collection<{ id: unknown }>
@@ -21,4 +27,10 @@ export const collectionsRegistry: CollectionRegistryEntry[] = [
   Folders,
   ProductTypes,
   ProductCollections,
+  ProductItems,
+  ProductBrands,
+  ProductMeasures,
+  ProductBarcodes,
+  ProductPackages,
+  ProductShipments,
 ]
