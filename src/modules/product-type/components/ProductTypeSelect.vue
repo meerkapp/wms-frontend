@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { ref, watchEffect, computed } from 'vue'
+import { computed } from 'vue'
 import { FloatLabel, Select } from 'primevue'
 import { useI18n } from 'vue-i18n'
-import { ProductTypes } from '@/modules/signaldb/models/product-types.model'
+import { useProductTypes } from '@/modules/sync/composables/read-model.composables'
 import type { ProductType } from '@meerkapp/wms-contracts'
 
 const props = defineProps<{
@@ -18,13 +18,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const productTypes = ref<ProductType[]>([])
-
-watchEffect((onCleanup) => {
-  const cursor = ProductTypes.find({}, { sort: { name: 1 } })
-  productTypes.value = cursor.fetch()
-  onCleanup(() => cursor.cleanup())
-})
+const productTypes = useProductTypes({ sortByName: true })
 
 const label = computed(() => props.label ?? t('product.type.select.label'))
 </script>

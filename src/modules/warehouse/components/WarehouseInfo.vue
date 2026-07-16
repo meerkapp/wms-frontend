@@ -1,9 +1,8 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { Tag } from 'primevue'
-import { Countries } from '@/modules/signaldb/models/countries.model'
-import { Localities } from '@/modules/signaldb/models/localities.model'
 import { getCountryName } from '@/modules/country/utils/country.utils'
+import { useWarehouseLocalityCountry } from '@/modules/sync/composables/read-model.composables'
 import type { Warehouse } from '@meerkapp/wms-contracts'
 
 const props = defineProps<{
@@ -13,14 +12,11 @@ const props = defineProps<{
   note?: Warehouse['note']
 }>()
 
-const locality = computed(() => {
-  return Localities.findOne({ id: props.localityId })
-})
+const { locality, country } = useWarehouseLocalityCountry(() => props.localityId)
 
 const countryName = computed(() => {
   if (!locality.value) return undefined
-  const c = Countries.findOne({ id: locality.value.countryId })
-  return c ? getCountryName(c.code) : undefined
+  return country.value ? getCountryName(country.value.code) : undefined
 })
 </script>
 

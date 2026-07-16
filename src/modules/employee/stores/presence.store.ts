@@ -13,6 +13,7 @@ interface EmployeeStatusEvent {
 export const usePresenceStore = defineStore('presence', () => {
   const { t } = i18n.global
   const onlineIds = ref<Set<string>>(new Set())
+  let handlersRegistered = false
 
   function onPresenceList(ids: string[]) {
     onlineIds.value = new Set(ids)
@@ -29,11 +30,14 @@ export const usePresenceStore = defineStore('presence', () => {
   }
 
   function setup() {
+    if (handlersRegistered) return
+    handlersRegistered = true
     socket.on('presence:list', onPresenceList)
     socket.on('employee:status', onEmployeeStatus)
   }
 
   function teardown() {
+    handlersRegistered = false
     socket.off('presence:list', onPresenceList)
     socket.off('employee:status', onEmployeeStatus)
     onlineIds.value = new Set()

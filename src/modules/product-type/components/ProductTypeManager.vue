@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed } from 'vue'
 import { Button } from 'primevue'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
@@ -10,10 +10,10 @@ import ProductTypeCard from '@/modules/product-type/components/ProductTypeCard.v
 
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { productTypeApi } from '@/modules/product-type/api/product-type.api'
-import { ProductTypes } from '@/modules/signaldb/models/product-types.model'
-import type { ProductType, CreateProductTypeDto } from '@meerkapp/wms-contracts'
+import type { CreateProductTypeDto } from '@meerkapp/wms-contracts'
 import { useAppDialog } from '@/core/composables/useAppDialog'
 import ProductTypeFormDialog from './ProductTypeFormDialog.vue'
+import { useProductTypes } from '@/modules/sync/composables/read-model.composables'
 
 const { t } = useI18n()
 const dialog = useAppDialog()
@@ -43,16 +43,7 @@ function openCreateDialog() {
   )
 }
 
-const productTypes = ref<ProductType[]>([])
-
-watchEffect((onCleanup) => {
-  const cursor = ProductTypes.find({})
-  productTypes.value = cursor.fetch()
-
-  onCleanup(() => {
-    cursor.cleanup()
-  })
-})
+const productTypes = useProductTypes()
 
 const title = computed(() =>
   productTypes.value.length > 0

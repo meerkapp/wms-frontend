@@ -9,6 +9,23 @@ export const socket = io(socketUrl, {
 })
 
 export function connectSocket(token: string) {
+  const currentToken =
+    typeof socket.auth === 'object' && socket.auth !== null
+      ? (socket.auth as { token?: unknown }).token
+      : undefined
+
   socket.auth = { token }
+
+  // Socket.IO only sends auth during the handshake. Reconnect explicitly when
+  // a refreshed access token replaces the token used by the active connection.
+  if (socket.active && currentToken !== token) {
+    socket.disconnect().connect()
+    return
+  }
+
   socket.connect()
+}
+
+export function disconnectSocket() {
+  socket.disconnect()
 }

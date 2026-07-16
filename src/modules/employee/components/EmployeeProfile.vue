@@ -1,15 +1,15 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
 import { Panel, Button } from 'primevue'
 import { useI18n } from 'vue-i18n'
 import type { Employee } from '@meerkapp/wms-contracts'
-import { Warehouses } from '@/modules/signaldb/models/warehouses.model'
 import EmployeeRoleTag from './EmployeeRoleTag.vue'
 import EmployeeAvatar from './EmployeeAvatar.vue'
 import EmployeePresenceLabel from './EmployeePresenceLabel.vue'
 import BaseCard from '@/core/components/BaseCard.vue'
 import WarehouseInfo from '@/modules/warehouse/components/WarehouseInfo.vue'
 import { useEmployeeRoleSync } from '@/modules/employee/composables/useEmployeeRoleSync'
+import { useDexieLiveQueryById } from '@/modules/sync/composables/dexie-live-query'
+import { warehouseRepository } from '@/modules/sync/repositories/read-model.repository'
 
 const props = defineProps<{ employee: Employee }>()
 
@@ -17,8 +17,9 @@ const { t } = useI18n()
 
 useEmployeeRoleSync(() => props.employee)
 
-const warehouse = computed(() =>
-  Warehouses.findOne({ id: props.employee.warehouseId ?? undefined }),
+const warehouse = useDexieLiveQueryById(
+  () => props.employee.warehouseId,
+  (warehouseId) => warehouseRepository.get(Number(warehouseId)),
 )
 </script>
 

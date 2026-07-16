@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { ref, watchEffect, computed } from 'vue'
+import { computed } from 'vue'
 import { FloatLabel, Select } from 'primevue'
 import OrganizationIcon from './OrganizationIcon.vue'
-import { Organizations } from '@/modules/signaldb/models/organizations.model'
+import { useOrganizations } from '@/modules/sync/composables/read-model.composables'
 import type { Organization } from '@meerkapp/wms-contracts'
 
 const props = defineProps<{ organizationId: Organization['id'] | null; label: string }>()
@@ -10,16 +10,7 @@ const emit = defineEmits<{
   'update:organizationId': [value: Organization['id']]
 }>()
 
-const organizationOptions = ref<Organization[]>([])
-
-watchEffect((onCleanup) => {
-  const cursor = Organizations.find({}, { sort: { name: 1 } })
-  organizationOptions.value = cursor.fetch()
-
-  onCleanup(() => {
-    cursor.cleanup()
-  })
-})
+const organizationOptions = useOrganizations({ sortByName: true })
 
 const selectedOrganization = computed(() => {
   return organizationOptions.value.find((org) => org.id === props.organizationId)

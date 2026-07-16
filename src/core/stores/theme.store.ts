@@ -23,8 +23,6 @@ export const useThemeStore = defineStore('theme', () => {
   type StatusKey = keyof typeof STATUS_GRADIENTS
   const currentStatus = ref<StatusKey>('green')
 
-  // const THEME_STORE_KEY = 'themePreference'
-
   const currentTheme = ref<Theme>('system')
   const isSystemThemeDark = ref<boolean>(true)
 
@@ -46,19 +44,14 @@ export const useThemeStore = defineStore('theme', () => {
 
   async function setTheme(theme: Theme) {
     await applyTheme(theme)
-    // await window.electronStore.set(THEME_STORE_KEY, theme)
   }
 
   async function toggleTheme() {
     const theme: Theme = currentTheme.value === 'dark' ? 'light' : 'dark'
     await applyTheme(theme)
-    // await window.electronStore.set(THEME_STORE_KEY, theme)
   }
 
   async function loadTheme() {
-    // const savedTheme = await window.electronStore.get(THEME_STORE_KEY)
-    // isSystemThemeDark.value = await window.theme.getDarkStatus()
-    // await applyTheme(savedTheme || 'system')
     await applyTheme('system')
   }
 

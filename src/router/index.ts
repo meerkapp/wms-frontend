@@ -1,8 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { authApi } from '@/modules/auth/api/auth.api'
-import { connectSocket } from '@/core/api/socket'
-import { usePresenceStore } from '@/modules/employee/stores/presence.store'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,7 +19,7 @@ const router = createRouter({
       path: '/sync',
       name: 'sync',
       meta: { requiresAuth: true },
-      component: () => import('@/modules/signaldb/views/SyncView.vue'),
+      component: () => import('@/modules/sync/views/SyncView.vue'),
     },
     {
       path: '/workspace',
@@ -41,11 +39,7 @@ router.beforeEach(async (to, from) => {
   if (!sessionRestored) {
     sessionRestored = true
     if (!auth.isAuthenticated) {
-      const restored = await auth.refresh()
-      if (restored) {
-        connectSocket(auth.accessToken!)
-        usePresenceStore().setup()
-      }
+      await auth.refresh()
     }
   }
 

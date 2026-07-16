@@ -71,13 +71,13 @@ const { mutate: setup, asyncStatus } = useMutation({
     toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
   },
   async onSuccess(tokens) {
-    auth.setTokens(tokens.access_token)
+    auth.activateSession(tokens.access_token)
 
     if (route.query.redirect === 'launcher') {
       const { code } = await authApi.getLauncherCode()
       launcherCode.value = code
     } else {
-      router.push({ name: 'workspace' })
+      await router.push({ name: 'sync' })
     }
   },
 })

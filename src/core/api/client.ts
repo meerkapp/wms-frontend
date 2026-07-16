@@ -13,19 +13,36 @@ export const apiClient = $fetch.create({
       options.headers = headers
     }
   },
-  async onResponseError({ response, request }) {
+  async onResponseError({ response, request, options }) {
     if (response.status === 401) {
       const auth = useAuthStore()
       const url = typeof request === 'string' ? request : request.url
       if (url.includes('/auth/')) {
-        auth.clearTokens()
+        // Login/refresh/logout own their account lifecycle. A generic transport
+        // hook must not remove local account state on every auth-route 401.
         return
       }
+
+      const retryOptions = options as typeof options & { authRetried?: boolean }
+      if (retryOptions.authRetried) {
+        await auth.logout()
+        await router.push({ name: 'login' })
+        return
+      }
+
       const refreshed = await auth.refresh()
       if (!refreshed) {
-        await auth.logout()
-        router.push({ name: 'login' })
+        await router.push({ name: 'login' })
+        return
       }
+
+      // ofetch evaluates retry options after this hook. Retrying once reruns
+      // onRequest, which attaches the freshly issued access token.
+      retryOptions.authRetried = true
+      retryOptions.retry = 1
+      retryOptions.retryStatusCodes = [
+        ...new Set([...(retryOptions.retryStatusCodes ?? []), 401]),
+      ]
     }
   },
 })

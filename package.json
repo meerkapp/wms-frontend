@@ -19,24 +19,22 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
+    "test": "vitest run",
     "type-check": "vue-tsc --build",
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
-    "format": "prettier --write --experimental-cli src/",
-    "postinstall": "electron-rebuild -f -w better-sqlite3"
+    "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
-    "@meerkapp/electron-bridge": "^0.1.5",
-    "@meerkapp/wms-contracts": "0.3.0-beta.11",
+    "@meerkapp/wms-contracts": "0.3.0-beta.16",
     "@pinia/colada": "^1.0.0",
     "@primeuix/themes": "^2.0.3",
-    "@signaldb/core": "2.0.0-beta.6",
-    "@signaldb/indexeddb": "2.0.0-beta.6",
-    "@signaldb/sync": "2.0.0-beta.6",
-    "@signaldb/vue": "2.0.0-beta.6",
     "@vee-validate/zod": "^4.15.1",
+    "ag-grid-community": "^35.2.1",
+    "ag-grid-vue3": "^35.2.1",
     "dayjs": "^1.11.20",
+    "dexie": "^4.4.4",
     "jwt-decode": "^4.0.0",
     "ofetch": "^1.5.1",
     "pinia": "^3.0.4",
@@ -49,7 +47,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@electron/rebuild": "^4.0.3",
     "@iconify-json/tabler": "^1.2.31",
     "@iconify/tailwind4": "^1.2.3",
     "@tailwindcss/vite": "^4.2.1",
@@ -62,6 +59,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-oxlint": "~1.50.0",
     "eslint-plugin-vue": "~10.8.0",
+    "fake-indexeddb": "^6.2.5",
     "jiti": "^2.6.1",
     "lightningcss": "^1.32.0",
     "npm-run-all2": "^8.0.4",
@@ -73,10 +71,11 @@
     "vite": "^7.3.1",
     "vite-plugin-pwa": "^1.2.0",
     "vite-plugin-vue-devtools": "^8.0.6",
+    "vitest": "^4.1.10",
     "vue-tsc": "^3.2.5"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
   },
-  "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
+  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8"
 }

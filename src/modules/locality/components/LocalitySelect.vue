@@ -1,21 +1,39 @@
 <script lang="ts" setup>
-import { ref, watchEffect, computed } from 'vue'
-import { FloatLabel, Select, Button } from 'primevue'
+import { computed, useId } from 'vue'
+import { Button, FloatLabel, MultiSelect, Select } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useMutation } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
-import { Localities } from '@/modules/signaldb/models/localities.model'
-import { Countries } from '@/modules/signaldb/models/countries.model'
+import { useCountries, useLocalities } from '@/modules/sync/composables/read-model.composables'
 import { getCountryFlag, getCountryName } from '@/modules/country/utils/country.utils'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { localityApi } from '../api/locality.api'
 import LocalityFormDialog from './LocalityFormDialog.vue'
-import type { Locality, Country, CreateLocalityDto } from '@meerkapp/wms-contracts'
+import type { Locality, CreateLocalityDto } from '@meerkapp/wms-contracts'
 
-const props = defineProps<{ localityId: Locality['id'] | null; label: string }>()
+const props = withDefaults(
+  defineProps<{
+    localityId?: Locality['id'] | null
+    localityIds?: Locality['id'][]
+    label: string
+    multiple?: boolean
+    disabledOptions?: Record<number, string>
+    placeholder?: string
+    showToggleAll?: boolean
+  }>(),
+  {
+    localityId: null,
+    localityIds: () => [],
+    multiple: false,
+    disabledOptions: () => ({}),
+    placeholder: undefined,
+    showToggleAll: true,
+  },
+)
 const emit = defineEmits<{
   'update:localityId': [value: Locality['id']]
+  'update:localityIds': [value: Locality['id'][]]
 }>()
 
 const { t } = useI18n()
@@ -24,20 +42,9 @@ const toast = useToast()
 const authStore = useAuthStore()
 const { checkUserPermissions } = authStore
 
-const localities = ref<Locality[]>([])
-const countries = ref<Country[]>([])
-
-watchEffect((onCleanup) => {
-  const localityCursor = Localities.find({}, { sort: { name: 1 } })
-  const countryCursor = Countries.find({}, { sort: { code: 1 } })
-  localities.value = localityCursor.fetch()
-  countries.value = countryCursor.fetch()
-
-  onCleanup(() => {
-    localityCursor.cleanup()
-    countryCursor.cleanup()
-  })
-})
+const localities = useLocalities()
+const countries = useCountries()
+const inputId = `locality_select_${useId()}`
 
 const selectedDisplay = computed(() => {
   const locality = localities.value.find((l) => l.id === props.localityId)
@@ -49,7 +56,10 @@ const selectedDisplay = computed(() => {
 
 const localityOptions = computed(() => {
   const countryMap = new Map(countries.value.map((c) => [c.id, c]))
-  const groups = new Map<number, { label: string; items: Locality[] }>()
+  const groups = new Map<
+    number,
+    { label: string; items: Array<Locality & { displayName: string; disabled: boolean }> }
+  >()
 
   for (const locality of localities.value) {
     if (!groups.has(locality.countryId)) {
@@ -59,7 +69,12 @@ const localityOptions = computed(() => {
         : String(locality.countryId)
       groups.set(locality.countryId, { label, items: [] })
     }
-    groups.get(locality.countryId)!.items.push(locality)
+    const disabledReason = props.disabledOptions[locality.id]
+    groups.get(locality.countryId)!.items.push({
+      ...locality,
+      displayName: disabledReason ? `${locality.name} · ${disabledReason}` : locality.name,
+      disabled: Boolean(disabledReason),
+    })
   }
 
   return [...groups.values()]
@@ -92,15 +107,34 @@ function openCreateDialog() {
 
 <template>
   <FloatLabel variant="on">
+    <MultiSelect
+      v-if="props.multiple"
+      :id="inputId"
+      :model-value="props.localityIds"
+      :options="localityOptions"
+      option-label="displayName"
+      option-value="id"
+      option-disabled="disabled"
+      option-group-label="label"
+      option-group-children="items"
+      :placeholder="props.placeholder"
+      display="chip"
+      :filter="localities.length > 5"
+      :show-toggle-all="props.showToggleAll"
+      fluid
+      @update:model-value="(value) => emit('update:localityIds', value ?? [])"
+    />
     <Select
+      v-else
+      :id="inputId"
       :model-value="props.localityId"
       :options="localityOptions"
       class="w-full"
-      optionLabel="name"
-      optionValue="id"
-      optionGroupLabel="label"
-      optionGroupChildren="items"
-      labelId="on_locality"
+      option-label="displayName"
+      option-value="id"
+      option-disabled="disabled"
+      option-group-label="label"
+      option-group-children="items"
       :filter="localities.length > 5"
       @update:model-value="(value) => emit('update:localityId', value)"
     >
@@ -121,6 +155,6 @@ function openCreateDialog() {
         </div>
       </template>
     </Select>
-    <label for="on_locality">{{ props.label }}</label>
+    <label :for="inputId">{{ props.label }}</label>
   </FloatLabel>
 </template>

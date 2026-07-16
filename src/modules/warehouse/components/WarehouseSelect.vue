@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import { ref, watchEffect, computed } from 'vue'
+import { computed } from 'vue'
 import { FloatLabel, Select, Tag } from 'primevue'
 import { useI18n } from 'vue-i18n'
-import { Warehouses } from '@/modules/signaldb/models/warehouses.model'
-import { Organizations } from '@/modules/signaldb/models/organizations.model'
+import { useWarehouses } from '@/modules/sync/composables/read-model.composables'
 
 import WarehouseInfo from './WarehouseInfo.vue'
-import type { Organization, Warehouse } from '@meerkapp/wms-contracts'
+import type { Warehouse } from '@meerkapp/wms-contracts'
 
 const props = defineProps<{ warehouseId: Warehouse['id'] | null; label?: string; disabled?: boolean }>()
 const emit = defineEmits<{
@@ -15,20 +14,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const warehouses = ref<Warehouse[]>([])
-const organizations = ref<Organization[]>([])
-
-watchEffect((onCleanup) => {
-  const warehouseCursor = Warehouses.find({}, { sort: { name: 1 } })
-  const organizationCursor = Organizations.find({}, { sort: { name: 1 } })
-  warehouses.value = warehouseCursor.fetch()
-  organizations.value = organizationCursor.fetch()
-
-  onCleanup(() => {
-    warehouseCursor.cleanup()
-    organizationCursor.cleanup()
-  })
-})
+const warehouses = useWarehouses()
 
 const label = computed(() => props.label ?? t('warehouse.select.label'))
 

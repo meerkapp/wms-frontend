@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
-import { computed, ref, shallowRef, watchEffect } from 'vue'
+import { computed, ref } from 'vue'
 import { i18n } from '@/plugins/i18n'
-import { Folders } from '@/modules/signaldb/models/folders.model'
 import type { Folder, ProductCollection } from '@meerkapp/wms-contracts'
-import type { NavigationMenuItem } from '@/modules/navigation/types/navigation.types'
-import { ProductCollections } from '@/modules/signaldb/models/product-collections.model'
+import type { NavigationMenuItem } from '@modules/navigation/types/navigation.types'
+import {
+  useFolders,
+  useProductCollections,
+} from '@/modules/sync/composables/read-model.composables'
 
 function comparePinned(
   a: { pinnedAt: string | null; pinOrder: number | null },
@@ -43,16 +45,16 @@ export const useNavigationStore = defineStore('navigation', () => {
 
   const extraMenuItems: NavigationMenuItem[] = [
     {
-      key: `product_item_archive`,
-      id: 1,
+      key: `product_archive`,
+      id: 0,
       label: i18n.global.t('navigation.archive'),
       type: 'product_archive',
       pinnedAt: null,
       pinOrder: null,
     },
     {
-      key: `product_item_favorite`,
-      id: 1,
+      key: `product_favorites`,
+      id: 0,
       label: i18n.global.t('navigation.favorites'),
       type: 'product_favorites',
       pinnedAt: null,
@@ -60,20 +62,8 @@ export const useNavigationStore = defineStore('navigation', () => {
     },
   ]
 
-  const rawFolders = shallowRef<Folder[]>([])
-  const rawProductCollections = shallowRef<ProductCollection[]>([])
-
-  watchEffect((onCleanup) => {
-    const cursor = Folders.find({})
-    rawFolders.value = cursor.fetch()
-    onCleanup(() => cursor.cleanup())
-  })
-
-  watchEffect((onCleanup) => {
-    const cursor = ProductCollections.find({})
-    rawProductCollections.value = cursor.fetch()
-    onCleanup(() => cursor.cleanup())
-  })
+  const rawFolders = useFolders()
+  const rawProductCollections = useProductCollections()
 
   const itemsMap = computed(() => {
     const map = new Map<string, { label: string; parentGroupId: number | null }>()
