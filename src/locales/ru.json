@@ -5,7 +5,11 @@
       "warehouse": "Склад",
       "locality": "Населённый пункт",
       "employee": "Сотрудник",
-      "role": "Роль"
+      "role": "Роль",
+      "product_type": "Типы товаров",
+      "folder": "Папки",
+      "product_collection": "Коллекции товаров",
+      "price_list": "Прайс-листы"
     },
     "organization_create": "Создание организаций",
     "organization_update": "Редактирование организаций",
@@ -25,7 +29,19 @@
     "employee_update_own_avatar": "Изменение своего аватара",
     "employee_update_avatar": "Изменение аватара сотрудника",
     "role_create": "Создание ролей",
-    "role_update": "Редактирование ролей"
+    "role_update": "Редактирование ролей",
+    "product_type_create": "Создание типов товаров",
+    "product_type_update": "Редактирование типов товаров",
+    "folder_create": "Создание папок",
+    "folder_update": "Редактирование папок",
+    "folder_delete": "Удаление папок",
+    "folder_pin": "Закрепление папок",
+    "product_collection_create": "Создание коллекций товаров",
+    "product_collection_update": "Редактирование коллекций товаров",
+    "product_collection_delete": "Удаление коллекций товаров",
+    "product_collection_pin": "Закрепление коллекций товаров",
+    "price_list_create": "Создание прайс-листов",
+    "price_list_update": "Редактирование прайс-листов"
   },
   "auth": {
     "logout": "Выйти",
@@ -69,7 +85,29 @@
     }
   },
   "sync": {
-    "greeting": "Привет, {firstName} {lastName}!"
+    "greeting": "Привет, {firstName} {lastName}!",
+    "preparing": "Подготовка синхронизации…",
+    "currentTable": "Синхронизация: {table}",
+    "errorTitle": "Не удалось синхронизировать данные",
+    "errorHint": "Проверьте соединение и попробуйте снова.",
+    "technicalDetails": "Технические подробности",
+    "tables": {
+      "country": "Страны",
+      "locality": "Населённые пункты",
+      "organization": "Организации",
+      "warehouse": "Склады",
+      "folder": "Папки",
+      "product_type": "Типы товаров",
+      "product_collection": "Коллекции товаров",
+      "product_brand": "Бренды товаров",
+      "product_measure": "Единицы измерения",
+      "product_package": "Упаковки товаров",
+      "product_shipment": "Остатки товаров",
+      "product_item": "Товары",
+      "product_item_stats": "Статистика товаров",
+      "product_barcode": "Штрих-коды товаров"
+    },
+    "retry": "Повторить"
   },
   "organization": {
     "manager": {
@@ -135,7 +173,6 @@
     "edit": "Изменить",
     "save": "Сохранить",
     "cancel": "Отмена",
-    "close": "Закрыть",
     "error": {
       "network": "Ошибка сети. Попробуйте позже.",
       "forbidden": "У вас нет прав для выполнения этого действия."
@@ -144,8 +181,7 @@
   "role": {
     "manager": {
       "title": "Роли",
-      "createRole": "Создать роль",
-      "selectRole": "Выберите роль из списка"
+      "createRole": "Создать роль"
     },
     "form": {
       "titleCreate": "Создать роль",
@@ -321,9 +357,7 @@
           "sku": "Артикул",
           "characteristics": "Характеристики"
         },
-        "skuExample": "Пример артикула",
         "name": "Название",
-        "code": "Код",
         "withdrawalStrategy": "Стратегия списания",
         "withdrawalStrategies": {
           "fifo": {
@@ -353,7 +387,6 @@
           "custom": "Индивидуальный шаблон артикула для этого типа товара"
         },
         "skuTemplate": "Шаблон артикула",
-        "skuTemplateHint": "Используйте {brand}, {counter} и ключи характеристик. Добавьте :{N} для ограничения длины.",
         "skuTemplateInfo": "Составьте шаблон артикула, выбирая из компонентов представленных ниже.",
         "skuTokens": {
           "brand": "Бренд",
@@ -371,14 +404,12 @@
           "toggle": "Переключатель",
           "checkbox": "Флажок"
         },
-        "schema": "Характеристики",
-        "addCharacteristic": "Добавить характеристику",
         "characteristic": {
+          "header": "Характеристика {index}",
           "label": "Название",
           "key": "Ключ",
           "type": "Тип",
           "required": "Обязательное поле",
-          "options": "Опции",
           "addOption": "Добавить опцию",
           "optionLabel": "Заголовок",
           "optionValue": "Значение",
@@ -394,7 +425,6 @@
         },
         "validation": {
           "nameRequired": "Введите название",
-          "codeRequired": "Введите код",
           "withdrawalStrategyRequired": "Выберите стратегию",
           "skuModeRequired": "Выберите тип артикула",
           "skuTemplateRequired": "Введите шаблон артикула",
@@ -409,6 +439,87 @@
           "toggleTrueLabelRequired": "Введите метку для «Да»",
           "toggleFalseLabelRequired": "Введите метку для «Нет»"
         }
+      }
+    },
+    "table": {
+      "search": {
+        "collection": "Поиск по коллекции",
+        "favorites": "Поиск по избранному",
+        "archive": "Поиск по архиву"
+      },
+      "barcodeSearch": {
+        "title": "Поиск по штрих-коду",
+        "input": "Штрих-код",
+        "showInTable": "Показать в таблице",
+        "openProductProfile": "Открыть профиль товара",
+        "notFound": "Товар с таким штрих-кодом не найден.",
+        "resetFiltersHint": "Для поиска по штрих-коду все фильтры будут сброшены.",
+        "submit": "Найти"
+      },
+      "columns": {
+        "sku": "Артикул",
+        "name": "Наименование",
+        "brand": "Бренд",
+        "measure": "Ед. изм.",
+        "quantity": "Остаток",
+        "retailPrice": "Розничная цена"
+      },
+      "empty": "В коллекции нет подходящих товаров",
+      "limitWarning": "Коллекция содержит больше {limit} товаров. Показаны первые {limit} по артикулу; остальные товары не показаны в таблице.",
+      "filter": {
+        "brandPlaceholder": "Выбрать бренд",
+        "options": {
+          "all": "Все товары",
+          "in-stock": "В наличии",
+          "out-of-stock": "Нет в наличии",
+          "private": "Приватный доступ",
+          "public": "Публичный доступ"
+        }
+      }
+    }
+  },
+  "price": {
+    "list": {
+      "manager": {
+        "title": "Прайс-листы",
+        "empty": "Прайс-листов пока нет",
+        "loadError": "Не удалось загрузить прайс-листы",
+        "retry": "Повторить"
+      },
+      "card": {
+        "default": "По умолчанию",
+        "currency": "Валюта",
+        "assignments": "Назначения",
+        "prices": "Цены"
+      },
+      "form": {
+        "titleCreate": "Создать прайс-лист",
+        "titleEdit": "Изменить прайс-лист",
+        "name": "Название",
+        "currency": "Валюта",
+        "currencyChangeHint": "Валюту можно изменить, только пока в прайс-листе нет цен.",
+        "assignedTo": "уже использует {name}",
+        "geography": {
+          "title": "Территория действия",
+          "hint": "Прайс-лист, выбранный для склада или организации, имеет более высокий приоритет.",
+          "countries": "Страны",
+          "localities": "Населённые пункты",
+          "optional": "Не выбрано",
+          "redundantLocality": "Выбранный населённый пункт уже покрывается этим же прайс-листом на уровне страны. Это не ошибка, но такое назначение избыточно."
+        },
+        "validation": {
+          "nameRequired": "Введите название"
+        }
+      },
+      "error": {
+        "currencyLocked": "Нельзя изменить валюту: в прайс-листе уже есть цены",
+        "targetConflict": "Один из выбранных объектов уже использует другой прайс-лист"
+      },
+      "directAssignment": {
+        "label": "Прайс-лист",
+        "loadError": "Не удалось загрузить назначение прайс-листа",
+        "warehouseHint": "Если прайс-лист не выбран, цены наследуются от организации, населённого пункта, страны или прайс-листа по умолчанию.",
+        "organizationHint": "Выбранный прайс-лист применяется к складам организации, если для склада не выбран другой."
       }
     }
   },

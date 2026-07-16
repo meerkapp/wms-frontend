@@ -8,11 +8,8 @@ import BaseCard from '@/core/components/BaseCard.vue'
 import NavigationMenu from './NavigationMenu.vue'
 import { useNavigationCreateItems } from '../composables/useNavigationCreateItems'
 import { useNavigationActions } from '../composables/useNavigationActions'
-import { useAuthStore } from '@/modules/auth/stores/auth.store'
 
 const { t } = useI18n()
-const authStore = useAuthStore()
-const { checkUserPermissions } = authStore
 
 const { openCreateFolderDialog, openCreateCollectionDialog } = useNavigationActions()
 
@@ -28,7 +25,7 @@ const createMenu = ref()
   <BaseCard :title="t('navigation.manager.title')">
     <template #header>
       <Button
-        v-if="checkUserPermissions('organization:create')"
+        v-if="createMenuItems.length > 0"
         size="small"
         icon="iconify tabler--plus"
         severity="secondary"

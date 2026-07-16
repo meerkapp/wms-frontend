@@ -16,8 +16,7 @@ const expandedKeys = ref<Record<string, boolean>>({})
 
 const navigationStore = useNavigationStore()
 const { setSelectedItem } = navigationStore
-const { menuItems, selectedItem, rawFolders, rawProductCollections } =
-  storeToRefs(navigationStore)
+const { menuItems, selectedItem, rawFolders, rawProductCollections } = storeToRefs(navigationStore)
 const { extraMenuItems } = navigationStore
 
 const { checkUserPermissions } = useAuthStore()
@@ -63,7 +62,11 @@ function onRowContextMenu(event: MouseEvent, rawItem: unknown) {
   const canPin =
     item.type === 'folder'
       ? checkUserPermissions('folder:pin')
-      : checkUserPermissions('product_collection:pin')
+      : item.type === 'product_collection' && checkUserPermissions('product_collection:pin')
+  const canEdit =
+    item.type === 'folder'
+      ? checkUserPermissions('folder:update')
+      : item.type === 'product_collection' && checkUserPermissions('product_collection:update')
 
   const siblings = findSiblings(menuItems.value, item.key) ?? []
   const pinnedSiblings = siblings.filter((s) => s.pinnedAt !== null)
@@ -72,22 +75,28 @@ function onRowContextMenu(event: MouseEvent, rawItem: unknown) {
   const items: MenuItem[] = []
 
   if (item.type === 'folder') {
-    items.push({
-      label: t('common.create'),
-      icon: 'iconify tabler--plus',
-      items: [
-        {
-          label: t('navigation.contextMenu.folder'),
-          icon: 'iconify tabler--folder-plus',
-          command: () => openCreateFolderDialog(item.id),
-        },
-        {
-          label: t('navigation.contextMenu.collection'),
-          icon: 'iconify tabler--table-plus',
-          command: () => openCreateCollectionDialog(item.id),
-        },
-      ],
-    })
+    const createItems: MenuItem[] = []
+    if (checkUserPermissions('folder:create')) {
+      createItems.push({
+        label: t('navigation.contextMenu.folder'),
+        icon: 'iconify tabler--folder-plus',
+        command: () => openCreateFolderDialog(item.id),
+      })
+    }
+    if (checkUserPermissions('product_collection:create')) {
+      createItems.push({
+        label: t('navigation.contextMenu.collection'),
+        icon: 'iconify tabler--table-plus',
+        command: () => openCreateCollectionDialog(item.id),
+      })
+    }
+    if (createItems.length > 0) {
+      items.push({
+        label: t('common.create'),
+        icon: 'iconify tabler--plus',
+        items: createItems,
+      })
+    }
   }
 
   if (canPin) {
@@ -135,9 +144,9 @@ function onRowContextMenu(event: MouseEvent, rawItem: unknown) {
     }
   }
 
-  items.push(
-    { separator: true },
-    {
+  if (canEdit) {
+    if (items.length > 0) items.push({ separator: true })
+    items.push({
       label: t('common.edit'),
       icon: 'iconify tabler--edit',
       command: () => {
@@ -149,8 +158,10 @@ function onRowContextMenu(event: MouseEvent, rawItem: unknown) {
           if (collection) openEditCollectionDialog(collection)
         }
       },
-    },
-  )
+    })
+  }
+
+  if (items.length === 0) return
 
   contextMenuItems.value = items
   contextMenuKey.value = item.key

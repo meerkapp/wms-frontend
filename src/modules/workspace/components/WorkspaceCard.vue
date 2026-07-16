@@ -11,21 +11,21 @@ const { clearSelectedItem } = navigationStore
 </script>
 
 <template>
-  <div class="h-full bg-surface-100 dark:bg-surface-900 rounded-xl">
+  <div class="h-full flex flex-col bg-surface-100 dark:bg-surface-900 rounded-xl overflow-hidden">
     <template v-if="selectedItem != null">
-      <div class="flex items-center h-12">
+      <div class="flex items-center h-12 shrink-0">
         <NavigationBreadcrumb />
         <div class="mr-2">
           <Button icon="iconify tabler--x" variant="text" rounded @click="clearSelectedItem()" />
         </div>
       </div>
-      <div>
+      <div class="flex-1 min-h-0">
         <slot name="main"></slot>
       </div>
-      <div class="flex items-center h-12">
+      <div class="flex items-center h-12 shrink-0">
         <slot name="footer"></slot>
       </div>
     </template>
-    <div v-else>Empty</div>
+    <div v-else class="flex-1 flex items-center justify-center text-muted-color">Empty</div>
   </div>
 </template>
