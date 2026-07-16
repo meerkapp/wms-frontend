@@ -2,14 +2,17 @@
 import { useI18n } from 'vue-i18n'
 import { Button } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
-import { useMutation } from '@pinia/colada'
+import { useMutation, useQueryCache } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 import BaseTile from '@/core/components/BaseTile.vue'
 import WarehouseInfo from './WarehouseInfo.vue'
 import WarehouseFormDialog from './WarehouseFormDialog.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { warehouseApi } from '../api/warehouse.api'
+import { localSyncService } from '@/modules/sync/services/sync.service'
 import type { Warehouse, UpdateWarehouseDto } from '@meerkapp/wms-contracts'
+
+type WarehouseFormResult = UpdateWarehouseDto & { priceListId?: number | null }
 
 const props = defineProps<{ warehouse: Warehouse }>()
 
@@ -19,9 +22,25 @@ const { checkUserPermissions } = authStore
 const { t } = useI18n()
 const dialog = useDialog()
 const toast = useToast()
+const queryCache = useQueryCache()
 
 const { mutate: updateWarehouse } = useMutation({
-  mutation: (dto: UpdateWarehouseDto) => warehouseApi.update(props.warehouse.id, dto),
+  mutation: async ({ priceListId, ...dto }: WarehouseFormResult) => {
+    const warehouse =
+      priceListId === undefined
+        ? await warehouseApi.update(props.warehouse.id, dto)
+        : await warehouseApi.updateWithPriceListAssignment(props.warehouse.id, {
+            ...dto,
+            priceListId,
+          })
+    void localSyncService
+      .applyServerUpsert('warehouse', warehouse)
+      .catch((error) => console.error('[warehouse:update:read-model]', error))
+    if (priceListId !== undefined) {
+      await queryCache.invalidateQueries({ key: ['price-lists'], exact: true })
+    }
+    return warehouse
+  },
   onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
 })
 
@@ -30,11 +49,12 @@ function openEditDialog() {
     props: {
       header: t('warehouse.form.titleEdit'),
       modal: true,
+      draggable: false,
       style: { width: '26rem' },
     },
     data: { warehouse: props.warehouse },
     onClose: (options) => {
-      if (options?.data) updateWarehouse(options.data)
+      if (options?.data) updateWarehouse(options.data as WarehouseFormResult)
     },
   })
 }

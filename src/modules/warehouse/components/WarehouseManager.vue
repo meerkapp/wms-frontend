@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, watchEffect, computed } from 'vue'
+import { computed } from 'vue'
 import { Button, Accordion, AccordionPanel, AccordionHeader, AccordionContent } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
-import { useMutation } from '@pinia/colada'
+import { useMutation, useQueryCache } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import BaseCard from '@/core/components/BaseCard.vue'
@@ -11,31 +11,22 @@ import WarehouseFormDialog from './WarehouseFormDialog.vue'
 import OrganizationIcon from '@/modules/organization/components/OrganizationIcon.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { warehouseApi } from '../api/warehouse.api'
-import { Warehouses } from '@/modules/signaldb/models/warehouses.model'
-import { Organizations } from '@/modules/signaldb/models/organizations.model'
+import { localSyncService } from '@/modules/sync/services/sync.service'
+import { useOrganizations, useWarehouses } from '@/modules/sync/composables/read-model.composables'
 import type { Warehouse, Organization, CreateWarehouseDto } from '@meerkapp/wms-contracts'
+
+type WarehouseCreateFormResult = CreateWarehouseDto & { priceListId?: number | null }
 
 const { t } = useI18n()
 const dialog = useDialog()
 const toast = useToast()
+const queryCache = useQueryCache()
 
 const authStore = useAuthStore()
 const { checkUserPermissions } = authStore
 
-const warehouses = ref<Warehouse[]>([])
-const organizations = ref<Organization[]>([])
-
-watchEffect((onCleanup) => {
-  const warehouseCursor = Warehouses.find({})
-  const organizationCursor = Organizations.find({}, { sort: { name: 1 } })
-  warehouses.value = warehouseCursor.fetch()
-  organizations.value = organizationCursor.fetch()
-
-  onCleanup(() => {
-    warehouseCursor.cleanup()
-    organizationCursor.cleanup()
-  })
-})
+const warehouses = useWarehouses()
+const organizations = useOrganizations({ sortByName: true })
 
 const warehouseGroups = computed(() => {
   const orgMap = new Map(organizations.value.map((o) => [o.id, o]))
@@ -60,7 +51,19 @@ const title = computed(() =>
 )
 
 const { mutate: createWarehouse } = useMutation({
-  mutation: (dto: CreateWarehouseDto) => warehouseApi.create(dto),
+  mutation: async ({ priceListId, ...dto }: WarehouseCreateFormResult) => {
+    const warehouse =
+      priceListId === undefined
+        ? await warehouseApi.create(dto)
+        : await warehouseApi.createWithPriceListAssignment({ ...dto, priceListId })
+    void localSyncService
+      .applyServerUpsert('warehouse', warehouse)
+      .catch((error) => console.error('[warehouse:create:read-model]', error))
+    if (priceListId !== undefined) {
+      await queryCache.invalidateQueries({ key: ['price-lists'], exact: true })
+    }
+    return warehouse
+  },
   onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
 })
 
@@ -69,10 +72,11 @@ function openCreateDialog() {
     props: {
       header: t('warehouse.form.titleCreate'),
       modal: true,
+      draggable: false,
       style: { width: '26rem' },
     },
     onClose: (options) => {
-      if (options?.data) createWarehouse(options.data)
+      if (options?.data) createWarehouse(options.data as WarehouseCreateFormResult)
     },
   })
 }

@@ -2,7 +2,7 @@
 import { Button } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useI18n } from 'vue-i18n'
-import { useMutation } from '@pinia/colada'
+import { useMutation, useQueryCache } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 import BaseTile from '@/core/components/BaseTile.vue'
 import OrganizationFormDialog from './OrganizationFormDialog.vue'
@@ -10,7 +10,10 @@ import OrganizationIcon from './OrganizationIcon.vue'
 import OrganizationStats from './OrganizationStats.vue'
 import { organizationApi } from '@/modules/organization/api/organization.api'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
-import type { Organization } from '@meerkapp/wms-contracts'
+import { localSyncService } from '@/modules/sync/services/sync.service'
+import type { Organization, UpdateOrganizationDto } from '@meerkapp/wms-contracts'
+
+type OrganizationFormResult = UpdateOrganizationDto & { priceListId?: number | null }
 
 const props = defineProps<{ organization: Organization }>()
 
@@ -18,10 +21,26 @@ const { t } = useI18n()
 const dialog = useDialog()
 const toast = useToast()
 const authStore = useAuthStore()
+const queryCache = useQueryCache()
 const { checkUserPermissions } = authStore
 
 const { mutate: update } = useMutation({
-  mutation: (dto: Partial<Organization>) => organizationApi.update(props.organization.id, dto),
+  mutation: async ({ priceListId, ...dto }: OrganizationFormResult) => {
+    const organization =
+      priceListId === undefined
+        ? await organizationApi.update(props.organization.id, dto)
+        : await organizationApi.updateWithPriceListAssignment(props.organization.id, {
+            ...dto,
+            priceListId,
+          })
+    void localSyncService
+      .applyServerUpsert('organization', organization)
+      .catch((error) => console.error('[organization:update:read-model]', error))
+    if (priceListId !== undefined) {
+      await queryCache.invalidateQueries({ key: ['price-lists'], exact: true })
+    }
+    return organization
+  },
   onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
 })
 
@@ -30,13 +49,14 @@ function openEditDialog() {
     props: {
       header: t('organization.form.titleEdit'),
       modal: true,
+      draggable: false,
       style: { width: '24rem' },
     },
     data: {
       organization: props.organization,
     },
     onClose: (options) => {
-      if (options?.data) update(options.data)
+      if (options?.data) update(options.data as OrganizationFormResult)
     },
   })
 }

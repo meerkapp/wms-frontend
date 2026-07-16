@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, type Ref } from 'vue'
+import { computed, inject, ref, type Ref } from 'vue'
 import { Button, FloatLabel, InputText, Message } from 'primevue'
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
 import { useForm } from 'vee-validate'
@@ -8,12 +8,17 @@ import { z } from 'zod'
 import { useI18n } from 'vue-i18n'
 import LocalitySelect from '@/modules/locality/components/LocalitySelect.vue'
 import OrganizationSelect from '@/modules/organization/components/OrganizationSelect.vue'
+import DirectPriceListSelect from '@/modules/price-list/components/DirectPriceListSelect.vue'
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import type { Warehouse } from '@meerkapp/wms-contracts'
 
 const { t } = useI18n()
 
 const dialogRef = inject<Ref<DynamicDialogInstance>>('dialogRef')
 const warehouse = computed<Warehouse | undefined>(() => dialogRef?.value.data?.warehouse)
+const directPriceListId = ref<number | null | undefined>()
+const { checkUserPermissions } = useAuthStore()
+const canManagePriceList = computed(() => checkUserPermissions('price_list:update'))
 
 const validationSchema = computed(() =>
   toTypedSchema(
@@ -51,9 +56,11 @@ const [organizationId] = defineField('organizationId')
 const [localityId] = defineField('localityId')
 
 const onSubmit = handleSubmit((values) => {
+  if (canManagePriceList.value && directPriceListId.value === undefined) return
   dialogRef?.value.close({
     ...values,
     note: values.note || null,
+    ...(canManagePriceList.value ? { priceListId: directPriceListId.value } : {}),
   })
 })
 </script>
@@ -66,7 +73,9 @@ const onSubmit = handleSubmit((values) => {
         :label="t('warehouse.form.organization')"
         @update:organizationId="setFieldValue('organizationId', $event)"
       />
-      <Message v-if="errors.organizationId" size="small" severity="error" variant="simple">{{ errors.organizationId }}</Message>
+      <Message v-if="errors.organizationId" size="small" severity="error" variant="simple">{{
+        errors.organizationId
+      }}</Message>
     </div>
     <div>
       <LocalitySelect
@@ -74,7 +83,9 @@ const onSubmit = handleSubmit((values) => {
         :label="t('warehouse.form.locality')"
         @update:localityId="setFieldValue('localityId', $event)"
       />
-      <Message v-if="errors.localityId" size="small" severity="error" variant="simple">{{ errors.localityId }}</Message>
+      <Message v-if="errors.localityId" size="small" severity="error" variant="simple">{{
+        errors.localityId
+      }}</Message>
     </div>
     <div>
       <FloatLabel variant="on">
@@ -87,7 +98,9 @@ const onSubmit = handleSubmit((values) => {
         />
         <label for="warehouse_address">{{ t('warehouse.form.address') }}</label>
       </FloatLabel>
-      <Message v-if="errors.address" size="small" severity="error" variant="simple">{{ errors.address }}</Message>
+      <Message v-if="errors.address" size="small" severity="error" variant="simple">{{
+        errors.address
+      }}</Message>
     </div>
     <div>
       <FloatLabel variant="on">
@@ -100,14 +113,24 @@ const onSubmit = handleSubmit((values) => {
         />
         <label for="warehouse_code">{{ t('warehouse.form.code') }}</label>
       </FloatLabel>
-      <Message v-if="errors.code" size="small" severity="error" variant="simple">{{ errors.code }}</Message>
+      <Message v-if="errors.code" size="small" severity="error" variant="simple">{{
+        errors.code
+      }}</Message>
     </div>
     <div>
       <FloatLabel variant="on">
         <InputText id="warehouse_note" v-model="note" v-bind="noteAttrs" fluid />
-        <label for="warehouse_note">{{ t('common.optionalField', { label: t('warehouse.form.note') }) }}</label>
+        <label for="warehouse_note">{{
+          t('common.optionalField', { label: t('warehouse.form.note') })
+        }}</label>
       </FloatLabel>
     </div>
+    <DirectPriceListSelect
+      v-if="canManagePriceList"
+      v-model="directPriceListId"
+      target-type="warehouse"
+      :target-id="warehouse?.id"
+    />
     <Button type="submit" :label="t('common.save')" rounded fluid />
   </form>
 </template>

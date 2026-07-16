@@ -7,6 +7,7 @@ import OrganizationManager from '@/modules/organization/components/OrganizationM
 import WarehouseManager from '@/modules/warehouse/components/WarehouseManager.vue'
 import EmployeeManager from '@/modules/employee/components/EmployeeManager.vue'
 import ProductTypeManager from '@/modules/product-type/components/ProductTypeManager.vue'
+import PriceListManager from '@/modules/price-list/components/PriceListManager.vue'
 
 export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
   const sideBarPrimaryItems = markRaw([
@@ -18,15 +19,6 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       content: markRaw(NavigationManager),
       hideTitle: true,
     },
-    {
-      title: i18n.global.t('product.type.manager.title'),
-      key: 'product_types',
-      iconClass: 'iconify tabler--category',
-      content: markRaw(ProductTypeManager),
-      position: 'bottom',
-      hideTitle: true,
-    },
-    { type: 'separator', key: 'sep-1', position: 'bottom' },
     {
       title: i18n.global.t('organization.manager.title'),
       key: 'organizations',
@@ -48,6 +40,23 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       key: 'employees',
       iconClass: 'iconify tabler--users',
       content: markRaw(EmployeeManager),
+      position: 'bottom',
+      hideTitle: true,
+    },
+    { type: 'separator', key: 'sep-1', position: 'bottom' },
+    {
+      title: i18n.global.t('product.type.manager.title'),
+      key: 'product_types',
+      iconClass: 'iconify tabler--category',
+      content: markRaw(ProductTypeManager),
+      position: 'bottom',
+      hideTitle: true,
+    },
+    {
+      title: i18n.global.t('price.list.manager.title'),
+      key: 'price_lists',
+      iconClass: 'iconify tabler--file-dollar',
+      content: markRaw(PriceListManager),
       position: 'bottom',
       hideTitle: true,
     },
