@@ -3,6 +3,7 @@ import { connectSocket, disconnectSocket, socket } from '@/core/api/socket'
 import { syncApi } from '../api/sync.api'
 import { db } from '../db/db'
 import { productItemStatsRepository } from '../repositories/product-item-stats.repository'
+import { localStateRepository } from '../repositories/local-state.repository'
 import { chunkArray, nextFrame } from '../utils/batching'
 import {
   hasSyncCursorChanged,
@@ -122,6 +123,18 @@ export class LocalSyncService {
     // Normally connectSocket emits `connect` asynchronously. This covers an
     // already-connected singleton without scheduling a duplicate catch-up.
     if (isNewSession && socket.connected) this.onSocketConnect()
+  }
+
+  async activateOfflineAccount(context: SyncSessionContext) {
+    this.stop()
+    this.accountId = context.accountId
+    this.homeWarehouseId = context.homeWarehouseId
+    this.homeWarehouseConfiguration = productItemStatsRepository.configureAccount(
+      context.accountId,
+      context.homeWarehouseId,
+    )
+    await this.homeWarehouseConfiguration
+    await productItemStatsRepository.cleanupExpired()
   }
 
   stop() {
@@ -306,6 +319,8 @@ export class LocalSyncService {
         await nextFrame()
       }
 
+      this.assertActiveSession(epoch)
+      await localStateRepository.markInitialSyncCompleted()
       this.assertActiveSession(epoch)
       this.runtimeState.status = 'done'
       this.runtimeState.current = collections.length

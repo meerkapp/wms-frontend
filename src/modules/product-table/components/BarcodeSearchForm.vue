@@ -9,6 +9,7 @@ import {
 } from '@/modules/sync/repositories/product.repository'
 import { useNavigationStore } from '@modules/navigation/stores/navigation.store'
 import { useProductTableStore } from '@modules/product-table/stores/product-table.store'
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
 
 const navigationStore = useNavigationStore()
 const { setSelectedItem: setSelectedNavigationItem } = navigationStore
@@ -17,6 +18,7 @@ const productTableStore = useProductTableStore()
 const { setSelectedProductItemId, setSelectedFilterPresetKey } = productTableStore
 const { selectedFilterPresetKey } = storeToRefs(productTableStore)
 const { t } = useI18n()
+const authStore = useAuthStore()
 
 const barcode = ref('')
 const isInvalid = ref(false)
@@ -31,16 +33,20 @@ function findByBarcode() {
   setSelectedFilterPresetKey('all')
 
   nextTick(async () => {
+    const localBarcode = await productBarcodeRepository.getByCode(barcode.value)
     const productBarcode =
-      (await productBarcodeRepository.getByCode(barcode.value)) ??
-      (await productBarcodeRepository.fetchByCode(barcode.value))
+      localBarcode ??
+      (authStore.isOffline ? undefined : await productBarcodeRepository.fetchByCode(barcode.value))
 
     if (productBarcode === undefined) {
       isInvalid.value = true
     } else {
+      const localProductItem = await productItemRepository.get(productBarcode.productItemId)
       const productItem =
-        (await productItemRepository.get(productBarcode.productItemId)) ??
-        (await productItemRepository.fetchById(productBarcode.productItemId))
+        localProductItem ??
+        (authStore.isOffline
+          ? undefined
+          : await productItemRepository.fetchById(productBarcode.productItemId))
 
       if (productItem !== undefined) {
         if (productItem.productCollectionId) {

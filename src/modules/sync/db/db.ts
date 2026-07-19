@@ -18,6 +18,12 @@ import type {
   LocalProductPackage,
   ProductItemStatsCacheScope,
 } from '../types/entities.types'
+import type {
+  LocalAccountAvatarCache,
+  LocalAccountProfile,
+  LocalSetting,
+  ReadModelMetadata,
+} from '../types/local-state.types'
 import type { SyncState } from '../types/sync.types'
 
 export const WMS_LOCAL_DB_NAME = 'meerk-wms-sync-read-model-db'
@@ -52,6 +58,14 @@ export const WMS_LOCAL_DB_SCHEMAS = {
     productItemStatsCache:
       '[accountId+warehouseId], accountId, warehouseId, pinned, loadedAt, accessedAt, expiresAt',
   },
+  5: {
+    accountProfiles: 'accountId, lastAuthenticatedAt',
+    localSettings: 'key',
+    readModelMetadata: 'key',
+  },
+  6: {
+    accountAvatarCache: 'accountId, sourceUrl, cachedAt',
+  },
 } as const
 
 export class WmsLocalDb extends Dexie {
@@ -71,6 +85,10 @@ export class WmsLocalDb extends Dexie {
   productItemStatsCache!: Table<ProductItemStatsCacheScope, [string, number]>
   productBarcodes!: EntityTable<ProductBarcode, 'id'>
   syncState!: EntityTable<SyncState, 'id'>
+  accountProfiles!: EntityTable<LocalAccountProfile, 'accountId'>
+  accountAvatarCache!: EntityTable<LocalAccountAvatarCache, 'accountId'>
+  localSettings!: EntityTable<LocalSetting, 'key'>
+  readModelMetadata!: EntityTable<ReadModelMetadata, 'key'>
 
   constructor(name = WMS_LOCAL_DB_NAME) {
     super(name)
@@ -86,6 +104,10 @@ export class WmsLocalDb extends Dexie {
     this.version(3).stores(WMS_LOCAL_DB_SCHEMAS[3])
 
     this.version(4).stores(WMS_LOCAL_DB_SCHEMAS[4])
+
+    this.version(5).stores(WMS_LOCAL_DB_SCHEMAS[5])
+
+    this.version(6).stores(WMS_LOCAL_DB_SCHEMAS[6])
   }
 }
 

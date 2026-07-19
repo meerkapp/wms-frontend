@@ -13,7 +13,7 @@ import ProductTable from '@modules/product-table/components/ProductTable.vue'
 import WorkspaceSearch from '@modules/workspace/components/WorkspaceSearch.vue'
 import ProductTableFilterSelect from '@modules/product-table/components/ProductTableFilterSelect.vue'
 
-const { user } = storeToRefs(useAuthStore())
+const { isOffline, user } = storeToRefs(useAuthStore())
 const { selectedSideBarPrimaryItemKey } = storeToRefs(useSideBarPrimaryStore())
 
 const productTableStore = useProductTableStore()
@@ -43,7 +43,11 @@ const productTableSearchValue = ref('')
         <div class="h-full flex flex-col gap-1.5">
           <div class="flex items-center p-1 gap-1.5 justify-between">
             <div class="w-1/3">
-              <WarehouseSelect v-model:warehouseId="selectedWarehouseId" class="w-fit min-w-3xs" />
+              <WarehouseSelect
+                v-model:warehouseId="selectedWarehouseId"
+                :disabled="isOffline"
+                class="w-fit min-w-3xs"
+              />
             </div>
             <div class="flex justify-center w-1/3">
               <WorkspaceSearch v-model:value="productTableSearchValue" />

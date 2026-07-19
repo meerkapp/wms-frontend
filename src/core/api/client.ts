@@ -32,7 +32,7 @@ export const apiClient = $fetch.create({
 
       const refreshed = await auth.refresh()
       if (!refreshed) {
-        await router.push({ name: 'login' })
+        if (!auth.canAccessWorkspace) await router.push({ name: 'login' })
         return
       }
 

@@ -96,9 +96,11 @@ export const useProductTableStore = defineStore('product-table', () => {
     )
 
     let cancelled = false
-    void productItemRepository.fetchByCollection(productCollectionId).catch((error) => {
-      if (!cancelled) console.error('[product-items:fetch]', error)
-    })
+    if (!authStore.isOffline) {
+      void productItemRepository.fetchByCollection(productCollectionId).catch((error) => {
+        if (!cancelled) console.error('[product-items:fetch]', error)
+      })
+    }
 
     onCleanup(() => {
       cancelled = true
@@ -129,9 +131,11 @@ export const useProductTableStore = defineStore('product-table', () => {
     let cancelled = false
     void (async () => {
       await productItemStatsRepository.cleanupExpired()
-      await productItemStatsRepository.ensureForWarehouse(warehouseId, {
-        pinned: warehouseId === user.value?.warehouseId,
-      })
+      if (!authStore.isOffline) {
+        await productItemStatsRepository.ensureForWarehouse(warehouseId, {
+          pinned: warehouseId === user.value?.warehouseId,
+        })
+      }
     })().catch((error) => {
       if (!cancelled) console.error('[product-item-stats:fetch]', error)
     })

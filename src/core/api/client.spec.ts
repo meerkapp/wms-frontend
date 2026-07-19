@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const auth = vi.hoisted(() => ({
   accessToken: 'old-token' as string | null,
+  canAccessWorkspace: false,
   refresh: vi.fn<() => Promise<boolean>>(),
   logout: vi.fn<() => Promise<void>>(),
 }))
@@ -33,6 +34,7 @@ describe('apiClient authentication retry', () => {
 
   beforeEach(() => {
     auth.accessToken = 'old-token'
+    auth.canAccessWorkspace = false
     auth.refresh.mockReset()
     auth.logout.mockReset().mockResolvedValue(undefined)
     routerPush.mockReset().mockResolvedValue(undefined)
@@ -87,6 +89,21 @@ describe('apiClient authentication retry', () => {
     expect(fetchMock).toHaveBeenCalledOnce()
     expect(auth.logout).not.toHaveBeenCalled()
     expect(routerPush).toHaveBeenCalledWith({ name: 'login' })
+  })
+
+  it('keeps the offline workspace when refresh falls back to local read-only access', async () => {
+    fetchMock.mockResolvedValueOnce(jsonResponse(401, { message: 'Unauthorized' }))
+    auth.refresh.mockImplementationOnce(async () => {
+      auth.accessToken = null
+      auth.canAccessWorkspace = true
+      return false
+    })
+    const { apiClient } = await import('./client')
+
+    await expect(apiClient('/inventory')).rejects.toMatchObject({ status: 401 })
+
+    expect(fetchMock).toHaveBeenCalledOnce()
+    expect(routerPush).not.toHaveBeenCalled()
   })
 
   it('leaves auth-route 401 lifecycle to the calling auth action', async () => {

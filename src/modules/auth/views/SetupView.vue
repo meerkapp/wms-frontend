@@ -71,7 +71,7 @@ const { mutate: setup, asyncStatus } = useMutation({
     toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
   },
   async onSuccess(tokens) {
-    auth.activateSession(tokens.access_token)
+    await auth.activateSession(tokens.access_token)
 
     if (route.query.redirect === 'launcher') {
       const { code } = await authApi.getLauncherCode()

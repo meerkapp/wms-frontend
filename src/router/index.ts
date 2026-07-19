@@ -43,16 +43,22 @@ router.beforeEach(async (to, from) => {
     }
   }
 
-  // Check setup status on every navigation
-  try {
-    const { setupRequired } = await authApi.setupStatus()
-    if (setupRequired && to.name !== 'setup') return { name: 'setup' }
-    if (!setupRequired && to.name === 'setup') return { name: 'login' }
-  } catch {}
+  // Setup state is server-owned and cannot change while using the local read model.
+  if (!auth.isOffline) {
+    try {
+      const { setupRequired } = await authApi.setupStatus()
+      if (setupRequired && to.name !== 'setup') return { name: 'setup' }
+      if (!setupRequired && to.name === 'setup') return { name: 'login' }
+    } catch {}
+  }
 
   // Auth guard
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+  if (to.meta.requiresAuth && !auth.canAccessWorkspace) {
     return { name: 'login' }
+  }
+
+  if (auth.isOffline && (to.name === 'login' || to.name === 'sync')) {
+    return { name: 'workspace' }
   }
 
   // Redirect authenticated users to sync before workspace

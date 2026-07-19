@@ -1,3 +1,5 @@
+import type { Permission } from '@meerkapp/wms-contracts'
+
 export interface JwtPayload {
   sub: string
   email: string
@@ -5,7 +7,7 @@ export interface JwtPayload {
   lastName: string
   warehouseId: number | null
   isActive: boolean
-  permissions: string[]
+  permissions: Permission[]
   lastSeen: string | null
   avatarUrl: string | null
 }

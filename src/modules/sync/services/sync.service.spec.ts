@@ -111,6 +111,20 @@ describe('LocalSyncService account lifecycle', () => {
     expect(await db.syncState.get('organizations')).toMatchObject({ cursor: 'cursor-1' })
   })
 
+  it('configures an offline account without starting transport or resetting shared state', async () => {
+    const service = new LocalSyncService()
+    await db.syncState.put({ id: 'organizations', cursor: 'cursor-1', status: 'idle' })
+
+    await service.activateOfflineAccount({ accountId: 'account-a', homeWarehouseId: 10 })
+
+    expect(transport.configureAccount).toHaveBeenCalledWith('account-a', 10)
+    expect(transport.cleanupExpired).toHaveBeenCalledOnce()
+    expect(transport.connectSocket).not.toHaveBeenCalled()
+    expect(transport.socket.on).not.toHaveBeenCalled()
+    expect(await db.syncState.get('organizations')).toMatchObject({ cursor: 'cursor-1' })
+    service.stop()
+  })
+
   it('full sync includes product items, excludes stats, and prefetches the account home warehouse', async () => {
     const service = new LocalSyncService()
     service.start('token-a', { accountId: 'account-a', homeWarehouseId: 10 })
@@ -127,6 +141,7 @@ describe('LocalSyncService account lifecycle', () => {
     expect(pulledTables).toContain('product_item')
     expect(pulledTables).not.toContain('product_item_stats')
     expect(transport.configureAccount).toHaveBeenCalledWith('account-a', 10)
+    expect(await db.readModelMetadata.get('initialSyncCompletedAt')).toBeDefined()
     service.stop()
   })
 
