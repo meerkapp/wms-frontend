@@ -49,7 +49,7 @@ onMounted(() => void runInitialSync())
 </script>
 
 <template>
-  <div class="h-screen flex flex-col justify-center">
+  <div class="h-full flex flex-col justify-center">
     <div class="text-center">
       <EmployeeAvatar
         :first-name="user?.firstName"

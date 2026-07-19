@@ -24,7 +24,7 @@ const productTableSearchValue = ref('')
 </script>
 
 <template>
-  <div class="h-screen flex">
+  <div class="h-full flex">
     <ActivityBarPrimary />
     <Splitter
       class="w-full"

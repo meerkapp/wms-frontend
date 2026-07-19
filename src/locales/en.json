@@ -84,6 +84,25 @@
       "retry": "Try again"
     }
   },
+  "app": {
+    "statusBar": {
+      "checking": "Checking connection",
+      "online": "Online",
+      "serverUnavailable": "Server unavailable",
+      "offline": "No Internet connection",
+      "darkTheme": "Dark mode",
+      "lightTheme": "Light mode",
+      "version": "Version: {version}"
+    },
+    "onlineRequired": {
+      "checkingTitle": "Restoring connection",
+      "checkingHint": "This section will open as soon as the server becomes available.",
+      "serverUnavailableTitle": "Server unavailable",
+      "serverUnavailableHint": "Internet access is available, but this section requires a connection to the server.",
+      "offlineTitle": "No Internet connection",
+      "offlineHint": "Connect to the Internet to open this section."
+    }
+  },
   "sync": {
     "greeting": "Hello, {firstName} {lastName}!",
     "preparing": "Preparing synchronization…",

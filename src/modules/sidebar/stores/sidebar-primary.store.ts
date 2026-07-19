@@ -18,6 +18,7 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       iconClass: 'iconify tabler--folders',
       content: markRaw(NavigationManager),
       hideTitle: true,
+      availability: 'local-read-model',
     },
     {
       title: i18n.global.t('organization.manager.title'),
@@ -26,6 +27,7 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       content: markRaw(OrganizationManager),
       position: 'bottom',
       hideTitle: true,
+      availability: 'local-read-model',
     },
     {
       title: i18n.global.t('warehouse.manager.title'),
@@ -34,6 +36,7 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       content: markRaw(WarehouseManager),
       position: 'bottom',
       hideTitle: true,
+      availability: 'local-read-model',
     },
     {
       title: i18n.global.t('employee.manager.title'),
@@ -42,6 +45,7 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       content: markRaw(EmployeeManager),
       position: 'bottom',
       hideTitle: true,
+      availability: 'server-required',
     },
     { type: 'separator', key: 'sep-1', position: 'bottom' },
     {
@@ -51,6 +55,7 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       content: markRaw(ProductTypeManager),
       position: 'bottom',
       hideTitle: true,
+      availability: 'local-read-model',
     },
     {
       title: i18n.global.t('price.list.manager.title'),
@@ -59,6 +64,7 @@ export const useSideBarPrimaryStore = defineStore('sidebar-primary', () => {
       content: markRaw(PriceListManager),
       position: 'bottom',
       hideTitle: true,
+      availability: 'server-required',
     },
     { type: 'separator', key: 'sep-2', position: 'bottom' },
   ] as SidebarEntry[])

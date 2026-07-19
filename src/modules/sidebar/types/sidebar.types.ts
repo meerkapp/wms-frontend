@@ -1,5 +1,7 @@
 import type { Component, ComputedRef } from 'vue'
 
+export type SidebarAvailability = 'local-read-model' | 'server-required'
+
 export interface SidebarItem {
   type?: 'item'
   title: string
@@ -9,6 +11,7 @@ export interface SidebarItem {
   badge?: ComputedRef<number>
   content: Component
   position: 'top' | 'bottom'
+  availability: SidebarAvailability
   disabled?: boolean
 }
 

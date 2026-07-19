@@ -84,6 +84,25 @@
       "retry": "Попробовать снова"
     }
   },
+  "app": {
+    "statusBar": {
+      "checking": "Проверка соединения",
+      "online": "В сети",
+      "serverUnavailable": "Сервер недоступен",
+      "offline": "Нет Интернета",
+      "darkTheme": "Тёмный режим",
+      "lightTheme": "Светлый режим",
+      "version": "Версия: {version}"
+    },
+    "onlineRequired": {
+      "checkingTitle": "Восстанавливаем соединение",
+      "checkingHint": "Раздел откроется, как только сервер станет доступен.",
+      "serverUnavailableTitle": "Сервер недоступен",
+      "serverUnavailableHint": "Интернет доступен, но для работы с этим разделом нужна связь с сервером.",
+      "offlineTitle": "Нет подключения к Интернету",
+      "offlineHint": "Подключитесь к Интернету, чтобы открыть этот раздел."
+    }
+  },
   "sync": {
     "greeting": "Привет, {firstName} {lastName}!",
     "preparing": "Подготовка синхронизации…",
