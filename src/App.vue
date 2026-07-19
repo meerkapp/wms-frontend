@@ -8,11 +8,13 @@ import { useRouter } from 'vue-router'
 import AppStatusBar from '@/core/components/AppStatusBar.vue'
 import { useConnectivityStore } from '@/core/stores/connectivity.store'
 import { useThemeStore } from '@/core/stores/theme.store'
+import { useAccountAvatarStore } from '@/modules/auth/stores/account-avatar.store'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { dayjs } from '@/plugins/dayjs'
 
 const themeStore = useThemeStore()
 const connectivityStore = useConnectivityStore()
+const accountAvatarStore = useAccountAvatarStore()
 const authStore = useAuthStore()
 const router = useRouter()
 const primevue = usePrimeVue()
@@ -56,12 +58,27 @@ watch(
   { immediate: true },
 )
 
+watch(
+  [
+    () => authStore.user?.sub ?? null,
+    () => authStore.user?.avatarUrl ?? null,
+    () => authStore.isOffline,
+  ],
+  ([accountId, sourceUrl, isOffline]) => {
+    void accountAvatarStore
+      .load({ accountId, sourceUrl, allowRemote: !isOffline })
+      .catch((error) => console.error('[account-avatar:load]', error))
+  },
+  { immediate: true },
+)
+
 onMounted(() => {
   themeStore.startSystemThemeMonitoring()
   connectivityStore.startMonitoring()
 })
 
 onBeforeUnmount(() => {
+  accountAvatarStore.clear()
   themeStore.stopSystemThemeMonitoring()
   connectivityStore.stopMonitoring()
 })

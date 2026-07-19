@@ -10,6 +10,7 @@ import EmployeeAvatar from './EmployeeAvatar.vue'
 import { employeeApi } from '@/modules/employee/api/employee.api'
 import { useEmployeeStore } from '@/modules/employee/stores/employee.store'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { useAccountAvatarStore } from '@/modules/auth/stores/account-avatar.store'
 
 const props = defineProps<{
   employee: Employee
@@ -21,9 +22,11 @@ const toast = useToast()
 const confirm = useConfirm()
 const employeeStore = useEmployeeStore()
 const authStore = useAuthStore()
+const accountAvatarStore = useAccountAvatarStore()
 
 const menu = ref()
 const fileInputRef = ref<HTMLInputElement | null>(null)
+const selectedAvatarFile = ref<File | null>(null)
 const localAvatarUrl = ref<string | null>(props.employee.avatarUrl ?? null)
 
 const { mutate: uploadAvatar, asyncStatus: uploadStatus } = useMutation({
@@ -34,10 +37,22 @@ const { mutate: uploadAvatar, asyncStatus: uploadStatus } = useMutation({
   onSuccess: async (updated) => {
     localAvatarUrl.value = updated.avatarUrl
     employeeStore.updateAvatarInList(props.employee.id, updated.avatarUrl)
-    if (props.isOwnProfile) await authStore.refresh()
+    if (props.isOwnProfile) {
+      const avatarFile = selectedAvatarFile.value
+      if (avatarFile) {
+        await accountAvatarStore
+          .replaceAvatar(props.employee.id, updated.avatarUrl, avatarFile)
+          .catch((error) => console.error('[account-avatar:replace]', error))
+      }
+      await authStore.refresh()
+    }
+    selectedAvatarFile.value = null
     toast.add({ severity: 'success', summary: t('employee.form.avatarUploaded'), life: 3000 })
   },
-  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+  onError: () => {
+    selectedAvatarFile.value = null
+    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+  },
 })
 
 const { mutate: deleteAvatar, asyncStatus: deleteStatus } = useMutation({
@@ -48,15 +63,25 @@ const { mutate: deleteAvatar, asyncStatus: deleteStatus } = useMutation({
   onSuccess: async () => {
     localAvatarUrl.value = null
     employeeStore.updateAvatarInList(props.employee.id, null)
-    if (props.isOwnProfile) await authStore.refresh()
+    if (props.isOwnProfile) {
+      await accountAvatarStore
+        .removeAvatar(props.employee.id)
+        .catch((error) => console.error('[account-avatar:remove]', error))
+      await authStore.refresh()
+    }
     toast.add({ severity: 'success', summary: t('employee.form.avatarDeleted'), life: 3000 })
   },
   onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
 })
 
 function onFileSelected(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (file) uploadAvatar(file)
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (file) {
+    selectedAvatarFile.value = file
+    uploadAvatar(file)
+  }
+  input.value = ''
 }
 
 function confirmDeleteAvatar() {

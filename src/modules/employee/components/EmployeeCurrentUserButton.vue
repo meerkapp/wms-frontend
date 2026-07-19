@@ -7,6 +7,7 @@ import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import type { MenuItem } from 'primevue/menuitem'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { useAccountAvatarStore } from '@/modules/auth/stores/account-avatar.store'
 import { useAppDialog } from '@/core/composables/useAppDialog'
 import { employeeApi } from '@/modules/employee/api/employee.api'
 import EmployeeAvatar from './EmployeeAvatar.vue'
@@ -20,7 +21,9 @@ const dialog = useAppDialog()
 const toast = useToast()
 
 const authStore = useAuthStore()
-const { user } = storeToRefs(authStore)
+const accountAvatarStore = useAccountAvatarStore()
+const { isOffline, user } = storeToRefs(authStore)
+const { displayUrl: accountAvatarUrl } = storeToRefs(accountAvatarStore)
 const { checkUserPermissions } = authStore
 
 const userMenu = useTemplateRef('userMenu')
@@ -90,11 +93,15 @@ const userMenuItems = computed<MenuItem[]>(() => [
   {
     label: user.value ? `${user.value.firstName} ${user.value.lastName}` : '',
     items: [
-      {
-        label: t('employee.card.openProfile'),
-        icon: 'iconify tabler--id',
-        command: openProfileDialog,
-      },
+      ...(!isOffline.value
+        ? [
+            {
+              label: t('employee.card.openProfile'),
+              icon: 'iconify tabler--id',
+              command: openProfileDialog,
+            },
+          ]
+        : []),
       ...(canEditOwnProfile.value
         ? [
             {
@@ -134,7 +141,7 @@ function toggleUserMenu() {
     <span ref="menuAnchor" class="absolute bottom-0 right-0 w-0 h-0" />
     <EmployeeAvatar
       :first-name="user.firstName"
-      :image="user.avatarUrl"
+      :image="accountAvatarUrl"
       size="large"
       shape="square"
       class="m-auto cursor-pointer rounded-xl! overflow-hidden [&_img]:transition-transform [&_img]:duration-200 [&_img]:group-hover:scale-125"
