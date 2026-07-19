@@ -15,6 +15,8 @@ export const useEmployeeStore = defineStore('employee', () => {
   const tick = ref(0)
 
   let tickInterval: ReturnType<typeof setInterval> | null = null
+  let isSetup = false
+  let requestGeneration = 0
 
   const hasMore = computed(() => employees.value.length < total.value)
 
@@ -25,43 +27,81 @@ export const useEmployeeStore = defineStore('employee', () => {
   }
 
   function setup() {
+    if (isSetup) return
+    isSetup = true
     tickInterval = setInterval(() => tick.value++, 60_000)
     socket.on('employee:status', onEmployeeStatus)
   }
 
   function teardown() {
+    requestGeneration += 1
+    isSetup = false
     if (tickInterval) {
       clearInterval(tickInterval)
       tickInterval = null
     }
     socket.off('employee:status', onEmployeeStatus)
+    employees.value = []
+    total.value = 0
+    page.value = 1
+    isLoading.value = false
+    isError.value = false
   }
 
-  async function loadPage(p: number) {
-    if (isLoading.value) return
+  async function reload() {
+    const generation = ++requestGeneration
     isLoading.value = true
     isError.value = false
     try {
-      const result = await employeeApi.getAll(p, LIMIT)
+      const result = await employeeApi.getAll(1, LIMIT)
+      if (generation !== requestGeneration) return
+
       total.value = result.total
-      employees.value.push(...result.items)
-      page.value = p
+      employees.value = mergeEmployees([], result.items)
+      page.value = result.page
     } catch {
-      isError.value = true
+      if (generation === requestGeneration) isError.value = true
     } finally {
-      isLoading.value = false
+      if (generation === requestGeneration) isLoading.value = false
     }
   }
 
-  function loadNextPage() {
-    loadPage(page.value + 1)
+  function mergeEmployees(current: Employee[], incoming: Employee[]): Employee[] {
+    const merged = [...current]
+    const indexById = new Map(merged.map((employee, index) => [employee.id, index]))
+
+    for (const employee of incoming) {
+      const index = indexById.get(employee.id)
+      if (index === undefined) {
+        indexById.set(employee.id, merged.length)
+        merged.push(employee)
+      } else {
+        merged[index] = employee
+      }
+    }
+
+    return merged
   }
 
-  function reset() {
-    employees.value = []
-    total.value = 0
+  async function loadNextPage() {
+    if (isLoading.value || !hasMore.value) return
+
+    const generation = requestGeneration
+    const nextPage = page.value + 1
+    isLoading.value = true
     isError.value = false
-    loadPage(1)
+    try {
+      const result = await employeeApi.getAll(nextPage, LIMIT)
+      if (generation !== requestGeneration) return
+
+      total.value = result.total
+      employees.value = mergeEmployees(employees.value, result.items)
+      page.value = result.page
+    } catch {
+      if (generation === requestGeneration) isError.value = true
+    } finally {
+      if (generation === requestGeneration) isLoading.value = false
+    }
   }
 
   function updateInList(updated: Employee) {
@@ -83,9 +123,8 @@ export const useEmployeeStore = defineStore('employee', () => {
     hasMore,
     setup,
     teardown,
-    loadPage,
+    reload,
     loadNextPage,
-    reset,
     updateInList,
     updateAvatarInList,
   }

@@ -20,7 +20,7 @@ const scrollEl = ref<HTMLElement | null>(null)
 
 onMounted(() => {
   store.setup()
-  store.loadPage(1)
+  void store.reload()
 })
 onUnmounted(() => store.teardown())
 
@@ -32,12 +32,12 @@ function onScroll(e: Event) {
   if (!store.hasMore || store.isLoading) return
   const el = e.target as HTMLElement
   if (el.scrollTop + el.clientHeight >= el.scrollHeight - 100) {
-    store.loadNextPage()
+    void store.loadNextPage()
   }
 }
 
 async function onCreateSuccess(email: string, password: string) {
-  store.reset()
+  void store.reload()
   await nextTick()
   if (scrollEl.value) scrollEl.value.scrollTop = 0
   dialog.open(EmployeeCreatedSuccessDialog, {
@@ -59,7 +59,7 @@ function openRoleManager() {
         modal: true,
         style: { width: '64rem' },
       },
-      onClose: () => store.reset(),
+      onClose: () => void store.reload(),
     },
     {
       type: 'extended',
