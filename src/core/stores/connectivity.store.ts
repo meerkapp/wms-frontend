@@ -1,13 +1,19 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { requestHealthcheck } from '@/core/api/health'
+import { isServerVersionCompatible } from '@/core/version/app-version'
 
 const HEALTHCHECK_INTERVAL_MS = 15_000
 const HEALTHCHECK_RETRY_MS = 2_000
 const HEALTHCHECK_TIMEOUT_MS = 5_000
 const SERVER_FAILURE_THRESHOLD = 2
 
-export type ConnectivityStatus = 'checking' | 'online' | 'server-unavailable' | 'offline'
+export type ConnectivityStatus =
+  | 'checking'
+  | 'online'
+  | 'update-required'
+  | 'server-unavailable'
+  | 'offline'
 export type ConnectivityStatusColor = 'green' | 'yellow' | 'red'
 export type ConnectionUnavailableReason = Exclude<ConnectivityStatus, 'online'>
 
@@ -18,6 +24,8 @@ function browserIsOnline() {
 export const useConnectivityStore = defineStore('connectivity', () => {
   const isClientOnline = ref(browserIsOnline())
   const isServerOnline = ref<boolean | null>(null)
+  const isClientVersionCompatible = ref<boolean | null>(null)
+  const hasPendingApplicationUpdate = ref(false)
   let consecutiveServerFailures = 0
   let monitoring = false
   let healthcheckPromise: Promise<void> | null = null
@@ -27,8 +35,12 @@ export const useConnectivityStore = defineStore('connectivity', () => {
 
   const status = computed<ConnectivityStatus>(() => {
     if (!isClientOnline.value) return 'offline'
-    if (isServerOnline.value === true) return 'online'
+    if (hasPendingApplicationUpdate.value) return 'update-required'
     if (isServerOnline.value === false) return 'server-unavailable'
+    if (isServerOnline.value === true && isClientVersionCompatible.value === false) {
+      return 'update-required'
+    }
+    if (isServerOnline.value === true && isClientVersionCompatible.value === true) return 'online'
     return 'checking'
   })
 
@@ -54,6 +66,7 @@ export const useConnectivityStore = defineStore('connectivity', () => {
   function markClientOffline() {
     isClientOnline.value = false
     isServerOnline.value = null
+    isClientVersionCompatible.value = null
     consecutiveServerFailures = 0
     clearRetry()
     healthcheckController?.abort()
@@ -62,6 +75,7 @@ export const useConnectivityStore = defineStore('connectivity', () => {
   function markClientOnline() {
     isClientOnline.value = true
     isServerOnline.value = null
+    isClientVersionCompatible.value = null
     consecutiveServerFailures = 0
     void checkServer()
   }
@@ -83,9 +97,10 @@ export const useConnectivityStore = defineStore('connectivity', () => {
     const timeoutId = setTimeout(() => controller.abort(), HEALTHCHECK_TIMEOUT_MS)
 
     const promise = requestHealthcheck(controller.signal)
-      .then(() => {
+      .then(({ version }) => {
         consecutiveServerFailures = 0
         isServerOnline.value = true
+        isClientVersionCompatible.value = isServerVersionCompatible(version)
         clearRetry()
       })
       .catch(() => {
@@ -96,6 +111,7 @@ export const useConnectivityStore = defineStore('connectivity', () => {
         consecutiveServerFailures += 1
         if (consecutiveServerFailures >= SERVER_FAILURE_THRESHOLD) {
           isServerOnline.value = false
+          isClientVersionCompatible.value = null
         } else {
           scheduleRetry()
         }
@@ -135,12 +151,19 @@ export const useConnectivityStore = defineStore('connectivity', () => {
     healthcheckController = null
   }
 
+  function requireUpdate() {
+    hasPendingApplicationUpdate.value = true
+  }
+
   return {
     isClientOnline,
     isServerOnline,
+    isClientVersionCompatible,
+    hasPendingApplicationUpdate,
     status,
     statusColor,
     checkServer,
+    requireUpdate,
     startMonitoring,
     stopMonitoring,
   }

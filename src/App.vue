@@ -100,7 +100,9 @@ watch(
       return
     }
     if (
-      (nextStatus === 'offline' || nextStatus === 'server-unavailable') &&
+      (nextStatus === 'offline' ||
+        nextStatus === 'server-unavailable' ||
+        nextStatus === 'update-required') &&
       authStore.isAuthenticated
     ) {
       void authStore

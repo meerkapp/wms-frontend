@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { jwtDecode } from 'jwt-decode'
 import { FetchError } from 'ofetch'
+import { ClientUpdateRequiredError } from '@/core/api/client-update-required.error'
 import { authApi } from '@/modules/auth/api/auth.api'
 import { usePresenceStore } from '@/modules/employee/stores/presence.store'
 import { localSyncService } from '@/modules/sync/services/sync.service'
@@ -57,6 +58,7 @@ function isUnauthorized(error: unknown) {
 }
 
 function isNetworkFailure(error: unknown) {
+  if (error instanceof ClientUpdateRequiredError) return true
   if (error instanceof TypeError) return true
   return error instanceof FetchError && (error.status === undefined || error.status === 0)
 }

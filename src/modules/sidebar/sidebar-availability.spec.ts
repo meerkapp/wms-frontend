@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { resolveOnlineRequiredReason } from './sidebar-availability'
 
 describe('sidebar availability', () => {
-  it.each(['checking', 'server-unavailable', 'offline'] as const)(
+  it.each(['checking', 'update-required', 'server-unavailable', 'offline'] as const)(
     'keeps local read-model sections available while connectivity is %s',
     (status) => {
       expect(resolveOnlineRequiredReason('local-read-model', status, true)).toBeNull()
@@ -13,6 +13,9 @@ describe('sidebar availability', () => {
     expect(resolveOnlineRequiredReason('server-required', 'offline', true)).toBe('offline')
     expect(resolveOnlineRequiredReason('server-required', 'server-unavailable', true)).toBe(
       'server-unavailable',
+    )
+    expect(resolveOnlineRequiredReason('server-required', 'update-required', true)).toBe(
+      'update-required',
     )
     expect(resolveOnlineRequiredReason('server-required', 'checking', false)).toBe('checking')
   })

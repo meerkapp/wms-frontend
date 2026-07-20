@@ -10,6 +10,7 @@ vi.mock('@/core/api/health', () => ({
 }))
 
 import { useConnectivityStore } from './connectivity.store'
+import { appVersion } from '@/core/version/app-version'
 
 let browserOnline = true
 let windowTarget: EventTarget
@@ -36,7 +37,10 @@ afterEach(() => {
 describe('connectivity store', () => {
   it('requires consecutive server failures before reporting an outage', async () => {
     const store = useConnectivityStore()
-    dependencies.requestHealthcheck.mockResolvedValueOnce(undefined)
+    dependencies.requestHealthcheck.mockResolvedValueOnce({
+      status: 'ok',
+      version: appVersion,
+    })
 
     await store.checkServer()
 
@@ -54,7 +58,10 @@ describe('connectivity store', () => {
 
   it('reacts immediately to browser offline and rechecks after reconnect', async () => {
     const store = useConnectivityStore()
-    dependencies.requestHealthcheck.mockResolvedValue(undefined)
+    dependencies.requestHealthcheck.mockResolvedValue({
+      status: 'ok',
+      version: appVersion,
+    })
     store.startMonitoring()
     await store.checkServer()
 
@@ -70,5 +77,32 @@ describe('connectivity store', () => {
 
     expect(store.status).toBe('online')
     store.stopMonitoring()
+  })
+
+  it('keeps the server reachable but requires an update for an incompatible client', async () => {
+    const store = useConnectivityStore()
+    dependencies.requestHealthcheck.mockResolvedValueOnce({
+      status: 'ok',
+      version: `${appVersion}-different`,
+    })
+
+    await store.checkServer()
+
+    expect(store.isServerOnline).toBe(true)
+    expect(store.isClientVersionCompatible).toBe(false)
+    expect(store.status).toBe('update-required')
+    expect(store.statusColor).toBe('yellow')
+  })
+
+  it('requires an update when a new service worker is waiting', async () => {
+    const store = useConnectivityStore()
+    dependencies.requestHealthcheck.mockResolvedValueOnce({ status: 'ok', version: appVersion })
+    await store.checkServer()
+
+    store.requireUpdate()
+
+    expect(store.hasPendingApplicationUpdate).toBe(true)
+    expect(store.status).toBe('update-required')
+    expect(store.statusColor).toBe('yellow')
   })
 })

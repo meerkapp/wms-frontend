@@ -2,6 +2,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { FetchError } from 'ofetch'
 import { watch } from 'vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ClientUpdateRequiredError } from '@/core/api/client-update-required.error'
 
 const dependencies = vi.hoisted(() => ({
   refresh: vi.fn(),
@@ -157,6 +158,20 @@ describe('auth store refresh lifecycle', () => {
     })
     expect(dependencies.syncStart).not.toHaveBeenCalled()
     expect(dependencies.presenceSetup).not.toHaveBeenCalled()
+    auth.deactivateSession()
+  })
+
+  it('preserves local account state when the client must be updated', async () => {
+    dependencies.refresh.mockRejectedValueOnce(new ClientUpdateRequiredError())
+    dependencies.getActiveAccountId.mockResolvedValueOnce('account-a')
+    dependencies.getOfflineAccount.mockResolvedValueOnce(offlineAccount())
+    const auth = useAuthStore()
+
+    await expect(auth.refresh()).resolves.toBe(false)
+
+    expect(auth.sessionMode).toBe('offline-readonly')
+    expect(dependencies.removeAccountProfile).not.toHaveBeenCalled()
+    expect(dependencies.removeAccountScopes).not.toHaveBeenCalled()
     auth.deactivateSession()
   })
 

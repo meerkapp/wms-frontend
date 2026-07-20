@@ -7,6 +7,10 @@ const auth = vi.hoisted(() => ({
   logout: vi.fn<() => Promise<void>>(),
 }))
 const routerPush = vi.hoisted(() => vi.fn())
+const connectivity = vi.hoisted(() => ({
+  status: 'online',
+  checkServer: vi.fn<() => Promise<void>>(),
+}))
 
 vi.mock('@/modules/auth/stores/auth.store', () => ({
   useAuthStore: () => auth,
@@ -14,6 +18,10 @@ vi.mock('@/modules/auth/stores/auth.store', () => ({
 
 vi.mock('@/router', () => ({
   default: { push: routerPush },
+}))
+
+vi.mock('@/core/stores/connectivity.store', () => ({
+  useConnectivityStore: () => connectivity,
 }))
 
 function jsonResponse(status: number, data: unknown) {
@@ -35,6 +43,8 @@ describe('apiClient authentication retry', () => {
   beforeEach(() => {
     auth.accessToken = 'old-token'
     auth.canAccessWorkspace = false
+    connectivity.status = 'online'
+    connectivity.checkServer.mockReset().mockResolvedValue(undefined)
     auth.refresh.mockReset()
     auth.logout.mockReset().mockResolvedValue(undefined)
     routerPush.mockReset().mockResolvedValue(undefined)
@@ -118,5 +128,30 @@ describe('apiClient authentication retry', () => {
     expect(auth.refresh).not.toHaveBeenCalled()
     expect(auth.logout).not.toHaveBeenCalled()
     expect(routerPush).not.toHaveBeenCalled()
+  })
+
+  it('does not send requests to an incompatible server', async () => {
+    connectivity.status = 'update-required'
+    const { ClientUpdateRequiredError } = await import('./client-update-required.error')
+    const { apiClient } = await import('./client')
+
+    await expect(apiClient('/inventory')).rejects.toBeInstanceOf(ClientUpdateRequiredError)
+
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(auth.refresh).not.toHaveBeenCalled()
+  })
+
+  it('checks compatibility before the first server request', async () => {
+    connectivity.status = 'checking'
+    connectivity.checkServer.mockImplementationOnce(async () => {
+      connectivity.status = 'update-required'
+    })
+    const { ClientUpdateRequiredError } = await import('./client-update-required.error')
+    const { apiClient } = await import('./client')
+
+    await expect(apiClient('/inventory')).rejects.toBeInstanceOf(ClientUpdateRequiredError)
+
+    expect(connectivity.checkServer).toHaveBeenCalledOnce()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 })

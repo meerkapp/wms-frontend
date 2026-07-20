@@ -1,4 +1,6 @@
 import { $fetch } from 'ofetch'
+import { ClientUpdateRequiredError } from '@/core/api/client-update-required.error'
+import { useConnectivityStore } from '@/core/stores/connectivity.store'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import router from '@/router'
 
@@ -6,6 +8,10 @@ export const apiClient = $fetch.create({
   baseURL: import.meta.env.VITE_API_URL ?? '/api',
   credentials: 'include', // send httpOnly cookie with every request
   async onRequest({ options }) {
+    const connectivity = useConnectivityStore()
+    if (connectivity.status === 'checking') await connectivity.checkServer()
+    if (connectivity.status === 'update-required') throw new ClientUpdateRequiredError()
+
     const auth = useAuthStore()
     if (auth.accessToken) {
       const headers = new Headers(options.headers as HeadersInit | undefined)
@@ -40,9 +46,7 @@ export const apiClient = $fetch.create({
       // onRequest, which attaches the freshly issued access token.
       retryOptions.authRetried = true
       retryOptions.retry = 1
-      retryOptions.retryStatusCodes = [
-        ...new Set([...(retryOptions.retryStatusCodes ?? []), 401]),
-      ]
+      retryOptions.retryStatusCodes = [...new Set([...(retryOptions.retryStatusCodes ?? []), 401])]
     }
   },
 })

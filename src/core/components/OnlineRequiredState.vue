@@ -23,6 +23,11 @@ const presentation = computed(() => {
       title: t('app.onlineRequired.serverUnavailableTitle'),
       hint: t('app.onlineRequired.serverUnavailableHint'),
     },
+    'update-required': {
+      icon: 'tabler--refresh-alert',
+      title: t('app.onlineRequired.updateRequiredTitle'),
+      hint: t('app.onlineRequired.updateRequiredHint'),
+    },
     offline: {
       icon: 'tabler--wifi-off',
       title: t('app.onlineRequired.offlineTitle'),

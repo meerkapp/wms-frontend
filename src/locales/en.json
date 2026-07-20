@@ -88,17 +88,27 @@
     "statusBar": {
       "checking": "Checking connection",
       "online": "Online",
+      "updateRequired": "Update required",
       "serverUnavailable": "Server unavailable",
       "offline": "No Internet connection",
       "darkTheme": "Dark mode",
       "lightTheme": "Light mode",
       "version": "Version: {version}"
     },
+    "update": {
+      "available": "A new version is available",
+      "title": "Application update",
+      "description": "The new version is ready. Update the application to continue with the latest version.",
+      "action": "Update",
+      "failed": "Could not update the application"
+    },
     "onlineRequired": {
       "checkingTitle": "Restoring connection",
       "checkingHint": "This section will open as soon as the server becomes available.",
       "serverUnavailableTitle": "Server unavailable",
       "serverUnavailableHint": "Internet access is available, but this section requires a connection to the server.",
+      "updateRequiredTitle": "The application is out of date",
+      "updateRequiredHint": "Update the application using the notification in the status bar to continue working with the server.",
       "offlineTitle": "No Internet connection",
       "offlineHint": "Connect to the Internet to open this section."
     }
