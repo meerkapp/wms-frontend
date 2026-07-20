@@ -77,11 +77,6 @@
         "confirmPasswordRequired": "Подтвердите пароль",
         "passwordMismatch": "Пароли не совпадают"
       }
-    },
-    "launcher": {
-      "redirecting": "Перенаправление в Meerk Launcher...",
-      "hint": "Если ничего не произошло, убедитесь что приложение установлено.",
-      "retry": "Попробовать снова"
     }
   },
   "app": {

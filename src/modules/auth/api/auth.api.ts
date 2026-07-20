@@ -17,7 +17,4 @@ export const authApi = {
 
   setupInit: (dto: SetupInitDto) =>
     apiClient<AuthTokens>('/setup/init', { method: 'POST', body: dto }),
-
-  // request one-time code for Electron launcher redirect
-  getLauncherCode: () => apiClient<{ code: string }>('/auth/launcher-code', { method: 'POST' }),
 }

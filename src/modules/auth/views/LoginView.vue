@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
@@ -11,17 +11,13 @@ import { z } from 'zod'
 
 import BaseCard from '@/core/components/BaseCard.vue'
 import AppLogo from '@/core/components/AppLogo.vue'
-import LauncherRedirectMessage from '@/modules/auth/components/LauncherRedirectMessage.vue'
 import { authApi } from '@/modules/auth/api/auth.api'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 
 const { t } = useI18n()
 const router = useRouter()
-const route = useRoute()
 const toast = useToast()
 const auth = useAuthStore()
-
-const launcherCode = ref<string | null>(null)
 
 const validationSchema = computed(() =>
   toTypedSchema(
@@ -54,13 +50,7 @@ const { mutate: login, asyncStatus } = useMutation({
   },
   async onSuccess(tokens) {
     await auth.activateSession(tokens.access_token)
-
-    if (route.query.redirect === 'launcher') {
-      const { code } = await authApi.getLauncherCode()
-      launcherCode.value = code
-    } else {
-      await router.push({ name: 'sync' })
-    }
+    await router.push({ name: 'sync' })
   },
 })
 
@@ -74,12 +64,7 @@ const onSubmit = handleSubmit(() => login())
         <div class="flex flex-col items-center justify-center h-full">
           <div class="w-72 sm:w-96">
             <AppLogo class="mb-10" />
-
-            <!-- Launcher redirect screen -->
-            <LauncherRedirectMessage v-if="launcherCode" :code="launcherCode" />
-
-            <!-- Login form -->
-            <Fieldset v-else :legend="t('auth.login.title')">
+            <Fieldset :legend="t('auth.login.title')">
               <form class="space-y-5 px-2 py-2" @submit.prevent="onSubmit">
                 <div>
                   <FloatLabel variant="on">
