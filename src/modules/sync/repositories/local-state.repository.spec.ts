@@ -5,10 +5,10 @@ import { db, WMS_LOCAL_DB_NAME } from '../db/db'
 import { localStateRepository, OFFLINE_ACCESS_GRACE_PERIOD_MS } from './local-state.repository'
 import type { LocalAccountProfile } from '../types/local-state.types'
 
-function account(lastAuthenticatedAt: number): LocalAccountProfile {
+function account(lastAuthenticatedAt: number, accountId = 'account-a'): LocalAccountProfile {
   return {
-    accountId: 'account-a',
-    email: 'account-a@test.local',
+    accountId,
+    email: `${accountId}@test.local`,
     firstName: 'Offline',
     lastName: 'User',
     warehouseId: 10,
@@ -36,11 +36,11 @@ describe('local state repository', () => {
     const now = Date.now()
     await localStateRepository.saveAuthenticatedAccount(account(now))
 
-    await expect(localStateRepository.getOfflineAccount(now)).resolves.toBeNull()
+    await expect(localStateRepository.getOfflineAccount(undefined, now)).resolves.toBeNull()
 
     await localStateRepository.markInitialSyncCompleted()
 
-    await expect(localStateRepository.getOfflineAccount(now)).resolves.toMatchObject({
+    await expect(localStateRepository.getOfflineAccount(undefined, now)).resolves.toMatchObject({
       accountId: 'account-a',
       warehouseId: 10,
     })
@@ -52,11 +52,76 @@ describe('local state repository', () => {
     await localStateRepository.markInitialSyncCompleted()
 
     await expect(
-      localStateRepository.getOfflineAccount(authenticatedAt + OFFLINE_ACCESS_GRACE_PERIOD_MS),
+      localStateRepository.getOfflineAccount(
+        undefined,
+        authenticatedAt + OFFLINE_ACCESS_GRACE_PERIOD_MS,
+      ),
     ).resolves.toBeDefined()
     await expect(
-      localStateRepository.getOfflineAccount(authenticatedAt + OFFLINE_ACCESS_GRACE_PERIOD_MS + 1),
+      localStateRepository.getOfflineAccount(
+        undefined,
+        authenticatedAt + OFFLINE_ACCESS_GRACE_PERIOD_MS + 1,
+      ),
     ).resolves.toBeNull()
+  })
+
+  it('selects one saved account without removing other account profiles', async () => {
+    const now = Date.now()
+    await localStateRepository.saveAuthenticatedAccount(account(now - 1, 'account-a'))
+    await localStateRepository.saveAuthenticatedAccount(account(now, 'account-b'))
+    await localStateRepository.markInitialSyncCompleted()
+
+    await localStateRepository.setActiveAccountId('account-a')
+
+    await expect(localStateRepository.getActiveAccountId()).resolves.toBe('account-a')
+    await expect(localStateRepository.getOfflineAccount('account-a', now)).resolves.toMatchObject({
+      accountId: 'account-a',
+    })
+    await expect(localStateRepository.listAccountProfiles()).resolves.toEqual([
+      expect.objectContaining({ accountId: 'account-b' }),
+      expect.objectContaining({ accountId: 'account-a' }),
+    ])
+  })
+
+  it('increments the active-account revision only when the selection changes', async () => {
+    const now = Date.now()
+
+    await expect(
+      localStateRepository.saveAuthenticatedAccount(account(now, 'account-a')),
+    ).resolves.toEqual({
+      selection: { accountId: 'account-a', revision: 1 },
+      changed: true,
+    })
+    await expect(
+      localStateRepository.saveAuthenticatedAccount(account(now + 1, 'account-a')),
+    ).resolves.toEqual({
+      selection: { accountId: 'account-a', revision: 1 },
+      changed: false,
+    })
+    await localStateRepository.saveAuthenticatedAccount(account(now + 2, 'account-b'), {
+      activate: false,
+    })
+    await expect(localStateRepository.setActiveAccountId('account-b')).resolves.toEqual({
+      selection: { accountId: 'account-b', revision: 2 },
+      changed: true,
+    })
+    await expect(localStateRepository.getActiveAccountSelection()).resolves.toEqual({
+      accountId: 'account-b',
+      revision: 2,
+    })
+  })
+
+  it('keeps an offline account removal pending until the account is authenticated again', async () => {
+    const profile = account(Date.now())
+    await localStateRepository.markAccountRemovalPending(profile.accountId)
+
+    await expect(localStateRepository.listPendingAccountRemovals()).resolves.toEqual([
+      expect.objectContaining({ accountId: profile.accountId }),
+    ])
+
+    await localStateRepository.saveAuthenticatedAccount(profile)
+
+    await expect(localStateRepository.listPendingAccountRemovals()).resolves.toEqual([])
   })
 
   it('removes only account metadata and preserves the shared read model', async () => {
@@ -75,7 +140,10 @@ describe('local state repository', () => {
       updatedAt: '2026-01-01T00:00:00.000Z',
     })
 
-    await localStateRepository.removeAccount('account-a')
+    await expect(localStateRepository.removeAccount('account-a')).resolves.toEqual({
+      selection: { accountId: null, revision: 2 },
+      changed: true,
+    })
 
     expect(await localStateRepository.getActiveAccountId()).toBeNull()
     expect(await db.accountProfiles.get('account-a')).toBeUndefined()

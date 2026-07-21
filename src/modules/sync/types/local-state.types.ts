@@ -13,6 +13,11 @@ export interface LocalAccountAvatarCache {
   cachedAt: number
 }
 
+export interface PendingAccountRemoval {
+  accountId: string
+  createdAt: number
+}
+
 export interface LocalAccountProfile {
   accountId: string
   email: string
@@ -27,10 +32,19 @@ export interface LocalAccountProfile {
   preferences?: LocalAccountPreferences
 }
 
-export interface LocalSetting {
-  key: 'activeAccountId'
-  value: string
+export interface ActiveAccountSelection {
+  accountId: string | null
+  revision: number
 }
+
+export interface ActiveAccountUpdate {
+  selection: ActiveAccountSelection
+  changed: boolean
+}
+
+export type LocalSetting =
+  | { key: 'activeAccountId'; value: string }
+  | { key: 'activeAccountRevision'; value: number }
 
 export interface ReadModelMetadata {
   key: 'initialSyncCompletedAt'

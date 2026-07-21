@@ -27,7 +27,7 @@
     "employee_update_own_email": "Изменение своего email",
     "employee_update_own_password": "Изменение своего пароля",
     "employee_update_own_avatar": "Изменение своего аватара",
-    "employee_update_avatar": "Изменение аватара сотрудника",
+    "employee_update_avatar": "Изменение аватара другого сотрудника",
     "role_create": "Создание ролей",
     "role_update": "Редактирование ролей",
     "product_type_create": "Создание типов товаров",
@@ -45,6 +45,18 @@
   },
   "auth": {
     "logout": "Выйти",
+    "accounts": {
+      "title": "Аккаунты",
+      "search": "Поиск",
+      "empty": "Нет добавленных аккаунтов.",
+      "continue": "Продолжить",
+      "add": "Добавить аккаунт",
+      "addTitle": "Добавление аккаунта",
+      "switch": "Сменить аккаунт",
+      "switchFailed": "Не удалось открыть выбранный аккаунт",
+      "switchedInAnotherTab": "Аккаунт переключён в другой вкладке",
+      "signedOutInAnotherTab": "Выход из аккаунта выполнен в другой вкладке"
+    },
     "login": {
       "title": "Вход в систему",
       "email": "Email",

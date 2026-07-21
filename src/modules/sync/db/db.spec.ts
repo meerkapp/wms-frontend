@@ -11,7 +11,7 @@ function databaseName(label: string) {
   return name
 }
 
-function createLegacyDatabase(name: string, version: 1 | 2 | 4 | 5) {
+function createLegacyDatabase(name: string, version: 1 | 2 | 4 | 5 | 6) {
   const legacy = new Dexie(name)
   legacy.version(1).stores(WMS_LOCAL_DB_SCHEMAS[1])
   if (version >= 2) legacy.version(2).stores(WMS_LOCAL_DB_SCHEMAS[2])
@@ -20,6 +20,7 @@ function createLegacyDatabase(name: string, version: 1 | 2 | 4 | 5) {
     legacy.version(4).stores(WMS_LOCAL_DB_SCHEMAS[4])
   }
   if (version >= 5) legacy.version(5).stores(WMS_LOCAL_DB_SCHEMAS[5])
+  if (version >= 6) legacy.version(6).stores(WMS_LOCAL_DB_SCHEMAS[6])
   return legacy
 }
 
@@ -34,7 +35,7 @@ describe('WmsLocalDb migrations', () => {
 
     await current.open()
 
-    expect(current.verno).toBe(6)
+    expect(current.verno).toBe(7)
     expect(current.tables.map((table) => table.name)).toEqual(
       expect.arrayContaining([
         'productItems',
@@ -43,6 +44,7 @@ describe('WmsLocalDb migrations', () => {
         'syncState',
         'accountProfiles',
         'accountAvatarCache',
+        'pendingAccountRemovals',
         'localSettings',
         'readModelMetadata',
       ]),
@@ -51,6 +53,32 @@ describe('WmsLocalDb migrations', () => {
       'accountId',
       'warehouseId',
     ])
+    current.close()
+  })
+
+  it('adds the pending account removal queue when upgrading version 6', async () => {
+    const name = databaseName('v6')
+    const legacy = createLegacyDatabase(name, 6)
+    await legacy.open()
+    await legacy.table('accountProfiles').put({
+      accountId: 'account-a',
+      email: 'account-a@test.local',
+      firstName: 'Offline',
+      lastName: 'User',
+      warehouseId: 10,
+      isActive: true,
+      permissions: [],
+      lastSeen: null,
+      avatarUrl: null,
+      lastAuthenticatedAt: Date.now(),
+    })
+    legacy.close()
+
+    const current = new WmsLocalDb(name)
+    await current.open()
+
+    expect(await current.accountProfiles.get('account-a')).toBeDefined()
+    expect(await current.pendingAccountRemovals.count()).toBe(0)
     current.close()
   })
 

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { authApi } from '@/modules/auth/api/auth.api'
+import { decideAccountStartup } from '@/modules/auth/account-startup'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,6 +15,11 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: () => import('@/modules/auth/views/LoginView.vue'),
+    },
+    {
+      path: '/accounts',
+      name: 'account-selection',
+      component: () => import('@/modules/auth/views/AccountSelectionView.vue'),
     },
     {
       path: '/sync',
@@ -30,16 +36,25 @@ const router = createRouter({
   ],
 })
 
-let sessionRestored = false
+let startupResolved = false
 
 router.beforeEach(async (to, from) => {
   const auth = useAuthStore()
 
-  // On first navigation, try to restore session via httpOnly cookie
-  if (!sessionRestored) {
-    sessionRestored = true
-    if (!auth.isAuthenticated) {
-      await auth.refresh()
+  if (!startupResolved) {
+    const accountIds = await auth.listAvailableAccountIds()
+    const decision = decideAccountStartup(accountIds)
+    startupResolved = true
+
+    if (decision.type === 'select') {
+      if (to.name !== 'account-selection') return { name: 'account-selection' }
+    } else if (decision.type === 'restore') {
+      const restored = await auth.switchAccount(decision.accountId)
+      if (restored && to.name === 'account-selection') {
+        return { name: auth.isOffline ? 'workspace' : 'sync' }
+      }
+    } else if (to.name === 'account-selection') {
+      return { name: 'login' }
     }
   }
 
@@ -61,8 +76,14 @@ router.beforeEach(async (to, from) => {
     return { name: 'workspace' }
   }
 
-  // Redirect authenticated users to sync before workspace
-  if (auth.isAuthenticated && to.name !== 'sync' && from.name !== 'sync') {
+  const isAddingAccount = to.name === 'login' && to.query.intent === 'add-account'
+  if (auth.isAuthenticated && to.name === 'login' && !isAddingAccount) {
+    return { name: 'sync' }
+  }
+
+  // An online account always performs a cursor-based catch-up before entering
+  // the workspace. Account selection and add-account login remain reachable.
+  if (auth.isAuthenticated && to.name === 'workspace' && from.name !== 'sync') {
     return { name: 'sync' }
   }
 })

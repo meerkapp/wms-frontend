@@ -27,7 +27,7 @@
     "employee_update_own_email": "Change own email",
     "employee_update_own_password": "Change own password",
     "employee_update_own_avatar": "Change own avatar",
-    "employee_update_avatar": "Change employee avatar",
+    "employee_update_avatar": "Change another employee's avatar",
     "role_create": "Create roles",
     "role_update": "Edit roles",
     "product_type_create": "Create product types",
@@ -45,6 +45,18 @@
   },
   "auth": {
     "logout": "Sign out",
+    "accounts": {
+      "title": "Accounts",
+      "search": "Search",
+      "empty": "No accounts have been added.",
+      "continue": "Continue",
+      "add": "Add account",
+      "addTitle": "Add account",
+      "switch": "Switch account",
+      "switchFailed": "Could not open the selected account",
+      "switchedInAnotherTab": "The account was switched in another tab",
+      "signedOutInAnotherTab": "The account was signed out in another tab"
+    },
     "login": {
       "title": "Sign in",
       "email": "Email",

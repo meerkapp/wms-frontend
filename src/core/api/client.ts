@@ -1,10 +1,30 @@
-import { $fetch } from 'ofetch'
+import { $fetch, type FetchOptions, type FetchRequest } from 'ofetch'
 import { ClientUpdateRequiredError } from '@/core/api/client-update-required.error'
+import { StaleAccountRequestError } from '@/core/api/stale-account-request.error'
 import { useConnectivityStore } from '@/core/stores/connectivity.store'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import router from '@/router'
 
-export const apiClient = $fetch.create({
+type AuthMode = 'account' | 'device'
+
+interface AuthAwareFetchOptions extends FetchOptions<'json'> {
+  authMode?: AuthMode
+  authAccountId?: string | null
+  authRetried?: boolean
+}
+
+function assertAccountContext(options: AuthAwareFetchOptions) {
+  if ((options.authMode ?? 'account') === 'device') return
+  const activeAccountId = useAuthStore().user?.sub ?? null
+  if (options.authAccountId !== activeAccountId) throw new StaleAccountRequestError()
+}
+
+async function navigateAfterAccountLoss() {
+  const accountIds = await useAuthStore().listAvailableAccountIds()
+  await router.push({ name: accountIds.length > 0 ? 'account-selection' : 'login' })
+}
+
+const fetchClient = $fetch.create({
   baseURL: import.meta.env.VITE_API_URL ?? '/api',
   credentials: 'include', // send httpOnly cookie with every request
   async onRequest({ options }) {
@@ -13,11 +33,22 @@ export const apiClient = $fetch.create({
     if (connectivity.status === 'update-required') throw new ClientUpdateRequiredError()
 
     const auth = useAuthStore()
+    const authOptions = options as AuthAwareFetchOptions
+    if ((authOptions.authMode ?? 'account') === 'device') return
+
+    if (authOptions.authAccountId === undefined) {
+      authOptions.authAccountId = auth.user?.sub ?? null
+    } else {
+      assertAccountContext(authOptions)
+    }
     if (auth.accessToken) {
       const headers = new Headers(options.headers as HeadersInit | undefined)
       headers.set('Authorization', `Bearer ${auth.accessToken}`)
       options.headers = headers
     }
+  },
+  onResponse({ options }) {
+    assertAccountContext(options as AuthAwareFetchOptions)
   },
   async onResponseError({ response, request, options }) {
     if (response.status === 401) {
@@ -29,16 +60,19 @@ export const apiClient = $fetch.create({
         return
       }
 
-      const retryOptions = options as typeof options & { authRetried?: boolean }
+      const retryOptions = options as AuthAwareFetchOptions
+      if ((retryOptions.authMode ?? 'account') === 'device') return
+      if (retryOptions.authAccountId !== (auth.user?.sub ?? null)) return
+      if (retryOptions.authAccountId === null) return
       if (retryOptions.authRetried) {
         await auth.logout()
-        await router.push({ name: 'login' })
+        await navigateAfterAccountLoss()
         return
       }
 
       const refreshed = await auth.refresh()
       if (!refreshed) {
-        if (!auth.canAccessWorkspace) await router.push({ name: 'login' })
+        if (!auth.canAccessWorkspace) await navigateAfterAccountLoss()
         return
       }
 
@@ -50,3 +84,7 @@ export const apiClient = $fetch.create({
     }
   },
 })
+
+export function apiClient<T>(request: FetchRequest, options?: AuthAwareFetchOptions): Promise<T> {
+  return fetchClient<T>(request, options)
+}

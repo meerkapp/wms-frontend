@@ -86,7 +86,12 @@ async function openEditDialog() {
 
 async function logout() {
   await authStore.logout()
-  router.push({ name: 'login' })
+  const accountIds = await authStore.listAvailableAccountIds()
+  await router.push({ name: accountIds.length > 0 ? 'account-selection' : 'login' })
+}
+
+function openAccountSelection() {
+  void router.push({ name: 'account-selection' })
 }
 
 const userMenuItems = computed<MenuItem[]>(() => [
@@ -102,6 +107,7 @@ const userMenuItems = computed<MenuItem[]>(() => [
             },
           ]
         : []),
+      { separator: true },
       ...(canEditOwnProfile.value
         ? [
             {
@@ -111,6 +117,11 @@ const userMenuItems = computed<MenuItem[]>(() => [
             },
           ]
         : []),
+      {
+        label: t('auth.accounts.switch'),
+        icon: 'iconify tabler--replace-user',
+        command: openAccountSelection,
+      },
       { separator: true },
       {
         label: t('auth.logout'),

@@ -67,8 +67,9 @@ const { mutate: setup, asyncStatus } = useMutation({
     toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
   },
   async onSuccess(tokens) {
-    await auth.activateSession(tokens.access_token)
-    await router.push({ name: 'sync' })
+    if (await auth.activateSession(tokens.access_token)) {
+      await router.push({ name: 'sync' })
+    }
   },
 })
 
@@ -97,7 +98,9 @@ const onSubmit = handleSubmit(() => setup())
                     />
                     <label for="setup_first_name">{{ t('auth.setup.firstName') }}</label>
                   </FloatLabel>
-                  <Message v-if="errors.firstName" size="small" severity="error" variant="simple">{{ errors.firstName }}</Message>
+                  <Message v-if="errors.firstName" size="small" severity="error" variant="simple">{{
+                    errors.firstName
+                  }}</Message>
                 </div>
                 <div>
                   <FloatLabel variant="on">
@@ -111,7 +114,9 @@ const onSubmit = handleSubmit(() => setup())
                     />
                     <label for="setup_last_name">{{ t('auth.setup.lastName') }}</label>
                   </FloatLabel>
-                  <Message v-if="errors.lastName" size="small" severity="error" variant="simple">{{ errors.lastName }}</Message>
+                  <Message v-if="errors.lastName" size="small" severity="error" variant="simple">{{
+                    errors.lastName
+                  }}</Message>
                 </div>
                 <div>
                   <FloatLabel variant="on">
@@ -126,7 +131,9 @@ const onSubmit = handleSubmit(() => setup())
                     />
                     <label for="setup_email">{{ t('auth.setup.email') }}</label>
                   </FloatLabel>
-                  <Message v-if="errors.email" size="small" severity="error" variant="simple">{{ errors.email }}</Message>
+                  <Message v-if="errors.email" size="small" severity="error" variant="simple">{{
+                    errors.email
+                  }}</Message>
                 </div>
                 <div>
                   <FloatLabel variant="on">
@@ -141,8 +148,12 @@ const onSubmit = handleSubmit(() => setup())
                     />
                     <label for="setup_password">{{ t('auth.setup.password') }}</label>
                   </FloatLabel>
-                  <Message v-if="errors.password" size="small" severity="error" variant="simple">{{ errors.password }}</Message>
-                  <Message v-else size="small" severity="secondary" variant="simple">{{ t('auth.setup.passwordHint') }}</Message>
+                  <Message v-if="errors.password" size="small" severity="error" variant="simple">{{
+                    errors.password
+                  }}</Message>
+                  <Message v-else size="small" severity="secondary" variant="simple">{{
+                    t('auth.setup.passwordHint')
+                  }}</Message>
                 </div>
                 <div>
                   <FloatLabel variant="on">
@@ -159,7 +170,13 @@ const onSubmit = handleSubmit(() => setup())
                       t('auth.setup.confirmPassword')
                     }}</label>
                   </FloatLabel>
-                  <Message v-if="errors.confirmPassword" size="small" severity="error" variant="simple">{{ errors.confirmPassword }}</Message>
+                  <Message
+                    v-if="errors.confirmPassword"
+                    size="small"
+                    severity="error"
+                    variant="simple"
+                    >{{ errors.confirmPassword }}</Message
+                  >
                 </div>
                 <Button
                   type="submit"

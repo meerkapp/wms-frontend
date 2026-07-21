@@ -22,6 +22,7 @@ import type {
   LocalAccountAvatarCache,
   LocalAccountProfile,
   LocalSetting,
+  PendingAccountRemoval,
   ReadModelMetadata,
 } from '../types/local-state.types'
 import type { SyncState } from '../types/sync.types'
@@ -66,6 +67,9 @@ export const WMS_LOCAL_DB_SCHEMAS = {
   6: {
     accountAvatarCache: 'accountId, sourceUrl, cachedAt',
   },
+  7: {
+    pendingAccountRemovals: 'accountId, createdAt',
+  },
 } as const
 
 export class WmsLocalDb extends Dexie {
@@ -87,6 +91,7 @@ export class WmsLocalDb extends Dexie {
   syncState!: EntityTable<SyncState, 'id'>
   accountProfiles!: EntityTable<LocalAccountProfile, 'accountId'>
   accountAvatarCache!: EntityTable<LocalAccountAvatarCache, 'accountId'>
+  pendingAccountRemovals!: EntityTable<PendingAccountRemoval, 'accountId'>
   localSettings!: EntityTable<LocalSetting, 'key'>
   readModelMetadata!: EntityTable<ReadModelMetadata, 'key'>
 
@@ -108,6 +113,8 @@ export class WmsLocalDb extends Dexie {
     this.version(5).stores(WMS_LOCAL_DB_SCHEMAS[5])
 
     this.version(6).stores(WMS_LOCAL_DB_SCHEMAS[6])
+
+    this.version(7).stores(WMS_LOCAL_DB_SCHEMAS[7])
   }
 }
 
