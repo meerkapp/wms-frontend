@@ -121,23 +121,20 @@ const statusPresentation = computed(() => {
       >
         {{ statusPresentation.label }}
       </Tag>
-      <div v-if="isUpdateAvailable" class="h-full flex items-center gap-1.5">
-        <i class="iconify tabler--refresh text-xs!" />
-        <span>{{ t('app.update.available') }}</span>
-        <Button
-          :label="t('app.update.action')"
-          icon="iconify tabler--progress-down"
-          size="small"
-          class="h-full! px-3! py-0! text-xs!"
-          :pt="{
-            icon: { class: 'text-xs!' },
-            label: { class: 'font-normal!' },
-          }"
-          rounded
-          :loading="isUpdating"
-          @click="updateApplication"
-        />
-      </div>
+      <Button
+        v-if="isUpdateAvailable"
+        :label="t('app.update.action')"
+        icon="iconify tabler--progress-down"
+        size="small"
+        class="h-full! px-3! py-0! text-xs!"
+        :pt="{
+          icon: { class: 'text-xs!' },
+          label: { class: 'font-normal!' },
+        }"
+        rounded
+        :loading="isUpdating"
+        @click="updateApplication"
+      />
     </div>
     <div class="h-full flex items-center gap-3">
       <Button

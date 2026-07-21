@@ -103,7 +103,6 @@
       "version": "Version: {version}"
     },
     "update": {
-      "available": "A new version is available",
       "title": "Application update",
       "description": "The new version is ready. Update the application to continue with the latest version.",
       "action": "Update",
