@@ -5,7 +5,13 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { useI18n } from 'vue-i18n'
-import type { CreateEmployeeDto, Employee, Role, UpdateEmployeeDto } from '@meerkapp/wms-contracts'
+import type {
+  CreateEmployeeDto,
+  Employee,
+  Role,
+  UpdateEmployeeDto,
+  UpdateOwnProfileDto,
+} from '@meerkapp/wms-contracts'
 import WarehouseSelect from '@/modules/warehouse/components/WarehouseSelect.vue'
 import EmployeeRoleMultiSelect from './EmployeeRoleMultiSelect.vue'
 import EmployeePasswordInput from './EmployeePasswordInput.vue'
@@ -20,7 +26,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  submit: [data: CreateEmployeeDto | (UpdateEmployeeDto & { roleIds: number[] })]
+  submit: [data: CreateEmployeeDto | UpdateEmployeeDto | UpdateOwnProfileDto]
 }>()
 
 const { t } = useI18n()
@@ -59,6 +65,24 @@ const canEditInfo = computed(
     (isOwnProfile.value
       ? checkUserPermissions('employee:update:own:info')
       : checkUserPermissions('employee:update:info')),
+)
+
+const canEditWarehouse = computed(
+  () =>
+    isCreate.value || (!isOwnProfile.value && checkUserPermissions('employee:update:warehouse')),
+)
+
+const canEditRoles = computed(
+  () => isCreate.value || (!isOwnProfile.value && checkUserPermissions('employee:update:roles')),
+)
+
+const canSubmitForm = computed(
+  () =>
+    isCreate.value ||
+    canEditInfo.value ||
+    canEditEmail.value ||
+    (!isOwnProfile.value &&
+      (canChangePassword.value || canEditWarehouse.value || canEditRoles.value)),
 )
 
 const validationSchema = computed(() =>
@@ -125,14 +149,27 @@ const onSubmit = handleSubmit((values) => {
       ...(roleIds?.length ? { roleIds } : {}),
     } as CreateEmployeeDto)
   } else {
-    emit('submit', {
-      firstName: values.firstName,
-      lastName: values.lastName,
-      phone: values.phone ? normalizePhone(values.phone) : null,
-      warehouseId: values.warehouseId ?? null,
-      roleIds: values.roleIds ?? [],
+    const personalDetails: UpdateOwnProfileDto = {
+      ...(canEditInfo.value
+        ? {
+            firstName: values.firstName,
+            lastName: values.lastName,
+            phone: values.phone ? normalizePhone(values.phone) : null,
+          }
+        : {}),
       ...(canEditEmail.value ? { email: values.email } : {}),
-      ...(values.password ? { newPassword: values.password } : {}),
+    }
+
+    if (isOwnProfile.value) {
+      emit('submit', personalDetails)
+      return
+    }
+
+    emit('submit', {
+      ...personalDetails,
+      ...(canEditWarehouse.value ? { warehouseId: values.warehouseId ?? null } : {}),
+      ...(canEditRoles.value ? { roleIds: values.roleIds ?? [] } : {}),
+      ...(canChangePassword.value && values.password ? { newPassword: values.password } : {}),
     })
   }
 })
@@ -219,7 +256,7 @@ function onRolesChange(updatedRoles: Role[]) {
           <WarehouseSelect
             :warehouse-id="warehouseId ?? null"
             :label="t('common.optionalField', { label: t('employee.form.warehouse') })"
-            :disabled="!checkUserPermissions('employee:update:warehouse')"
+            :disabled="!canEditWarehouse"
             @update:warehouse-id="setFieldValue('warehouseId', $event)"
           />
         </div>
@@ -227,7 +264,7 @@ function onRolesChange(updatedRoles: Role[]) {
           <EmployeeRoleMultiSelect
             :role-ids="(roleIds as number[] | undefined) ?? []"
             :label="t('common.optionalField', { label: t('employee.form.roles') })"
-            :disabled="!(isCreate || checkUserPermissions('employee:update:roles'))"
+            :disabled="!canEditRoles"
             @update:roles="onRolesChange"
           />
         </div>
@@ -252,7 +289,14 @@ function onRolesChange(updatedRoles: Role[]) {
           }}</Message>
         </div>
 
-        <Button type="submit" :label="t('common.save')" rounded fluid class="mb-5" />
+        <Button
+          v-if="canSubmitForm"
+          type="submit"
+          :label="t('common.save')"
+          rounded
+          fluid
+          class="mb-5"
+        />
       </form>
     </template>
   </BaseCard>

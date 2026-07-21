@@ -86,7 +86,7 @@ const permissionGroups = computed(() => {
     </template>
     <template #main>
       <div
-        v-if="props.permissions.length === 0"
+        v-if="props.permissions.length === 0 && !props.editable"
         class="flex flex-col h-full justify-center items-center"
       >
         <i class="iconify tabler--shield-question text-4xl text-muted-color"></i>

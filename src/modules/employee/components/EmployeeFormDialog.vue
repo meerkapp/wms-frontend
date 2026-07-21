@@ -10,14 +10,17 @@ import EmployeeForm from './EmployeeForm.vue'
 import { employeeApi } from '@/modules/employee/api/employee.api'
 import { useEmployeeUpdate } from '@/modules/employee/composables/useEmployeeUpdate'
 import { parseApiError } from '@/core/api/errors'
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
 
 const dialogRef = inject<Ref<DynamicDialogInstance>>('dialogRef')
 
 const { t } = useI18n()
 const toast = useToast()
+const authStore = useAuthStore()
 
 const employee = computed<Employee | undefined>(() => dialogRef?.value.data?.employee)
 const mode = computed<'create' | 'edit'>(() => dialogRef?.value.data?.mode ?? 'create')
+const isOwnProfile = computed(() => employee.value?.id === authStore.user?.sub)
 
 const formRef = ref<InstanceType<typeof EmployeeForm> | null>(null)
 
@@ -42,15 +45,16 @@ function handleEmployeeError(error: unknown) {
 
 const { mutate: updateEmployee } = useEmployeeUpdate(
   () => employee.value!,
+  isOwnProfile,
   () => dialogRef?.value.close(),
   (error) => handleEmployeeError(error),
 )
 
-function onSubmit(data: CreateEmployeeDto | (UpdateEmployeeDto & { roleIds: number[] })) {
+function onSubmit(data: CreateEmployeeDto | UpdateEmployeeDto) {
   if (mode.value === 'create') {
     createEmployee(data as CreateEmployeeDto)
   } else {
-    updateEmployee(data as UpdateEmployeeDto & { roleIds: number[] })
+    updateEmployee(data as UpdateEmployeeDto)
   }
 }
 </script>

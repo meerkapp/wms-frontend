@@ -19,10 +19,14 @@ const dialog = useAppDialog()
 const employee = computed<Employee | undefined>(() => dialogRef?.value.data?.employee)
 
 const isOwnProfile = computed(() => employee.value?.id === authStore.user?.sub)
+const isProtectedProfile = computed(() =>
+  employee.value?.roleAssignments.some(({ employeeRole }) => employeeRole.name === 'superadmin'),
+)
 
 const canEditAvatar = computed(
   () =>
     !!employee.value &&
+    (!isProtectedProfile.value || isOwnProfile.value) &&
     (isOwnProfile.value
       ? checkUserPermissions('employee:update:own:avatar')
       : checkUserPermissions('employee:update:avatar')),

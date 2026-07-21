@@ -11,6 +11,7 @@ import { employeeApi } from '@/modules/employee/api/employee.api'
 import { useEmployeeStore } from '@/modules/employee/stores/employee.store'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useAccountAvatarStore } from '@/modules/auth/stores/account-avatar.store'
+import { parseApiError } from '@/core/api/errors'
 
 const props = defineProps<{
   employee: Employee
@@ -28,6 +29,18 @@ const menu = ref()
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const selectedAvatarFile = ref<File | null>(null)
 const localAvatarUrl = ref<string | null>(props.employee.avatarUrl ?? null)
+
+function handleAvatarError(error: unknown) {
+  selectedAvatarFile.value = null
+  toast.add({
+    severity: 'error',
+    summary:
+      parseApiError(error)?.status === 403
+        ? t('common.error.forbidden')
+        : t('common.error.network'),
+    life: 3000,
+  })
+}
 
 const { mutate: uploadAvatar, asyncStatus: uploadStatus } = useMutation({
   mutation: (file: File) =>
@@ -49,10 +62,7 @@ const { mutate: uploadAvatar, asyncStatus: uploadStatus } = useMutation({
     selectedAvatarFile.value = null
     toast.add({ severity: 'success', summary: t('employee.form.avatarUploaded'), life: 3000 })
   },
-  onError: () => {
-    selectedAvatarFile.value = null
-    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
-  },
+  onError: handleAvatarError,
 })
 
 const { mutate: deleteAvatar, asyncStatus: deleteStatus } = useMutation({
@@ -71,7 +81,7 @@ const { mutate: deleteAvatar, asyncStatus: deleteStatus } = useMutation({
     }
     toast.add({ severity: 'success', summary: t('employee.form.avatarDeleted'), life: 3000 })
   },
-  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+  onError: handleAvatarError,
 })
 
 function onFileSelected(event: Event) {

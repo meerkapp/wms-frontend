@@ -21,13 +21,19 @@ const authStore = useAuthStore()
 const { checkUserPermissions } = authStore
 
 const isOwnCard = computed(() => props.employee.id === authStore.user?.sub)
+const isProtectedCard = computed(() =>
+  props.employee.roleAssignments.some(({ employeeRole }) => employeeRole.name === 'superadmin'),
+)
 
-const canEdit = computed(() =>
-  isOwnCard.value
+const canEdit = computed(() => {
+  if (isProtectedCard.value && !isOwnCard.value) return false
+
+  return isOwnCard.value
     ? checkUserPermissions(
         'employee:update:own:info',
         'employee:update:own:email',
         'employee:update:own:password',
+        'employee:update:own:avatar',
       )
     : checkUserPermissions(
         'employee:update:info',
@@ -36,8 +42,9 @@ const canEdit = computed(() =>
         'employee:update:email',
         'employee:update:password',
         'employee:toggle:active',
-      ),
-)
+        'employee:update:avatar',
+      )
+})
 
 function openViewDialog() {
   dialog.open(
