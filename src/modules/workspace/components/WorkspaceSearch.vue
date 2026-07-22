@@ -19,7 +19,7 @@ function openBarcodeSearchDialog() {
     props: {
       header: t('product.table.barcodeSearch.title'),
       modal: true,
-      style: { width: '30rem' },
+      style: { width: '25rem' },
     },
   })
 }
