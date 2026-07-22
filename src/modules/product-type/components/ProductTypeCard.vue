@@ -38,6 +38,12 @@ const skuModeLabel = computed(() => {
   return map[props.productType.skuMode] ?? props.productType.skuMode
 })
 
+const characteristicCount = computed(() =>
+  Array.isArray(props.productType.characteristicsScheme)
+    ? props.productType.characteristicsScheme.length
+    : 0,
+)
+
 const { mutate: update } = useMutation({
   mutation: (dto: UpdateProductTypeDto) => productTypeApi.update(props.productType.id, dto),
   onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
@@ -64,30 +70,33 @@ function openEditDialog() {
 
 <template>
   <BaseTile>
-    <div>
-      <div class="leading-none">
-        <span class="font-semibold text-sm">{{ productType.name }}</span>
-      </div>
-      <div class="flex flex-wrap gap-2 mt-4">
-        <Tag
-          :value="strategyLabel"
-          icon="iconify tabler--package-export"
-          severity="info"
-          class="text-xs! font-medium!"
-          v-tooltip.bottom="t('product.type.form.withdrawalStrategy')"
-        />
-        <Tag
-          :value="skuModeLabel"
-          icon="iconify tabler--hash"
-          severity="info"
-          class="text-xs! font-medium!"
-          v-tooltip.bottom="t('product.type.form.skuMode')"
-        />
-      </div>
+    <div class="flex items-center gap-2">
+      <i class="iconify tabler--category" />
+      <span class="truncate text-sm font-medium">{{ props.productType.name }}</span>
+    </div>
+    <div class="flex flex-wrap items-center gap-2 pt-4">
+      <Tag
+        :value="strategyLabel"
+        icon="iconify tabler--package-export"
+        severity="info"
+        v-tooltip.bottom="t('product.type.form.withdrawalStrategy')"
+      />
+      <Tag
+        :value="skuModeLabel"
+        icon="iconify tabler--hash"
+        severity="info"
+        v-tooltip.bottom="t('product.type.form.skuMode')"
+      />
+      <Tag
+        :value="String(characteristicCount)"
+        icon="iconify tabler--list-details"
+        severity="info"
+        v-tooltip.bottom="t('product.type.form.sections.characteristics')"
+      />
     </div>
     <Button
       v-if="checkUserPermissions('product_type:update')"
-      class="mt-5"
+      class="mt-4"
       :label="t('common.edit')"
       icon="iconify tabler--edit"
       severity="secondary"
