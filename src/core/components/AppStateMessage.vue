@@ -27,5 +27,6 @@ withDefaults(
       {{ title }}
     </p>
     <p v-if="description" class="mt-1 max-w-72 text-sm">{{ description }}</p>
+    <slot />
   </div>
 </template>

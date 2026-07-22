@@ -2,7 +2,10 @@ import { computed, ref, shallowRef, watch, watchEffect } from 'vue'
 import { defineStore, storeToRefs } from 'pinia'
 import { i18n } from '@/plugins/i18n'
 import { useNavigationStore } from '@modules/navigation/stores/navigation.store'
+import { UNASSIGNED_PRODUCT_COLLECTION_ID } from '@/modules/navigation/navigation.constants'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { useConnectivityStore } from '@/core/stores/connectivity.store'
+import { useProductItemArchiveStore } from '@/modules/product-archive/stores/product-item-archive.store'
 import {
   productBrandRepository,
   productMeasureRepository,
@@ -23,8 +26,17 @@ import type {
 export const useProductTableStore = defineStore('product-table', () => {
   const navigationStore = useNavigationStore()
   const authStore = useAuthStore()
+  const connectivityStore = useConnectivityStore()
+  const productItemArchiveStore = useProductItemArchiveStore()
   const { selectedItem: selectedNavigationItem } = storeToRefs(navigationStore)
   const { user } = storeToRefs(authStore)
+  const {
+    items: archivedItems,
+    isLoading: isArchiveLoading,
+    hasLoadError: hasArchiveLoadError,
+    isTruncated: isArchiveTruncated,
+    revision: archiveRevision,
+  } = storeToRefs(productItemArchiveStore)
 
   const gridApi = shallowRef<GridApi<LocalProductItem> | null>(null)
 
@@ -58,7 +70,7 @@ export const useProductTableStore = defineStore('product-table', () => {
   const selectedWarehouseId = ref<Warehouse['id'] | null>(null)
   const isProductTableTruncated = ref(false)
   const availableFilterPresets = computed(() =>
-    selectedWarehouseId.value === null
+    selectedWarehouseId.value === null || selectedNavigationItem.value?.type === 'product_archive'
       ? filterPresets.filter(({ key }) => key !== 'in-stock' && key !== 'out-of-stock')
       : filterPresets,
   )
@@ -114,8 +126,15 @@ export const useProductTableStore = defineStore('product-table', () => {
       return
     }
 
+    if (type === 'product_archive') {
+      rawItems.value = archivedItems.value
+      isProductTableTruncated.value = isArchiveTruncated.value
+      return
+    }
+
+    const selectedCollectionId = Number(selectedNavigationItem.value!.id)
     const productCollectionId =
-      type === 'product_collection' ? Number(selectedNavigationItem.value!.id) : null
+      selectedCollectionId === UNASSIGNED_PRODUCT_COLLECTION_ID ? null : selectedCollectionId
 
     const unsubscribe = subscribeDexieLiveQuery(
       () => productItemRepository.listByCollection(productCollectionId),
@@ -138,13 +157,32 @@ export const useProductTableStore = defineStore('product-table', () => {
     })
   })
 
+  watch(
+    [
+      () => selectedNavigationItem.value?.type,
+      () => connectivityStore.status,
+      () => user.value?.sub,
+      archiveRevision,
+    ],
+    ([type, connectivityStatus]) => {
+      if (
+        type === 'product_archive' &&
+        connectivityStatus === 'online' &&
+        authStore.isAuthenticated
+      ) {
+        void productItemArchiveStore.load()
+      } else if (type === 'product_archive') {
+        productItemArchiveStore.clear()
+      }
+    },
+    { immediate: true },
+  )
+
   watchEffect((onCleanup) => {
     const warehouseId = selectedWarehouseId.value
     const navigationType = selectedNavigationItem.value?.type
     const isProductTableOpen =
-      navigationType === 'product_collection' ||
-      navigationType === 'product_favorites' ||
-      navigationType === 'product_archive'
+      navigationType === 'product_collection' || navigationType === 'product_favorites'
 
     if (warehouseId === null || !isProductTableOpen) {
       rawStats.value = []
@@ -269,6 +307,14 @@ export const useProductTableStore = defineStore('product-table', () => {
     if (newVal?.type !== oldVal?.type || newVal?.id !== oldVal?.id) {
       setSelectedProductItemId(null, false)
 
+      if (
+        newVal?.type === 'product_archive' &&
+        (selectedFilterPresetKey.value === 'in-stock' ||
+          selectedFilterPresetKey.value === 'out-of-stock')
+      ) {
+        setSelectedFilterPresetKey('all')
+      }
+
       if (newVal) getLiveGridApi()?.ensureIndexVisible(0, 'top')
     }
   })
@@ -297,10 +343,13 @@ export const useProductTableStore = defineStore('product-table', () => {
     filterPresets,
     availableFilterPresets,
     selectedFilterPresetKey,
+    isArchiveLoading,
+    hasArchiveLoadError,
     setGridApi,
     clearGridApi,
     applySelectedProductItem,
     setSelectedProductItemId,
     setSelectedFilterPresetKey,
+    reloadArchive: productItemArchiveStore.load,
   }
 })

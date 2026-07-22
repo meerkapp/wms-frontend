@@ -9,6 +9,7 @@
       "product_type": "Product types",
       "folder": "Folders",
       "product_collection": "Product collections",
+      "product_item": "Products",
       "price_list": "Price lists"
     },
     "organization_create": "Create organizations",
@@ -40,6 +41,7 @@
     "product_collection_update": "Edit product collections",
     "product_collection_delete": "Delete product collections",
     "product_collection_pin": "Pin product collections",
+    "product_item_archive": "Archive and restore products",
     "price_list_create": "Create price lists",
     "price_list_update": "Edit price lists"
   },
@@ -533,6 +535,19 @@
         "removed": "Product removed from favorites",
         "updateError": "Could not update favorites"
       },
+      "archive": {
+        "empty": "There are no archived products yet",
+        "limitWarning": "The archive contains more than {limit} products. No more than {limit} products are shown by SKU; a barcode match may temporarily replace one row in the bounded result.",
+        "loadError": "Could not load the archive",
+        "archiveAction": "Move to archive",
+        "restoreAction": "Restore from archive",
+        "archived": "Product moved to archive",
+        "restored": "Product restored from archive",
+        "updateError": "Could not update the product state",
+        "stockConflict": "A product must have a zero balance at every warehouse before it can be archived",
+        "confirmTitle": "Move product to archive?",
+        "confirmMessage": "\"{name}\" will no longer be available offline. Its history and related data will remain on the server."
+      },
       "filter": {
         "brandPlaceholder": "Select brand",
         "options": {
@@ -665,6 +680,7 @@
     },
     "archive": "Archive",
     "favorites": "Favorites",
+    "unassignedProducts": "Products without a collection",
     "folder": {
       "label": "Folder",
       "root": "Root folder",

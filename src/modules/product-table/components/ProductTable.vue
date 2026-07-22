@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
-import { Message } from 'primevue'
+import { Button, Message, ProgressSpinner } from 'primevue'
 import { AgGridVue } from 'ag-grid-vue3'
 import {
   CellApiModule,
@@ -36,6 +36,10 @@ import { getCurrencyMinorUnits } from '@meerkapp/wms-contracts'
 import { formatMinorAmount } from '@/modules/price-list/utils/money'
 import { PRODUCT_TABLE_LIMIT } from '@/modules/product-table/product-table.constants'
 import ProductTableContextMenu from '@/modules/product-table/components/ProductTableContextMenu.vue'
+import AppStateMessage from '@/core/components/AppStateMessage.vue'
+import OnlineRequiredState from '@/core/components/OnlineRequiredState.vue'
+import { useConnectivityStore } from '@/core/stores/connectivity.store'
+import type { ConnectionUnavailableReason } from '@/core/stores/connectivity.store'
 
 const productTableStore = useProductTableStore()
 const {
@@ -51,10 +55,14 @@ const {
   selectedProductItemId,
   selectedFilterPresetKey,
   selectedWarehouseId,
+  isArchiveLoading,
+  hasArchiveLoadError,
 } = storeToRefs(productTableStore)
+const { reloadArchive } = productTableStore
 
 const navigationStore = useNavigationStore()
 const { selectedItem } = storeToRefs(navigationStore)
+const { status: connectivityStatus } = storeToRefs(useConnectivityStore())
 
 const rowContextMenu = ref<InstanceType<typeof ProductTableContextMenu>>()
 
@@ -78,15 +86,22 @@ const productTableModules: Module[] = [
 ]
 
 const isArchive = computed(() => selectedItem.value?.type === 'product_archive')
+const archiveUnavailableReason = computed<ConnectionUnavailableReason>(() =>
+  connectivityStatus.value === 'online' ? 'checking' : connectivityStatus.value,
+)
 const emptyMessage = computed(() =>
   selectedItem.value?.type === 'product_favorites'
     ? t('product.table.favorites.empty')
-    : t('product.table.empty'),
+    : isArchive.value
+      ? t('product.table.archive.empty')
+      : t('product.table.empty'),
 )
 const limitWarning = computed(() =>
   selectedItem.value?.type === 'product_favorites'
     ? t('product.table.favorites.limitWarning', { limit: PRODUCT_TABLE_LIMIT })
-    : t('product.table.limitWarning', { limit: PRODUCT_TABLE_LIMIT }),
+    : isArchive.value
+      ? t('product.table.archive.limitWarning', { limit: PRODUCT_TABLE_LIMIT })
+      : t('product.table.limitWarning', { limit: PRODUCT_TABLE_LIMIT }),
 )
 
 function toCurrencyPrice(
@@ -136,7 +151,7 @@ const columnDefs = computed<ColDef<ProductTableItem>[]>(() => [
   {
     field: 'retailPrice',
     headerName: t('product.table.columns.retailPrice'),
-    hide: selectedWarehouseId.value === null,
+    hide: isArchive.value || selectedWarehouseId.value === null,
     width: 160,
     valueFormatter: ({ value, data }) => toCurrencyPrice(value, data?.currency),
   },
@@ -209,11 +224,7 @@ function onSelectionChanged({ selectedNodes }: SelectionChangedEvent<ProductTabl
 
 function onCellContextMenu(event: CellContextMenuEvent<ProductTableItem>) {
   const productItem = event.data
-  if (
-    productItem === undefined ||
-    selectedItem.value?.type === 'product_archive' ||
-    !(event.event instanceof MouseEvent)
-  ) {
+  if (productItem === undefined || !(event.event instanceof MouseEvent)) {
     return
   }
 
@@ -239,43 +250,68 @@ function doesExternalFilterPass(node: IRowNode<ProductTableItem>): boolean {
 
 <template>
   <div class="flex flex-col w-full h-full">
-    <Message
-      v-if="isProductTableTruncated"
-      severity="warn"
-      :closable="false"
-      size="small"
-      class="m-2 shrink-0"
-    >
-      {{ limitWarning }}
-    </Message>
     <ProductTableContextMenu ref="rowContextMenu" />
-    <div class="relative flex-1 min-h-0">
-      <AgGridVue
-        :modules="productTableModules"
-        :theme="myTheme"
-        :rowData="productTableItems"
-        :columnDefs="columnDefs"
-        :rowSelection="{ mode: 'singleRow', checkboxes: false, enableClickSelection: true }"
-        :quickFilterText="props.quickFilterValue"
-        :animateRows="false"
-        :suppressRowTransform="true"
-        :alwaysShowVerticalScroll="true"
-        :suppressColumnVirtualisation="true"
-        :isExternalFilterPresent="isExternalFilterPresent"
-        :doesExternalFilterPass="doesExternalFilterPass"
-        :rowBuffer="10"
-        :valueCache="true"
-        :localeText="{ noRowsToShow: emptyMessage }"
-        :preventDefaultOnContextMenu="true"
-        :getRowId="({ data }) => String(data.id)"
-        @gridReady="setGridApi($event.api)"
-        @gridPreDestroyed="clearGridApi($event.api)"
-        @rowDataUpdated="applySelectedProductItem"
-        @selectionChanged="onSelectionChanged"
-        @cellContextMenu="onCellContextMenu"
-        class="w-full h-full"
-      />
+    <OnlineRequiredState
+      v-if="isArchive && connectivityStatus !== 'online'"
+      :title="t('navigation.archive')"
+      :reason="archiveUnavailableReason"
+      embedded
+    />
+    <div v-else-if="isArchive && isArchiveLoading" class="h-full flex items-center justify-center">
+      <ProgressSpinner class="size-10!" stroke-width="4" />
     </div>
+    <AppStateMessage
+      v-else-if="isArchive && hasArchiveLoadError"
+      icon="tabler--server-off"
+      :title="t('product.table.archive.loadError')"
+    >
+      <Button
+        :label="t('common.retry')"
+        icon="iconify tabler--refresh"
+        size="small"
+        class="mt-4"
+        rounded
+        @click="reloadArchive()"
+      />
+    </AppStateMessage>
+    <template v-else>
+      <Message
+        v-if="isProductTableTruncated"
+        severity="warn"
+        :closable="false"
+        size="small"
+        class="m-2 shrink-0"
+      >
+        {{ limitWarning }}
+      </Message>
+      <div class="relative flex-1 min-h-0">
+        <AgGridVue
+          :modules="productTableModules"
+          :theme="myTheme"
+          :rowData="productTableItems"
+          :columnDefs="columnDefs"
+          :rowSelection="{ mode: 'singleRow', checkboxes: false, enableClickSelection: true }"
+          :quickFilterText="props.quickFilterValue"
+          :animateRows="false"
+          :suppressRowTransform="true"
+          :alwaysShowVerticalScroll="true"
+          :suppressColumnVirtualisation="true"
+          :isExternalFilterPresent="isExternalFilterPresent"
+          :doesExternalFilterPass="doesExternalFilterPass"
+          :rowBuffer="10"
+          :valueCache="true"
+          :localeText="{ noRowsToShow: emptyMessage }"
+          :preventDefaultOnContextMenu="true"
+          :getRowId="({ data }) => String(data.id)"
+          class="w-full h-full"
+          @gridReady="setGridApi($event.api)"
+          @gridPreDestroyed="clearGridApi($event.api)"
+          @rowDataUpdated="applySelectedProductItem"
+          @selectionChanged="onSelectionChanged"
+          @cellContextMenu="onCellContextMenu"
+        />
+      </div>
+    </template>
   </div>
 </template>
 

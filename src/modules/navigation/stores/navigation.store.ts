@@ -7,6 +7,7 @@ import {
   useFolders,
   useProductCollections,
 } from '@/modules/sync/composables/read-model.composables'
+import { UNASSIGNED_PRODUCT_COLLECTION_ID } from '@/modules/navigation/navigation.constants'
 
 function comparePinned(
   a: { pinnedAt: string | null; pinOrder: number | null },
@@ -67,6 +68,11 @@ export const useNavigationStore = defineStore('navigation', () => {
 
   const itemsMap = computed(() => {
     const map = new Map<string, { label: string; parentGroupId: number | null }>()
+
+    map.set(`product_collection_${UNASSIGNED_PRODUCT_COLLECTION_ID}`, {
+      label: i18n.global.t('navigation.unassignedProducts'),
+      parentGroupId: null,
+    })
 
     for (const folder of rawFolders.value) {
       map.set(`folder_${folder.id}`, {

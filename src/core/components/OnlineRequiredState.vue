@@ -5,10 +5,14 @@ import BaseCard from '@/core/components/BaseCard.vue'
 import AppStateMessage from '@/core/components/AppStateMessage.vue'
 import type { ConnectionUnavailableReason } from '@/core/stores/connectivity.store'
 
-const props = defineProps<{
-  title: string
-  reason: ConnectionUnavailableReason
-}>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    reason: ConnectionUnavailableReason
+    embedded?: boolean
+  }>(),
+  { embedded: false },
+)
 
 const { t } = useI18n()
 
@@ -40,7 +44,13 @@ const presentation = computed(() => {
 </script>
 
 <template>
-  <BaseCard :title="title" class="h-full">
+  <AppStateMessage
+    v-if="embedded"
+    :icon="presentation.icon"
+    :title="presentation.title"
+    :description="presentation.hint"
+  />
+  <BaseCard v-else :title="title" class="h-full">
     <template #main>
       <AppStateMessage
         :icon="presentation.icon"

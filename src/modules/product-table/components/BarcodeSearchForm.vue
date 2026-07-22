@@ -12,6 +12,10 @@ import {
 import { useNavigationStore } from '@modules/navigation/stores/navigation.store'
 import { useProductTableStore } from '@modules/product-table/stores/product-table.store'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { productItemArchiveApi } from '@/modules/product-archive/api/product-item-archive.api'
+import { useProductItemArchiveStore } from '@/modules/product-archive/stores/product-item-archive.store'
+import { localSyncService } from '@/modules/sync/services/sync.service'
+import { UNASSIGNED_PRODUCT_COLLECTION_ID } from '@/modules/navigation/navigation.constants'
 
 const navigationStore = useNavigationStore()
 const { setSelectedItem: setSelectedNavigationItem } = navigationStore
@@ -23,6 +27,7 @@ const { quickFilterValue, selectedFilterPresetKey } = storeToRefs(productTableSt
 const { t } = useI18n()
 const toast = useToast()
 const authStore = useAuthStore()
+const productItemArchiveStore = useProductItemArchiveStore()
 
 const barcode = ref('')
 const isInvalid = ref(false)
@@ -38,24 +43,17 @@ async function findByBarcode() {
   isInvalid.value = false
 
   try {
-    const localBarcode = await productBarcodeRepository.getByCode(normalizedBarcode)
-    const productBarcode =
-      localBarcode ??
-      (authStore.isOffline
+    const accountId = authStore.user?.sub ?? null
+    const productItem = authStore.isOffline
+      ? await (async () => {
+          const productBarcode = await productBarcodeRepository.getByCode(normalizedBarcode)
+          return productBarcode
+            ? productItemRepository.get(productBarcode.productItemId)
+            : undefined
+        })()
+      : accountId === null
         ? undefined
-        : await productBarcodeRepository.fetchByCode(normalizedBarcode))
-
-    if (productBarcode === undefined) {
-      isInvalid.value = true
-      return
-    }
-
-    const localProductItem = await productItemRepository.get(productBarcode.productItemId)
-    const productItem =
-      localProductItem ??
-      (authStore.isOffline
-        ? undefined
-        : await productItemRepository.fetchById(productBarcode.productItemId))
+        : await productItemArchiveApi.findByBarcode(normalizedBarcode, accountId)
 
     if (productItem === undefined) {
       isInvalid.value = true
@@ -66,16 +64,31 @@ async function findByBarcode() {
     setSelectedProductItemId(null)
     setSelectedFilterPresetKey('all')
 
-    if (productItem.productCollectionId !== null) {
-      setSelectedNavigationItem('product_collection', productItem.productCollectionId)
-    } else {
+    if (productItem.archivedAt !== null) {
       setSelectedNavigationItem('product_archive', 0)
+      // Let the archive watcher start its regular load first. The ensured load
+      // must be the latest one so a match beyond the bounded page stays visible.
+      await nextTick()
+      const loaded = await productItemArchiveStore.load(productItem)
+      if (!loaded) throw new Error('Could not load archived products')
+    } else {
+      if (!authStore.isOffline) {
+        await localSyncService.applyServerUpsert('product_item', productItem)
+      }
+      setSelectedNavigationItem(
+        'product_collection',
+        productItem.productCollectionId ?? UNASSIGNED_PRODUCT_COLLECTION_ID,
+      )
     }
 
     await nextTick()
     setSelectedProductItemId(productItem.id)
     dialogRef?.value.close()
-  } catch {
+  } catch (error) {
+    if ((error as { status?: number }).status === 404) {
+      isInvalid.value = true
+      return
+    }
     toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
   } finally {
     isSearching.value = false
