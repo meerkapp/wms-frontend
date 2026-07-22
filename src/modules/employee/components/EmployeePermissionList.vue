@@ -4,6 +4,7 @@ import { Checkbox, Panel } from 'primevue'
 import { useI18n } from 'vue-i18n'
 import { ALL_PERMISSIONS, type Permission } from '@meerkapp/wms-contracts'
 import BaseCard from '@/core/components/BaseCard.vue'
+import AppEmptyState from '@/core/components/AppEmptyState.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -85,15 +86,11 @@ const permissionGroups = computed(() => {
       <slot name="header" />
     </template>
     <template #main>
-      <div
+      <AppEmptyState
         v-if="props.permissions.length === 0 && !props.editable"
-        class="flex flex-col h-full justify-center items-center"
-      >
-        <i class="iconify tabler--shield-question text-4xl text-muted-color"></i>
-        <span class="text-muted-color mt-3">
-          {{ props.emptyMessage ?? t('employee.permission.list.notAvailable') }}
-        </span>
-      </div>
+        icon="tabler--shield-question"
+        :message="props.emptyMessage ?? t('employee.permission.list.notAvailable')"
+      />
       <div v-else class="h-full overflow-y-auto px-3 pb-3 space-y-3">
         <Panel
           v-for="{ group, items } in permissionGroups"

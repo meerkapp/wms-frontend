@@ -3,11 +3,17 @@ import { computed } from 'vue'
 import { Button, FloatLabel, InputText, Message } from 'primevue'
 import { useForm, useFieldArray } from 'vee-validate'
 import { useI18n } from 'vue-i18n'
-import type { ProductType, CreateProductTypeDto, UpdateProductTypeDto, Characteristic } from '@meerkapp/wms-contracts'
+import type {
+  ProductType,
+  CreateProductTypeDto,
+  UpdateProductTypeDto,
+  Characteristic,
+} from '@meerkapp/wms-contracts'
 import ProductTypeCharacteristicItem from './ProductTypeCharacteristicItem.vue'
 import WithdrawalStrategySelect from './WithdrawalStrategySelect.vue'
 import SkuModeSelect from './SkuModeSelect.vue'
 import BaseCard from '@/core/components/BaseCard.vue'
+import AppEmptyState from '@/core/components/AppEmptyState.vue'
 import { useProductTypeFormSchema } from '../composables/useProductTypeFormSchema'
 import { useSkuTemplateInput } from '../composables/useSkuTemplateInput'
 import { useCharacteristicsField } from '../composables/useCharacteristicsField'
@@ -202,7 +208,7 @@ defineExpose({ submit: onSubmit })
                 <ProductTypeCharacteristicItem
                   v-for="(char, index) in characteristics"
                   :key="char.key"
-                  :modelValue="(char.value as Characteristic)"
+                  :modelValue="char.value as Characteristic"
                   @update:modelValue="updateCharacteristic(index, $event)"
                   :index="index"
                   :isFirst="index === 0"
@@ -213,15 +219,11 @@ defineExpose({ submit: onSubmit })
                   @move-down="moveCharacteristic(index, index + 1)"
                 />
 
-                <div
+                <AppEmptyState
                   v-if="characteristics.length === 0"
-                  class="flex h-full flex-col items-center justify-center text-muted-color"
-                >
-                  <i class="iconify tabler--list-details text-5xl mb-4 opacity-20"></i>
-                  <span class="text-sm font-medium opacity-50">{{
-                    t('product.type.form.characteristic.empty')
-                  }}</span>
-                </div>
+                  icon="tabler--list-details"
+                  :message="t('product.type.form.characteristic.empty')"
+                />
               </div>
             </div>
           </div>

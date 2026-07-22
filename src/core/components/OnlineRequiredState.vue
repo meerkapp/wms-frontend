@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseCard from '@/core/components/BaseCard.vue'
+import AppStateMessage from '@/core/components/AppStateMessage.vue'
 import type { ConnectionUnavailableReason } from '@/core/stores/connectivity.store'
 
 const props = defineProps<{
@@ -41,15 +42,11 @@ const presentation = computed(() => {
 <template>
   <BaseCard :title="title" class="h-full">
     <template #main>
-      <div
-        class="h-full flex flex-col items-center justify-center px-6 text-center text-muted-color"
-        role="status"
-        aria-live="polite"
-      >
-        <i class="iconify text-5xl opacity-40" :class="presentation.icon" />
-        <p class="mt-4 font-medium text-color">{{ presentation.title }}</p>
-        <p class="mt-1 max-w-72 text-sm">{{ presentation.hint }}</p>
-      </div>
+      <AppStateMessage
+        :icon="presentation.icon"
+        :title="presentation.title"
+        :description="presentation.hint"
+      />
     </template>
   </BaseCard>
 </template>
