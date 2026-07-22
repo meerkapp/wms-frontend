@@ -9,6 +9,7 @@ import BarcodeSearchForm from '@modules/product-table/components/BarcodeSearchFo
 
 const navigationStore = useNavigationStore()
 const { selectedItem: selectedNavigationItem } = storeToRefs(navigationStore)
+const value = defineModel<string>('value', { default: '' })
 
 const dialog = useAppDialog()
 const { t } = useI18n()
@@ -25,13 +26,13 @@ function openBarcodeSearchDialog() {
 </script>
 
 <template>
-  <div>
-    <InputGroup v-if="selectedNavigationItem !== null">
+  <div class="h-10 w-full">
+    <InputGroup v-if="selectedNavigationItem !== null" class="h-full">
       <InputGroupAddon>
         <Button icon="iconify tabler--filter-search text-primary" severity="secondary" />
       </InputGroupAddon>
 
-      <ProductTableSearch />
+      <ProductTableSearch v-model:value="value" />
 
       <InputGroupAddon>
         <Button
@@ -46,7 +47,8 @@ function openBarcodeSearchDialog() {
       v-else
       icon="iconify tabler--barcode"
       :label="t('product.table.barcodeSearch.title')"
-      variant="outlined"
+      severity="secondary"
+      :pt="{ root: 'h-full text-primary! border-1 border-surface!' }"
       fluid
       rounded
       @click="openBarcodeSearchDialog"

@@ -32,12 +32,19 @@ import { formatMinorAmount } from '@/modules/price-list/utils/money'
 import { PRODUCT_TABLE_LIMIT } from '@/modules/sync/repositories/product.repository'
 
 const productTableStore = useProductTableStore()
-const { setGridApi, setSelectedProductItemId, filterPresets } = productTableStore
+const {
+  applySelectedProductItem,
+  clearGridApi,
+  setGridApi,
+  setSelectedProductItemId,
+  filterPresets,
+} = productTableStore
 const {
   productTableItems,
   isProductTableTruncated,
   selectedProductItemId,
   selectedFilterPresetKey,
+  selectedWarehouseId,
 } = storeToRefs(productTableStore)
 
 const navigationStore = useNavigationStore()
@@ -105,12 +112,13 @@ const columnDefs = computed<ColDef<ProductTableItem>[]>(() => [
   {
     field: 'quantity',
     headerName: t('product.table.columns.quantity'),
-    hide: isArchive.value,
+    hide: isArchive.value || selectedWarehouseId.value === null,
     width: 110,
   },
   {
     field: 'retailPrice',
     headerName: t('product.table.columns.retailPrice'),
+    hide: selectedWarehouseId.value === null,
     width: 160,
     valueFormatter: ({ value, data }) => toCurrencyPrice(value, data?.currency),
   },
@@ -227,6 +235,8 @@ function doesExternalFilterPass(node: IRowNode<ProductTableItem>): boolean {
         :localeText="{ noRowsToShow: t('product.table.empty') }"
         :getRowId="({ data }) => String(data.id)"
         @gridReady="setGridApi($event.api)"
+        @gridPreDestroyed="clearGridApi($event.api)"
+        @rowDataUpdated="applySelectedProductItem"
         @selectionChanged="onSelectionChanged"
         class="w-full h-full"
       />

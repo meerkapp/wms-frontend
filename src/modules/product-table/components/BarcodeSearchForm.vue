@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, nextTick } from 'vue'
+import { inject, ref, nextTick, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { Message, IconField, InputIcon, InputText, Button, SelectButton } from 'primevue'
+import { Message, IconField, InputIcon, InputText, Button, Checkbox } from 'primevue'
+import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
+import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import {
   productBarcodeRepository,
@@ -13,56 +15,71 @@ import { useAuthStore } from '@/modules/auth/stores/auth.store'
 
 const navigationStore = useNavigationStore()
 const { setSelectedItem: setSelectedNavigationItem } = navigationStore
+const dialogRef = inject<Ref<DynamicDialogInstance>>('dialogRef')
 
 const productTableStore = useProductTableStore()
 const { setSelectedProductItemId, setSelectedFilterPresetKey } = productTableStore
-const { selectedFilterPresetKey } = storeToRefs(productTableStore)
+const { quickFilterValue, selectedFilterPresetKey } = storeToRefs(productTableStore)
 const { t } = useI18n()
+const toast = useToast()
 const authStore = useAuthStore()
 
 const barcode = ref('')
 const isInvalid = ref(false)
-const searchResultTypes = computed(() => [
-  { label: t('product.table.barcodeSearch.showInTable'), value: 'show-in-table' },
-  { label: t('product.table.barcodeSearch.openProductProfile'), value: 'open-product-profile' },
-])
-const selectedSearchResultType = ref('show-in-table')
+const isSearching = ref(false)
+// TODO(product-profile): honor this option once the product profile is implemented.
+const openProductProfile = ref(false)
 
-function findByBarcode() {
-  setSelectedProductItemId(null)
-  setSelectedFilterPresetKey('all')
+async function findByBarcode() {
+  const normalizedBarcode = barcode.value.trim()
+  if (normalizedBarcode === '' || isSearching.value) return
 
-  nextTick(async () => {
-    const localBarcode = await productBarcodeRepository.getByCode(barcode.value)
+  isSearching.value = true
+  isInvalid.value = false
+
+  try {
+    const localBarcode = await productBarcodeRepository.getByCode(normalizedBarcode)
     const productBarcode =
       localBarcode ??
-      (authStore.isOffline ? undefined : await productBarcodeRepository.fetchByCode(barcode.value))
+      (authStore.isOffline
+        ? undefined
+        : await productBarcodeRepository.fetchByCode(normalizedBarcode))
 
     if (productBarcode === undefined) {
       isInvalid.value = true
-    } else {
-      const localProductItem = await productItemRepository.get(productBarcode.productItemId)
-      const productItem =
-        localProductItem ??
-        (authStore.isOffline
-          ? undefined
-          : await productItemRepository.fetchById(productBarcode.productItemId))
-
-      if (productItem !== undefined) {
-        if (productItem.productCollectionId) {
-          setSelectedNavigationItem('product_collection', productItem.productCollectionId)
-        } else if (productItem.productCollectionId === null) {
-          setSelectedNavigationItem('product_archive', 0)
-        }
-
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            setSelectedProductItemId(productItem.id)
-          })
-        })
-      }
+      return
     }
-  })
+
+    const localProductItem = await productItemRepository.get(productBarcode.productItemId)
+    const productItem =
+      localProductItem ??
+      (authStore.isOffline
+        ? undefined
+        : await productItemRepository.fetchById(productBarcode.productItemId))
+
+    if (productItem === undefined) {
+      isInvalid.value = true
+      return
+    }
+
+    quickFilterValue.value = ''
+    setSelectedProductItemId(null)
+    setSelectedFilterPresetKey('all')
+
+    if (productItem.productCollectionId !== null) {
+      setSelectedNavigationItem('product_collection', productItem.productCollectionId)
+    } else {
+      setSelectedNavigationItem('product_archive', 0)
+    }
+
+    await nextTick()
+    setSelectedProductItemId(productItem.id)
+    dialogRef?.value.close()
+  } catch {
+    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+  } finally {
+    isSearching.value = false
+  }
 }
 </script>
 
@@ -87,26 +104,21 @@ function findByBarcode() {
         {{ t('product.table.barcodeSearch.notFound') }}
       </Message>
     </div>
-    <SelectButton
-      v-model="selectedSearchResultType"
-      :options="searchResultTypes"
-      optionLabel="label"
-      optionValue="value"
-      size="small"
-      fluid
-    />
-    <Message
-      v-if="selectedSearchResultType === 'show-in-table' && selectedFilterPresetKey !== 'all'"
-      size="small"
-      severity="info"
-    >
+    <div class="flex items-center gap-2">
+      <Checkbox v-model="openProductProfile" input-id="open_product_profile" binary />
+      <label for="open_product_profile" class="cursor-pointer">
+        {{ t('product.table.barcodeSearch.openProductProfile') }}
+      </label>
+    </div>
+    <Message v-if="selectedFilterPresetKey !== 'all'" size="small" severity="info">
       {{ t('product.table.barcodeSearch.resetFiltersHint') }}
     </Message>
     <Button
       type="button"
       :label="t('product.table.barcodeSearch.submit')"
       icon="pi pi-search"
-      :disabled="barcode === ''"
+      :loading="isSearching"
+      :disabled="barcode.trim() === ''"
       fluid
       rounded
       @click="findByBarcode"

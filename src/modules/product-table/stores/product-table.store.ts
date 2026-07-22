@@ -52,9 +52,15 @@ export const useProductTableStore = defineStore('product-table', () => {
   ]
   const selectedFilterPresetKey = ref<FilterPresetKey>('all')
 
+  const quickFilterValue = ref('')
   const selectedProductItemId = ref<LocalProductItem['id'] | null>(null)
   const selectedWarehouseId = ref<Warehouse['id'] | null>(null)
   const isProductTableTruncated = ref(false)
+  const availableFilterPresets = computed(() =>
+    selectedWarehouseId.value === null
+      ? filterPresets.filter(({ key }) => key !== 'in-stock' && key !== 'out-of-stock')
+      : filterPresets,
+  )
 
   const rawItems = shallowRef<LocalProductItem[]>([])
   const rawStats = shallowRef<LocalProductItemStats[]>([])
@@ -157,16 +163,24 @@ export const useProductTableStore = defineStore('product-table', () => {
     () => new Map(rawMeasures.value.map((productMeasure) => [productMeasure.id, productMeasure])),
   )
 
+  function getMeasureDisplayName(measure: ProductMeasure | undefined): string {
+    if (!measure) return '—'
+    if (measure.name) return measure.name
+    if (!measure.code) return '—'
+
+    const translationKey = `product.measure.units.${measure.code}`
+    return i18n.global.te(translationKey) ? i18n.global.t(translationKey) : measure.code
+  }
+
   const productTableItems = computed<ProductTableItem[]>(() =>
     rawItems.value.map((item) => ({
       ...item,
       productBrandName:
         (item.productBrandId === null ? null : brandMap.value.get(item.productBrandId)?.name) ?? '',
       productMeasureName:
-        (item.productMeasureId === null
-          ? null
-          : (measureMap.value.get(item.productMeasureId)?.name ??
-            measureMap.value.get(item.productMeasureId)?.code)) ?? '',
+        item.productMeasureId === null
+          ? '—'
+          : getMeasureDisplayName(measureMap.value.get(item.productMeasureId)),
       retailPrice:
         statsMap.value.get(item.id)?.retailPrice === null ||
         statsMap.value.get(item.id)?.retailPrice === undefined
@@ -177,57 +191,89 @@ export const useProductTableStore = defineStore('product-table', () => {
     })),
   )
 
-  function setGridApi(api: GridApi<LocalProductItem>) {
-    gridApi.value = api
+  let shouldScrollToSelectedProduct = false
+
+  function getLiveGridApi() {
+    const api = gridApi.value
+    if (!api) return null
+    if (!api.isDestroyed()) return api
+
+    gridApi.value = null
+    return null
   }
 
-  watch(selectedNavigationItem, (newVal, oldVal) => {
-    if (newVal?.type !== oldVal?.type || newVal?.id !== oldVal?.id) {
-      // setSelectedProductItemId(null, false)
-      selectedProductItemId.value = null
+  function applySelectedProductItem() {
+    const api = getLiveGridApi()
+    if (!api) return
 
-      if (newVal && gridApi.value) {
-        gridApi.value.ensureIndexVisible(0, 'top')
-      }
+    const selectedId = selectedProductItemId.value
+    if (selectedId === null) {
+      shouldScrollToSelectedProduct = false
+      if (api.getSelectedRows().length > 0) api.deselectAll()
+      return
     }
-  })
+
+    const node = api.getRowNode(String(selectedId))
+    if (!node) return
+
+    if (!node.isSelected()) node.setSelected(true)
+    if (shouldScrollToSelectedProduct) api.ensureNodeVisible(node, 'middle')
+    shouldScrollToSelectedProduct = false
+  }
+
+  function setGridApi(api: GridApi<LocalProductItem>) {
+    gridApi.value = api
+    applySelectedProductItem()
+  }
+
+  function clearGridApi(api: GridApi<LocalProductItem>) {
+    if (gridApi.value === api) gridApi.value = null
+  }
 
   function setSelectedProductItemId(
     id: LocalProductItem['id'] | null,
     scrollToSelectedProduct = true,
   ) {
     selectedProductItemId.value = id
-
-    if (gridApi.value) {
-      if (selectedProductItemId.value !== null) {
-        requestAnimationFrame(() => {
-          const node = gridApi.value?.getRowNode(String(selectedProductItemId.value))
-          if (node) {
-            if (!node.isSelected()) node.setSelected(true)
-            if (scrollToSelectedProduct) gridApi.value?.ensureNodeVisible(node, 'middle')
-          }
-        })
-      } else {
-        const selectedRows = gridApi.value.getSelectedRows()
-        if (selectedRows && selectedRows.length > 0) gridApi.value.deselectAll()
-      }
-    }
+    shouldScrollToSelectedProduct = id !== null && scrollToSelectedProduct
+    applySelectedProductItem()
   }
+
+  watch(selectedNavigationItem, (newVal, oldVal) => {
+    if (newVal?.type !== oldVal?.type || newVal?.id !== oldVal?.id) {
+      setSelectedProductItemId(null, false)
+
+      if (newVal) getLiveGridApi()?.ensureIndexVisible(0, 'top')
+    }
+  })
 
   function setSelectedFilterPresetKey(key: FilterPresetKey) {
     selectedFilterPresetKey.value = key
-    gridApi.value?.onFilterChanged()
+    getLiveGridApi()?.onFilterChanged()
   }
 
+  watch(selectedWarehouseId, (warehouseId) => {
+    if (
+      warehouseId === null &&
+      (selectedFilterPresetKey.value === 'in-stock' ||
+        selectedFilterPresetKey.value === 'out-of-stock')
+    ) {
+      setSelectedFilterPresetKey('all')
+    }
+  })
+
   return {
-    gridApi,
     productTableItems,
     isProductTableTruncated,
+    quickFilterValue,
     selectedProductItemId,
     selectedWarehouseId,
     filterPresets,
+    availableFilterPresets,
     selectedFilterPresetKey,
     setGridApi,
+    clearGridApi,
+    applySelectedProductItem,
     setSelectedProductItemId,
     setSelectedFilterPresetKey,
   }

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Splitter, SplitterPanel } from 'primevue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
@@ -17,10 +16,8 @@ const { isOffline, user } = storeToRefs(useAuthStore())
 const { selectedSideBarPrimaryItemKey } = storeToRefs(useSideBarPrimaryStore())
 
 const productTableStore = useProductTableStore()
-const { selectedWarehouseId } = storeToRefs(productTableStore)
+const { quickFilterValue, selectedWarehouseId } = storeToRefs(productTableStore)
 selectedWarehouseId.value = user.value?.warehouseId ?? null
-
-const productTableSearchValue = ref('')
 </script>
 
 <template>
@@ -41,7 +38,7 @@ const productTableSearchValue = ref('')
       </SplitterPanel>
       <SplitterPanel :size="80" :minSize="70" pt:root="py-1.5 pr-1.5">
         <div class="h-full flex flex-col gap-1.5">
-          <div class="flex items-center p-1 gap-1.5 justify-between">
+          <div class="h-12 shrink-0 flex items-center px-1 gap-1.5 justify-between">
             <div class="w-1/3">
               <WarehouseSelect
                 v-model:warehouseId="selectedWarehouseId"
@@ -49,14 +46,14 @@ const productTableSearchValue = ref('')
                 class="w-fit min-w-3xs"
               />
             </div>
-            <div class="flex justify-center w-1/3">
-              <WorkspaceSearch v-model:value="productTableSearchValue" />
+            <div class="h-10 flex justify-center w-1/4">
+              <WorkspaceSearch v-model:value="quickFilterValue" />
             </div>
             <div class="w-1/3"></div>
           </div>
           <WorkspaceCard class="flex-1 min-h-0">
             <template #main>
-              <ProductTable :quickFilterValue="productTableSearchValue" />
+              <ProductTable :quickFilterValue="quickFilterValue" />
             </template>
             <template #footer>
               <div class="flex items-center gap-1.5 px-1.5">

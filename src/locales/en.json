@@ -380,6 +380,22 @@
     "lastSeen": "last seen {time}"
   },
   "product": {
+    "measure": {
+      "units": {
+        "pcs": "pcs",
+        "kg": "kg",
+        "g": "g",
+        "t": "t",
+        "l": "L",
+        "ml": "mL",
+        "m": "m",
+        "cm": "cm",
+        "mm": "mm",
+        "m2": "m²",
+        "hour": "h",
+        "day": "days"
+      }
+    },
     "type": {
       "manager": {
         "title": "Product Types",
@@ -489,7 +505,6 @@
       "barcodeSearch": {
         "title": "Search by barcode",
         "input": "Barcode",
-        "showInTable": "Show in table",
         "openProductProfile": "Open product profile",
         "notFound": "No product was found with this barcode.",
         "resetFiltersHint": "All filters will be reset when searching by barcode.",
