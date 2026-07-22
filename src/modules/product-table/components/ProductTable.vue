@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { Message } from 'primevue'
@@ -22,14 +22,20 @@ import {
   themeQuartz,
   type Module,
 } from 'ag-grid-community'
-import type { ColDef, SelectionChangedEvent, IRowNode } from 'ag-grid-community'
+import type {
+  CellContextMenuEvent,
+  ColDef,
+  SelectionChangedEvent,
+  IRowNode,
+} from 'ag-grid-community'
 import { useNavigationStore } from '@modules/navigation/stores/navigation.store'
 import { useProductTableStore } from '@modules/product-table/stores/product-table.store'
 import type { ProductTableItem } from '@modules/product-table/types/product-table.type'
 import ProductBrandFilter from '@modules/product-table/components/ProductBrandFilter.vue'
 import { getCurrencyMinorUnits } from '@meerkapp/wms-contracts'
 import { formatMinorAmount } from '@/modules/price-list/utils/money'
-import { PRODUCT_TABLE_LIMIT } from '@/modules/sync/repositories/product.repository'
+import { PRODUCT_TABLE_LIMIT } from '@/modules/product-table/product-table.constants'
+import ProductTableContextMenu from '@/modules/product-table/components/ProductTableContextMenu.vue'
 
 const productTableStore = useProductTableStore()
 const {
@@ -49,6 +55,8 @@ const {
 
 const navigationStore = useNavigationStore()
 const { selectedItem } = storeToRefs(navigationStore)
+
+const rowContextMenu = ref<InstanceType<typeof ProductTableContextMenu>>()
 
 const props = defineProps<{ quickFilterValue: string }>()
 const { locale, t } = useI18n()
@@ -70,6 +78,16 @@ const productTableModules: Module[] = [
 ]
 
 const isArchive = computed(() => selectedItem.value?.type === 'product_archive')
+const emptyMessage = computed(() =>
+  selectedItem.value?.type === 'product_favorites'
+    ? t('product.table.favorites.empty')
+    : t('product.table.empty'),
+)
+const limitWarning = computed(() =>
+  selectedItem.value?.type === 'product_favorites'
+    ? t('product.table.favorites.limitWarning', { limit: PRODUCT_TABLE_LIMIT })
+    : t('product.table.limitWarning', { limit: PRODUCT_TABLE_LIMIT }),
+)
 
 function toCurrencyPrice(
   value: string | null,
@@ -189,6 +207,20 @@ function onSelectionChanged({ selectedNodes }: SelectionChangedEvent<ProductTabl
   }
 }
 
+function onCellContextMenu(event: CellContextMenuEvent<ProductTableItem>) {
+  const productItem = event.data
+  if (
+    productItem === undefined ||
+    selectedItem.value?.type === 'product_archive' ||
+    !(event.event instanceof MouseEvent)
+  ) {
+    return
+  }
+
+  setSelectedProductItemId(productItem.id, false)
+  rowContextMenu.value?.show(event.event, productItem)
+}
+
 function isExternalFilterPresent() {
   return selectedFilterPresetKey.value !== 'all'
 }
@@ -214,8 +246,9 @@ function doesExternalFilterPass(node: IRowNode<ProductTableItem>): boolean {
       size="small"
       class="m-2 shrink-0"
     >
-      {{ t('product.table.limitWarning', { limit: PRODUCT_TABLE_LIMIT }) }}
+      {{ limitWarning }}
     </Message>
+    <ProductTableContextMenu ref="rowContextMenu" />
     <div class="relative flex-1 min-h-0">
       <AgGridVue
         :modules="productTableModules"
@@ -232,12 +265,14 @@ function doesExternalFilterPass(node: IRowNode<ProductTableItem>): boolean {
         :doesExternalFilterPass="doesExternalFilterPass"
         :rowBuffer="10"
         :valueCache="true"
-        :localeText="{ noRowsToShow: t('product.table.empty') }"
+        :localeText="{ noRowsToShow: emptyMessage }"
+        :preventDefaultOnContextMenu="true"
         :getRowId="({ data }) => String(data.id)"
         @gridReady="setGridApi($event.api)"
         @gridPreDestroyed="clearGridApi($event.api)"
         @rowDataUpdated="applySelectedProductItem"
         @selectionChanged="onSelectionChanged"
+        @cellContextMenu="onCellContextMenu"
         class="w-full h-full"
       />
     </div>

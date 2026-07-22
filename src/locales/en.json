@@ -140,7 +140,8 @@
       "product_shipment": "Product shipments",
       "product_item": "Product items",
       "product_item_stats": "Product item statistics",
-      "product_barcode": "Product barcodes"
+      "product_barcode": "Product barcodes",
+      "product_item_favorites": "Favorite products"
     },
     "retry": "Retry"
   },
@@ -523,6 +524,15 @@
       },
       "empty": "No matching products in this collection",
       "limitWarning": "This collection contains more than {limit} products. The first {limit} by SKU are shown; the remaining products are not displayed in the table.",
+      "favorites": {
+        "empty": "There are no favorite products yet",
+        "limitWarning": "Favorites contain more than {limit} products. The first {limit} by SKU are shown; the remaining products are not displayed in the table.",
+        "addAction": "Add to favorites",
+        "removeAction": "Remove from favorites",
+        "added": "Product added to favorites",
+        "removed": "Product removed from favorites",
+        "updateError": "Could not update favorites"
+      },
       "filter": {
         "brandPlaceholder": "Select brand",
         "options": {

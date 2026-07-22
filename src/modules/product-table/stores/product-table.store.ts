@@ -8,6 +8,7 @@ import {
   productMeasureRepository,
 } from '@/modules/sync/repositories/read-model.repository'
 import { productItemRepository } from '@/modules/sync/repositories/product.repository'
+import { productItemFavoriteRepository } from '@/modules/sync/repositories/product-item-favorite.repository'
 import { productItemStatsRepository } from '@/modules/sync/repositories/product-item-stats.repository'
 import { subscribeDexieLiveQuery } from '@/modules/sync/composables/dexie-live-query'
 import type { LocalProductItem, LocalProductItemStats } from '@/modules/sync/types/entities.types'
@@ -84,9 +85,32 @@ export const useProductTableStore = defineStore('product-table', () => {
   watchEffect((onCleanup) => {
     const type = selectedNavigationItem.value?.type
 
-    if (type !== 'product_collection' && type !== 'product_archive') {
+    if (
+      type !== 'product_collection' &&
+      type !== 'product_favorites' &&
+      type !== 'product_archive'
+    ) {
       rawItems.value = []
       isProductTableTruncated.value = false
+      return
+    }
+
+    if (type === 'product_favorites') {
+      const accountId = user.value?.sub
+      if (accountId === undefined) {
+        rawItems.value = []
+        isProductTableTruncated.value = false
+        return
+      }
+
+      const unsubscribe = subscribeDexieLiveQuery(
+        () => productItemFavoriteRepository.listProductItems(accountId),
+        (result) => {
+          rawItems.value = result.items
+          isProductTableTruncated.value = result.truncated
+        },
+      )
+      onCleanup(unsubscribe)
       return
     }
 
@@ -118,7 +142,9 @@ export const useProductTableStore = defineStore('product-table', () => {
     const warehouseId = selectedWarehouseId.value
     const navigationType = selectedNavigationItem.value?.type
     const isProductTableOpen =
-      navigationType === 'product_collection' || navigationType === 'product_archive'
+      navigationType === 'product_collection' ||
+      navigationType === 'product_favorites' ||
+      navigationType === 'product_archive'
 
     if (warehouseId === null || !isProductTableOpen) {
       rawStats.value = []
