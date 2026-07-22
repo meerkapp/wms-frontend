@@ -6,6 +6,7 @@ import { useMutation, useQueryCache } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import BaseCard from '@/core/components/BaseCard.vue'
+import AppEmptyState from '@/core/components/AppEmptyState.vue'
 import WarehouseCard from './WarehouseCard.vue'
 import WarehouseFormDialog from './WarehouseFormDialog.vue'
 import OrganizationIcon from '@/modules/organization/components/OrganizationIcon.vue'
@@ -90,13 +91,18 @@ function openCreateDialog() {
         size="small"
         icon="iconify tabler--plus"
         severity="secondary"
-        :label="t('common.create')"
         rounded
+        v-tooltip.bottom="t('common.create')"
         @click="openCreateDialog"
       />
     </template>
     <template #main>
-      <Accordion :value="warehouseGroups.map((g) => g.organization.id.toString())" multiple>
+      <AppEmptyState
+        v-if="warehouseGroups.length === 0"
+        icon="tabler--building-warehouse"
+        :message="t('warehouse.manager.empty')"
+      />
+      <Accordion v-else :value="warehouseGroups.map((g) => g.organization.id.toString())" multiple>
         <AccordionPanel
           v-for="group in warehouseGroups"
           :key="group.organization.id"

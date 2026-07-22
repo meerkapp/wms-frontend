@@ -6,6 +6,7 @@ import { useMutation } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 
 import BaseCard from '@/core/components/BaseCard.vue'
+import AppEmptyState from '@/core/components/AppEmptyState.vue'
 import ProductTypeCard from '@/modules/product-type/components/ProductTypeCard.vue'
 
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
@@ -60,13 +61,18 @@ const title = computed(() =>
         size="small"
         icon="iconify tabler--plus"
         severity="secondary"
-        :label="t('common.create')"
         rounded
+        v-tooltip.bottom="t('common.create')"
         @click="openCreateDialog"
       />
     </template>
     <template #main>
-      <div class="px-3 @container">
+      <AppEmptyState
+        v-if="productTypes.length === 0"
+        icon="tabler--category"
+        :message="t('product.type.manager.empty')"
+      />
+      <div v-else class="px-3 @container">
         <div class="grid gap-3 grid-cols-1 @md:grid-cols-2">
           <ProductTypeCard
             v-for="productType in productTypes"

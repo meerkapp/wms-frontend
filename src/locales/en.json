@@ -146,7 +146,8 @@
   },
   "organization": {
     "manager": {
-      "title": "Organizations"
+      "title": "Organizations",
+      "empty": "No organizations yet"
     },
     "card": {
       "visitWebsite": "Visit website"
@@ -168,7 +169,8 @@
   },
   "warehouse": {
     "manager": {
-      "title": "Warehouses"
+      "title": "Warehouses",
+      "empty": "No warehouses yet"
     },
     "select": {
       "label": "Warehouse"
@@ -208,6 +210,7 @@
     "edit": "Edit",
     "save": "Save",
     "cancel": "Cancel",
+    "retry": "Retry",
     "error": {
       "network": "Network error. Please try again.",
       "forbidden": "You don't have permission to perform this action."
@@ -379,7 +382,8 @@
   "product": {
     "type": {
       "manager": {
-        "title": "Product Types"
+        "title": "Product Types",
+        "empty": "No product types yet"
       },
       "select": {
         "label": "Product Type"
@@ -560,7 +564,9 @@
   },
   "employee": {
     "manager": {
-      "title": "Employees"
+      "title": "Employees",
+      "empty": "No employees yet",
+      "loadError": "Could not load employees"
     },
     "permission": {
       "list": {
@@ -626,7 +632,8 @@
   },
   "navigation": {
     "manager": {
-      "title": "Navigation"
+      "title": "Navigation",
+      "empty": "No folders or collections yet"
     },
     "archive": "Archive",
     "favorites": "Favorites",

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, nextTick, onMounted, onUnmounted } from 'vue'
-import { Button, Skeleton } from 'primevue'
+import { Button, Message, Skeleton } from 'primevue'
 import { useAppDialog } from '@/core/composables/useAppDialog'
 import { useI18n } from 'vue-i18n'
 import BaseCard from '@/core/components/BaseCard.vue'
+import AppEmptyState from '@/core/components/AppEmptyState.vue'
 import EmployeeCard from '@/modules/employee/components/EmployeeCard.vue'
 import EmployeeFormDialog from '@/modules/employee/components/EmployeeFormDialog.vue'
 import EmployeeCreatedSuccessDialog from '@/modules/employee/components/EmployeeCreatedSuccessDialog.vue'
@@ -85,6 +86,10 @@ function openCreateDialog() {
     { type: 'extended', disableContentBackground: true },
   )
 }
+
+function retryLoad() {
+  void store.reload()
+}
 </script>
 
 <template>
@@ -96,6 +101,7 @@ function openCreateDialog() {
         icon="iconify tabler--shield-cog"
         severity="secondary"
         rounded
+        v-tooltip.bottom="t('role.manager.title')"
         @click="openRoleManager"
       />
       <Button
@@ -104,11 +110,32 @@ function openCreateDialog() {
         icon="iconify tabler--user-plus"
         severity="secondary"
         rounded
+        v-tooltip.bottom="t('employee.form.titleCreate')"
         @click="openCreateDialog"
       />
     </template>
     <template #main>
       <div
+        v-if="store.isError && store.employees.length === 0"
+        class="h-full flex flex-col items-center justify-center gap-4 px-6 text-center"
+      >
+        <Message severity="error">{{ t('employee.manager.loadError') }}</Message>
+        <Button
+          :label="t('common.retry')"
+          icon="iconify tabler--refresh"
+          severity="secondary"
+          size="small"
+          rounded
+          @click="retryLoad"
+        />
+      </div>
+      <AppEmptyState
+        v-else-if="!store.isLoading && store.employees.length === 0"
+        icon="tabler--users"
+        :message="t('employee.manager.empty')"
+      />
+      <div
+        v-else
         ref="scrollEl"
         class="h-full overflow-y-auto px-3 pb-3 space-y-3"
         @scroll.passive="onScroll"

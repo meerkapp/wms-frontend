@@ -7,6 +7,7 @@ import { useMutation, useQueryCache } from '@pinia/colada'
 import { useToast } from 'primevue/usetoast'
 
 import BaseCard from '@/core/components/BaseCard.vue'
+import AppEmptyState from '@/core/components/AppEmptyState.vue'
 import OrganizationCard from './OrganizationCard.vue'
 import OrganizationFormDialog from './OrganizationFormDialog.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
@@ -72,13 +73,18 @@ function openCreateDialog() {
         size="small"
         icon="iconify tabler--plus"
         severity="secondary"
-        :label="t('common.create')"
         rounded
+        v-tooltip.bottom="t('common.create')"
         @click="openCreateDialog"
       />
     </template>
     <template #main>
-      <div class="px-3 @container">
+      <AppEmptyState
+        v-if="organizations.length === 0"
+        icon="tabler--building-store"
+        :message="t('organization.manager.empty')"
+      />
+      <div v-else class="px-3 @container">
         <div class="grid gap-3 grid-cols-1 @md:grid-cols-2">
           <OrganizationCard v-for="org in organizations" :key="org.id" :organization="org" />
         </div>

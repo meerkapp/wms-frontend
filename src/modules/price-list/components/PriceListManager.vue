@@ -11,6 +11,7 @@ import type {
   UpdatePriceListDto,
 } from '@meerkapp/wms-contracts'
 import BaseCard from '@/core/components/BaseCard.vue'
+import AppEmptyState from '@/core/components/AppEmptyState.vue'
 import { useAppDialog } from '@/core/composables/useAppDialog'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { priceListApi } from '@/modules/price-list/api/price-list.api'
@@ -109,8 +110,8 @@ function openEditDialog(priceList: PriceListSummary) {
         size="small"
         icon="iconify tabler--plus"
         severity="secondary"
-        :label="t('common.create')"
         rounded
+        v-tooltip.bottom="t('common.create')"
         @click="openCreateDialog"
       />
     </template>
@@ -137,15 +138,11 @@ function openEditDialog(priceList: PriceListSummary) {
         />
       </div>
 
-      <div
+      <AppEmptyState
         v-else-if="priceLists.length === 0"
-        class="flex h-full flex-col items-center justify-center text-muted-color"
-      >
-        <i class="iconify tabler--file-dollar text-5xl opacity-20" />
-        <span class="mt-3 text-sm font-medium opacity-60">
-          {{ t('price.list.manager.empty') }}
-        </span>
-      </div>
+        icon="tabler--file-dollar"
+        :message="t('price.list.manager.empty')"
+      />
 
       <div v-else class="px-3 @container">
         <div class="grid grid-cols-1 gap-3 @md:grid-cols-2">

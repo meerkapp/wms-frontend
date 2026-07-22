@@ -11,7 +11,7 @@ const { clearSelectedItem } = navigationStore
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-surface-100 dark:bg-surface-900 rounded-xl overflow-hidden">
+  <div class="h-full flex flex-col bg-surface-50 dark:bg-surface-900 rounded-xl overflow-hidden">
     <template v-if="selectedItem != null">
       <div class="flex items-center h-12 shrink-0">
         <NavigationBreadcrumb />

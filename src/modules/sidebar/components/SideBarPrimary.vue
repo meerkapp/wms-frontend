@@ -48,7 +48,7 @@ const onlineRequiredReason = computed(() => {
       class="flex-1 min-h-0"
     />
     <KeepAlive v-else>
-      <component :is="selectedSideBarItem?.content" class="flex-1 overflow-auto min-h-0" />
+      <component :is="selectedSideBarItem?.content" class="flex-1 min-h-0" />
     </KeepAlive>
   </div>
 </template>
