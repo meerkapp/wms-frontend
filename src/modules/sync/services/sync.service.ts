@@ -1,7 +1,14 @@
 import { reactive, readonly } from 'vue'
+import {
+  PRODUCT_ITEM_FAVORITE_CHANGED_EVENT,
+  ProductItemFavoriteChangeSchema,
+} from '@meerkapp/wms-contracts'
+import type { ProductItemFavoriteChange } from '@meerkapp/wms-contracts'
 import { connectSocket, disconnectSocket, socket } from '@/core/api/socket'
+import { productItemFavoriteApi } from '@/modules/product-favorite/api/product-item-favorite.api'
 import { syncApi } from '../api/sync.api'
 import { db } from '../db/db'
+import { productItemFavoriteRepository } from '../repositories/product-item-favorite.repository'
 import { productItemStatsRepository } from '../repositories/product-item-stats.repository'
 import { localStateRepository } from '../repositories/local-state.repository'
 import { chunkArray, nextFrame } from '../utils/batching'
@@ -25,10 +32,12 @@ import type {
 const APPLY_CHUNK_SIZE = 1000
 const PULL_PAGE_SIZE = 1000
 const MAX_PULL_ITERATIONS = 1000
+const PRODUCT_ITEM_FAVORITES_QUEUE_ID = 'account:product-item-favorites'
 
 const initialSyncCollections = syncCollections.filter(
   (collection) => collection.initialSync !== false,
 )
+const INITIAL_SYNC_STEP_COUNT = initialSyncCollections.length + 1
 
 interface SyncAllOptions {
   reason?: SyncReason
@@ -60,13 +69,14 @@ export class LocalSyncService {
   private homeWarehouseConfiguration: Promise<void> = Promise.resolve()
   private sessionEpoch = 0
   private syncAllPromise: Promise<void> | null = null
+  private pendingSocketCatchUpReason: SyncReason | null = null
   private readonly collectionQueues = new Map<string, Promise<void>>()
   private readonly socketCollectionHandlers = new Map<string, (payload: unknown) => void>()
   private readonly runtimeState = reactive<SyncRuntimeState>({
     status: 'idle',
     reason: null,
     current: 0,
-    total: initialSyncCollections.length,
+    total: INITIAL_SYNC_STEP_COUNT,
     currentTable: null,
     error: null,
   })
@@ -77,7 +87,11 @@ export class LocalSyncService {
     if (!this.started) return
     const reason: SyncReason = this.hasConnected ? 'reconnect' : 'connect'
     this.hasConnected = true
-    void this.syncAll({ reason }).catch((error) => this.logError(`[sync:${reason}]`, error))
+    if (this.syncAllPromise) {
+      this.pendingSocketCatchUpReason = reason
+      return
+    }
+    this.runSocketCatchUp(reason)
   }
 
   private readonly onSocketConnectError = (error: Error) => {
@@ -87,6 +101,12 @@ export class LocalSyncService {
       this.runtimeState.status = 'error'
       this.runtimeState.error = `WebSocket: ${error.message}`
     }
+  }
+
+  private readonly onProductItemFavoriteChanged = (payload: unknown) => {
+    void this.handleProductItemFavoriteChange(payload).catch((error) =>
+      this.logError('[product-item-favorites:socket]', error),
+    )
   }
 
   start(token: string, context: SyncSessionContext) {
@@ -104,11 +124,12 @@ export class LocalSyncService {
       this.started = true
       this.sessionEpoch += 1
       this.hasConnected = false
+      this.pendingSocketCatchUpReason = null
       Object.assign(this.runtimeState, {
         status: 'idle',
         reason: null,
         current: 0,
-        total: initialSyncCollections.length,
+        total: INITIAL_SYNC_STEP_COUNT,
         currentTable: null,
         error: null,
       } satisfies SyncRuntimeState)
@@ -141,6 +162,7 @@ export class LocalSyncService {
     const accountId = this.accountId
     if (!this.started && !this.socketHandlersRegistered) {
       productItemStatsRepository.deactivateAccount(accountId ?? undefined)
+      this.pendingSocketCatchUpReason = null
       this.accountId = null
       this.homeWarehouseId = null
       this.homeWarehouseConfiguration = Promise.resolve()
@@ -151,6 +173,7 @@ export class LocalSyncService {
     this.started = false
     this.sessionEpoch += 1
     this.hasConnected = false
+    this.pendingSocketCatchUpReason = null
     this.accountId = null
     this.homeWarehouseId = null
     this.homeWarehouseConfiguration = Promise.resolve()
@@ -164,7 +187,7 @@ export class LocalSyncService {
       status: 'idle',
       reason: null,
       current: 0,
-      total: initialSyncCollections.length,
+      total: INITIAL_SYNC_STEP_COUNT,
       currentTable: null,
       error: null,
     } satisfies SyncRuntimeState)
@@ -172,7 +195,10 @@ export class LocalSyncService {
 
   async removeAccount(accountId: string) {
     if (this.accountId === accountId) this.stop()
-    return productItemStatsRepository.removeAccountScopes(accountId)
+    await Promise.all([
+      productItemStatsRepository.removeAccountScopes(accountId),
+      productItemFavoriteRepository.removeAccount(accountId),
+    ])
   }
 
   initialSync(onProgress?: (progress: SyncProgress) => void) {
@@ -185,7 +211,12 @@ export class LocalSyncService {
 
     const epoch = this.sessionEpoch
     const promise = this.runSyncAll(epoch, options).finally(() => {
-      if (this.syncAllPromise === promise) this.syncAllPromise = null
+      if (this.syncAllPromise !== promise) return
+
+      this.syncAllPromise = null
+      const reason = this.pendingSocketCatchUpReason
+      this.pendingSocketCatchUpReason = null
+      if (reason !== null && this.started) this.runSocketCatchUp(reason)
     })
     this.syncAllPromise = promise
     return promise
@@ -227,6 +258,19 @@ export class LocalSyncService {
       if (error instanceof SyncSessionStoppedError) return
       throw error
     }
+  }
+
+  applyProductItemFavoriteChange(accountId: string, change: ProductItemFavoriteChange) {
+    if (!this.started || this.accountId !== accountId) {
+      return Promise.reject(new SyncSessionStoppedError())
+    }
+
+    const epoch = this.sessionEpoch
+    return this.enqueueCollection(PRODUCT_ITEM_FAVORITES_QUEUE_ID, () =>
+      productItemFavoriteRepository.applyServerChange(accountId, change, () =>
+        this.assertActiveSession(epoch),
+      ),
+    )
   }
 
   async handleSocketEvent(tableName: string, payload: unknown): Promise<void> {
@@ -294,11 +338,12 @@ export class LocalSyncService {
   private async runSyncAll(epoch: number, options: SyncAllOptions) {
     const reason = options.reason ?? 'manual'
     const collections = initialSyncCollections
+    const totalSteps = collections.length + 1
     Object.assign(this.runtimeState, {
       status: 'syncing',
       reason,
       current: 0,
-      total: collections.length,
+      total: totalSteps,
       currentTable: null,
       error: null,
     } satisfies SyncRuntimeState)
@@ -320,10 +365,14 @@ export class LocalSyncService {
       }
 
       this.assertActiveSession(epoch)
+      this.runtimeState.current = totalSteps
+      this.runtimeState.currentTable = 'product_item_favorites'
+      await this.syncProductItemFavorites(epoch)
+      this.assertActiveSession(epoch)
       await localStateRepository.markInitialSyncCompleted()
       this.assertActiveSession(epoch)
       this.runtimeState.status = 'done'
-      this.runtimeState.current = collections.length
+      this.runtimeState.current = totalSteps
       this.runtimeState.currentTable = null
       this.scheduleProductItemStatsMaintenance(epoch)
     } catch (error) {
@@ -462,6 +511,7 @@ export class LocalSyncService {
 
     socket.on('connect', this.onSocketConnect)
     socket.on('connect_error', this.onSocketConnectError)
+    socket.on(PRODUCT_ITEM_FAVORITE_CHANGED_EVENT, this.onProductItemFavoriteChanged)
 
     for (const collection of syncCollections) {
       if (collection.socketSync === false) continue
@@ -486,6 +536,7 @@ export class LocalSyncService {
 
     socket.off('connect', this.onSocketConnect)
     socket.off('connect_error', this.onSocketConnectError)
+    socket.off(PRODUCT_ITEM_FAVORITE_CHANGED_EVENT, this.onProductItemFavoriteChanged)
     for (const [tableName, handler] of this.socketCollectionHandlers) {
       socket.off(`sync:${tableName}`, handler)
     }
@@ -510,6 +561,34 @@ export class LocalSyncService {
 
   private logError(prefix: string, error: unknown) {
     if (!(error instanceof SyncSessionStoppedError)) console.error(prefix, error)
+  }
+
+  private runSocketCatchUp(reason: SyncReason) {
+    void this.syncAll({ reason }).catch((error) => this.logError(`[sync:${reason}]`, error))
+  }
+
+  private async syncProductItemFavorites(epoch: number) {
+    await this.enqueueCollection(PRODUCT_ITEM_FAVORITES_QUEUE_ID, async () => {
+      this.assertActiveSession(epoch)
+      const accountId = this.accountId
+      if (accountId === null) throw new SyncSessionStoppedError()
+
+      const favorites = await productItemFavoriteApi.listAll(accountId)
+      this.assertActiveSession(epoch)
+      await productItemFavoriteRepository.replaceAccountSnapshot(accountId, favorites, () =>
+        this.assertActiveSession(epoch),
+      )
+    })
+  }
+
+  private async handleProductItemFavoriteChange(payload: unknown) {
+    if (!this.started) return
+    const parsed = ProductItemFavoriteChangeSchema.safeParse(payload)
+    if (!parsed.success) return
+    const accountId = this.accountId
+    if (accountId === null) return
+
+    await this.applyProductItemFavoriteChange(accountId, parsed.data)
   }
 
   private scheduleProductItemStatsMaintenance(epoch: number) {

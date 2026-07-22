@@ -7,6 +7,7 @@ import type {
   ProductBrand,
   ProductCollection,
   ProductItem,
+  ProductItemFavorite,
   ProductItemStats,
   ProductMeasure,
   ProductPackage,
@@ -42,6 +43,10 @@ export interface ProductItemStatsCacheScope {
   loadedAt: number
   accessedAt: number
   expiresAt: number | null
+}
+
+export interface LocalProductItemFavorite extends ProductItemFavorite {
+  accountId: string
 }
 
 export type LocalEntity =

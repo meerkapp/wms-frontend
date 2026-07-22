@@ -14,6 +14,7 @@ import type {
 } from '@meerkapp/wms-contracts'
 import type {
   LocalProductItem,
+  LocalProductItemFavorite,
   LocalProductItemStats,
   LocalProductPackage,
   ProductItemStatsCacheScope,
@@ -70,6 +71,9 @@ export const WMS_LOCAL_DB_SCHEMAS = {
   7: {
     pendingAccountRemovals: 'accountId, createdAt',
   },
+  8: {
+    productItemFavorites: '[accountId+productItemId], accountId, productItemId, createdAt',
+  },
 } as const
 
 export class WmsLocalDb extends Dexie {
@@ -87,6 +91,7 @@ export class WmsLocalDb extends Dexie {
   productItems!: EntityTable<LocalProductItem, 'id'>
   productItemStats!: EntityTable<LocalProductItemStats, 'id'>
   productItemStatsCache!: Table<ProductItemStatsCacheScope, [string, number]>
+  productItemFavorites!: Table<LocalProductItemFavorite, [string, number]>
   productBarcodes!: EntityTable<ProductBarcode, 'id'>
   syncState!: EntityTable<SyncState, 'id'>
   accountProfiles!: EntityTable<LocalAccountProfile, 'accountId'>
@@ -115,6 +120,8 @@ export class WmsLocalDb extends Dexie {
     this.version(6).stores(WMS_LOCAL_DB_SCHEMAS[6])
 
     this.version(7).stores(WMS_LOCAL_DB_SCHEMAS[7])
+
+    this.version(8).stores(WMS_LOCAL_DB_SCHEMAS[8])
   }
 }
 

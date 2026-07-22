@@ -11,7 +11,7 @@ function databaseName(label: string) {
   return name
 }
 
-function createLegacyDatabase(name: string, version: 1 | 2 | 4 | 5 | 6) {
+function createLegacyDatabase(name: string, version: 1 | 2 | 4 | 5 | 6 | 7) {
   const legacy = new Dexie(name)
   legacy.version(1).stores(WMS_LOCAL_DB_SCHEMAS[1])
   if (version >= 2) legacy.version(2).stores(WMS_LOCAL_DB_SCHEMAS[2])
@@ -21,6 +21,7 @@ function createLegacyDatabase(name: string, version: 1 | 2 | 4 | 5 | 6) {
   }
   if (version >= 5) legacy.version(5).stores(WMS_LOCAL_DB_SCHEMAS[5])
   if (version >= 6) legacy.version(6).stores(WMS_LOCAL_DB_SCHEMAS[6])
+  if (version >= 7) legacy.version(7).stores(WMS_LOCAL_DB_SCHEMAS[7])
   return legacy
 }
 
@@ -35,12 +36,13 @@ describe('WmsLocalDb migrations', () => {
 
     await current.open()
 
-    expect(current.verno).toBe(7)
+    expect(current.verno).toBe(8)
     expect(current.tables.map((table) => table.name)).toEqual(
       expect.arrayContaining([
         'productItems',
         'productItemStats',
         'productItemStatsCache',
+        'productItemFavorites',
         'syncState',
         'accountProfiles',
         'accountAvatarCache',
@@ -53,6 +55,41 @@ describe('WmsLocalDb migrations', () => {
       'accountId',
       'warehouseId',
     ])
+    expect(current.productItemFavorites.schema.primKey.keyPath).toEqual([
+      'accountId',
+      'productItemId',
+    ])
+    current.close()
+  })
+
+  it('adds account-scoped product favorites when upgrading version 7', async () => {
+    const name = databaseName('v7')
+    const legacy = createLegacyDatabase(name, 7)
+    await legacy.open()
+    await legacy.table('productItems').put({
+      id: 41,
+      sku: 'SKU-41',
+      name: 'Shared product',
+      productCollectionId: null,
+      productTypeId: 1,
+      productBrandId: null,
+      productMeasureId: 1,
+      isPublic: true,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    })
+    legacy.close()
+
+    const current = new WmsLocalDb(name)
+    await current.open()
+
+    expect(await current.productItems.get(41)).toMatchObject({ sku: 'SKU-41' })
+    expect(await current.productItemFavorites.count()).toBe(0)
+    await current.productItemFavorites.put({
+      accountId: 'account-a',
+      productItemId: 41,
+      createdAt: '2026-07-22T00:00:00.000Z',
+    })
+    expect(await current.productItemFavorites.get(['account-a', 41])).toBeDefined()
     current.close()
   })
 
