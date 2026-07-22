@@ -50,6 +50,7 @@
   "devDependencies": {
     "@iconify-json/tabler": "^1.2.31",
     "@iconify/tailwind4": "^1.2.3",
+    "@intlify/eslint-plugin-vue-i18n": "~4.5.1",
     "@tailwindcss/vite": "^4.2.1",
     "@tsconfig/node24": "^24.0.4",
     "@types/node": "^24.11.0",
