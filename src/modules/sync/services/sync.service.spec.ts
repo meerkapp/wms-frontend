@@ -338,4 +338,67 @@ describe('LocalSyncService account lifecycle', () => {
     expect(await db.syncState.get('productItemStats')).toBeUndefined()
     service.stop()
   })
+
+  it('removes the complete local product graph when an archive tombstone arrives', async () => {
+    await db.productItems.put({
+      id: 1,
+      sku: 'SKU-1',
+      name: 'Archived product',
+      productCollectionId: 1,
+      productTypeId: 1,
+      productBrandId: null,
+      productMeasureId: 1,
+      countryId: null,
+      characteristics: {},
+      writeoffStrategy: null,
+      isPublic: true,
+      archivedAt: null,
+      archivedByEmployeeId: null,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    })
+    await db.productBarcodes.put({
+      id: 1,
+      code: 'BARCODE-1',
+      type: 'FACTORY',
+      productItemId: 1,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    })
+    await db.productPackages.put({
+      id: 1,
+      name: null,
+      isBase: true,
+      productItemId: 1,
+      conversionFactor: '1',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    })
+    await db.productShipments.put({
+      id: 1,
+      warehouseId: 1,
+      productItemId: 1,
+      arrivalDate: '2026-01-01',
+      expiryDate: null,
+      quantity: 0,
+      priceAmount: 0n,
+      currency: 'RUB',
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    })
+    await db.productItemStats.put(stat(1, 1))
+    await db.productItemFavorites.put({
+      accountId: 'account-a',
+      productItemId: 1,
+      createdAt: '2026-01-01T00:00:00.000Z',
+    })
+
+    const service = new LocalSyncService()
+    service.start('token-a', { accountId: 'account-a', homeWarehouseId: 1 })
+    await service.handleSocketEvent('product_item', { deletedIds: [1] })
+
+    expect(await db.productItems.count()).toBe(0)
+    expect(await db.productBarcodes.count()).toBe(0)
+    expect(await db.productPackages.count()).toBe(0)
+    expect(await db.productShipments.count()).toBe(0)
+    expect(await db.productItemStats.count()).toBe(0)
+    expect(await db.productItemFavorites.get(['account-a', 1])).toBeDefined()
+    service.stop()
+  })
 })

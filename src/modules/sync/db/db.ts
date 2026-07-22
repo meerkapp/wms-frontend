@@ -122,6 +122,16 @@ export class WmsLocalDb extends Dexie {
     this.version(7).stores(WMS_LOCAL_DB_SCHEMAS[7])
 
     this.version(8).stores(WMS_LOCAL_DB_SCHEMAS[8])
+
+    this.version(9).upgrade((transaction) =>
+      transaction
+        .table<LocalProductItem>('productItems')
+        .toCollection()
+        .modify((productItem) => {
+          productItem.archivedAt = null
+          productItem.archivedByEmployeeId = null
+        }),
+    )
   }
 }
 

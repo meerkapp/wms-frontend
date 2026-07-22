@@ -9,6 +9,10 @@ import { productItemFavoriteApi } from '@/modules/product-favorite/api/product-i
 import { syncApi } from '../api/sync.api'
 import { db } from '../db/db'
 import { productItemFavoriteRepository } from '../repositories/product-item-favorite.repository'
+import {
+  getProductReadModelTables,
+  removeProductItemsFromCurrentTransaction,
+} from '../repositories/product-read-model.repository'
 import { productItemStatsRepository } from '../repositories/product-item-stats.repository'
 import { localStateRepository } from '../repositories/local-state.repository'
 import { chunkArray, nextFrame } from '../utils/batching'
@@ -260,6 +264,27 @@ export class LocalSyncService {
     }
   }
 
+  async applyServerDelete(tableName: string, id: LocalEntity['id']): Promise<void> {
+    const collection = getSyncCollectionByTableName(tableName)
+    if (!collection) throw new Error(`Unknown sync table: ${tableName}`)
+    if (!this.started) return
+
+    const epoch = this.sessionEpoch
+    try {
+      await this.enqueueCollection(collection.id, async () => {
+        await this.applyBatch(
+          collection,
+          { upserted: [], deletedIds: [id], cursor: null, hasMore: false },
+          epoch,
+          false,
+        )
+      })
+    } catch (error) {
+      if (error instanceof SyncSessionStoppedError) return
+      throw error
+    }
+  }
+
   applyProductItemFavoriteChange(accountId: string, change: ProductItemFavoriteChange) {
     if (!this.started || this.accountId !== accountId) {
       return Promise.reject(new SyncSessionStoppedError())
@@ -456,7 +481,12 @@ export class LocalSyncService {
     persistState = true,
   ) {
     this.assertActiveSession(epoch)
-    await db.transaction('rw', collection.table, db.syncState, async () => {
+    const transactionTables =
+      collection.tableName === 'product_item'
+        ? [...getProductReadModelTables(), db.syncState]
+        : [collection.table, db.syncState]
+
+    await db.transaction('rw', transactionTables, async () => {
       this.assertActiveSession(epoch)
 
       for (const chunk of chunkArray(batch.upserted, APPLY_CHUNK_SIZE)) {
@@ -473,9 +503,15 @@ export class LocalSyncService {
 
       for (const chunk of chunkArray(batch.deletedIds, APPLY_CHUNK_SIZE)) {
         this.assertActiveSession(epoch)
-        await collection.table.bulkDelete(
-          chunk as Parameters<typeof collection.table.bulkDelete>[0],
-        )
+        if (collection.tableName === 'product_item') {
+          await removeProductItemsFromCurrentTransaction(
+            chunk.filter((id): id is number => typeof id === 'number'),
+          )
+        } else {
+          await collection.table.bulkDelete(
+            chunk as Parameters<typeof collection.table.bulkDelete>[0],
+          )
+        }
       }
 
       if (!persistState) return

@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@meerkapp/wms-contracts':
-        specifier: 0.3.0-beta.18
-        version: 0.3.0-beta.18
+        specifier: 0.3.0-beta.19
+        version: 0.3.0-beta.19
       '@pinia/colada':
         specifier: ^1.0.0
         version: 1.0.0(pinia@3.0.4(typescript@5.9.3)(vue@3.5.29(typescript@5.9.3)))(vue@3.5.29(typescript@5.9.3))
@@ -967,8 +967,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@meerkapp/wms-contracts@0.3.0-beta.18':
-    resolution: {integrity: sha512-Co7UjiL4hBIznCQ5wEXCke4LYSyXhG8raT6/6zlhEv1aMPX58D/StKL+S/qD/u6TkIziWbC/oc/KQ+RKnuGqBw==}
+  '@meerkapp/wms-contracts@0.3.0-beta.19':
+    resolution: {integrity: sha512-7dDxeiIxs5ls1W6N8xe6pq/nsjCdlXk3h/AH8hKPJ8VLyMQ9ZgcBtAGwg8vsEYZpFVVjuNh4+ylOMjcFAxgfzg==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -4755,7 +4755,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@meerkapp/wms-contracts@0.3.0-beta.18':
+  '@meerkapp/wms-contracts@0.3.0-beta.19':
     dependencies:
       zod: 3.25.76
 

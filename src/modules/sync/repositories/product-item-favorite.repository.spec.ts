@@ -18,6 +18,8 @@ function product(id: number, sku: string): LocalProductItem {
     characteristics: {},
     writeoffStrategy: null,
     isPublic: true,
+    archivedAt: null,
+    archivedByEmployeeId: null,
     updatedAt: '2026-07-22T00:00:00.000Z',
     productBrand: null,
     productMeasure: null,
