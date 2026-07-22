@@ -164,9 +164,9 @@ export const useProductTableStore = defineStore('product-table', () => {
   )
 
   function getMeasureDisplayName(measure: ProductMeasure | undefined): string {
-    if (!measure) return '—'
+    if (!measure) return ''
     if (measure.name) return measure.name
-    if (!measure.code) return '—'
+    if (!measure.code) return ''
 
     const translationKey = `product.measure.units.${measure.code}`
     return i18n.global.te(translationKey) ? i18n.global.t(translationKey) : measure.code
@@ -179,7 +179,7 @@ export const useProductTableStore = defineStore('product-table', () => {
         (item.productBrandId === null ? null : brandMap.value.get(item.productBrandId)?.name) ?? '',
       productMeasureName:
         item.productMeasureId === null
-          ? '—'
+          ? ''
           : getMeasureDisplayName(measureMap.value.get(item.productMeasureId)),
       retailPrice:
         statsMap.value.get(item.id)?.retailPrice === null ||

@@ -119,7 +119,7 @@ describe('WmsLocalDb migrations', () => {
       productCollectionId: null,
       productTypeId: 1,
       productBrandId: null,
-      productMeasureId: null,
+      productMeasureId: 1,
       isPublic: true,
       updatedAt: '2026-01-01T00:00:00.000Z',
     })
