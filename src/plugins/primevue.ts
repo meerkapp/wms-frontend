@@ -2,7 +2,6 @@ import PrimeVue from 'primevue/config'
 import { definePreset } from '@primeuix/themes'
 import Aura from '@primeuix/themes/aura'
 
-
 const Noir = definePreset(Aura, {
   semantic: {
     primary: {
