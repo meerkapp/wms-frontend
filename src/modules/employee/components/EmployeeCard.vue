@@ -11,6 +11,7 @@ import EmployeePresenceLabel from '@/modules/employee/components/EmployeePresenc
 import EmployeeFormDialog from '@/modules/employee/components/EmployeeFormDialog.vue'
 import EmployeeFormDialogFooter from '@/modules/employee/components/EmployeeFormDialogFooter.vue'
 import EmployeeProfileDialog from '@/modules/employee/components/EmployeeProfileDialog.vue'
+import { SUPERADMIN_ROLE_NAME } from '@/modules/employee/role.constants'
 import type { Employee } from '@meerkapp/wms-contracts'
 
 const props = defineProps<{ employee: Employee; tick?: number }>()
@@ -22,7 +23,9 @@ const { checkUserPermissions } = authStore
 
 const isOwnCard = computed(() => props.employee.id === authStore.user?.sub)
 const isProtectedCard = computed(() =>
-  props.employee.roleAssignments.some(({ employeeRole }) => employeeRole.name === 'superadmin'),
+  props.employee.roleAssignments.some(
+    ({ employeeRole }) => employeeRole.name === SUPERADMIN_ROLE_NAME,
+  ),
 )
 
 const canEdit = computed(() => {

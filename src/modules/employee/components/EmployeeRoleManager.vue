@@ -10,8 +10,7 @@ import { roleApi } from '@/modules/employee/api/role.api'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import EmployeePermissionList from './EmployeePermissionList.vue'
 import EmployeeRoleFormDialog from './EmployeeRoleFormDialog.vue'
-
-const SUPERADMIN_ROLE = 'superadmin'
+import { SUPERADMIN_ROLE_NAME } from '@/modules/employee/role.constants'
 
 const { t } = useI18n()
 const dialog = useAppDialog()
@@ -40,6 +39,10 @@ const selectedRolePermissions = computed<Permission[]>(() => {
 function selectRole(role: Role) {
   if (isEditing.value) return
   selectedRole.value = role
+}
+
+function roleDisplayName(role: Role): string {
+  return role.name === SUPERADMIN_ROLE_NAME ? t('role.names.superadmin') : role.name
 }
 
 function startEdit() {
@@ -127,11 +130,13 @@ function openCreateDialog() {
             :style="{ color: role.color }"
           />
           <span class="text-sm truncate font-medium flex-1" :style="{ color: role.color }">{{
-            role.name
+            roleDisplayName(role)
           }}</span>
           <i
             v-if="
-              checkUserPermissions('role:update') && role.name !== SUPERADMIN_ROLE && !isEditing
+              checkUserPermissions('role:update') &&
+              role.name !== SUPERADMIN_ROLE_NAME &&
+              !isEditing
             "
             class="iconify tabler--pencil opacity-0 group-hover:opacity-100 transition-opacity text-muted-color text-sm"
             @click.stop="openEditRoleDialog(role)"
@@ -170,7 +175,7 @@ function openCreateDialog() {
         <Button
           v-else
           :label="t('common.edit')"
-          :disabled="!selectedRole || selectedRole.name === SUPERADMIN_ROLE"
+          :disabled="!selectedRole || selectedRole.name === SUPERADMIN_ROLE_NAME"
           severity="secondary"
           icon="iconify tabler--edit"
           size="small"

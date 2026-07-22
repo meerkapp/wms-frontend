@@ -217,6 +217,9 @@
     }
   },
   "role": {
+    "names": {
+      "superadmin": "Super admin"
+    },
     "manager": {
       "title": "Roles",
       "createRole": "Create role"

@@ -133,9 +133,8 @@ const userMenuItems = computed<MenuItem[]>(() => [
   },
 ])
 
-function toggleUserMenu() {
-  if (menuAnchor.value)
-    userMenu.value?.toggle({ currentTarget: menuAnchor.value } as unknown as Event)
+function toggleUserMenu(event: Event) {
+  if (menuAnchor.value) userMenu.value?.toggle(event, menuAnchor.value)
 }
 </script>
 
@@ -149,14 +148,15 @@ function toggleUserMenu() {
       pt: { text: '!text-nowrap' },
     }"
   >
-    <span ref="menuAnchor" class="absolute bottom-0 right-0 w-0 h-0" />
-    <EmployeeAvatar
-      :first-name="user.firstName"
-      :image="accountAvatarUrl"
-      size="large"
-      shape="square"
-      class="m-auto cursor-pointer rounded-xl! overflow-hidden [&_img]:transition-transform [&_img]:duration-200 [&_img]:group-hover:scale-125"
-    />
+    <span ref="menuAnchor" class="absolute bottom-0 right-0 w-0 h-0">
+      <EmployeeAvatar
+        :first-name="user.firstName"
+        :image="accountAvatarUrl"
+        size="large"
+        shape="square"
+        class="absolute bottom-1 right-1 cursor-pointer rounded-xl! overflow-hidden [&_img]:transition-transform [&_img]:duration-200 [&_img]:group-hover:scale-125"
+      />
+    </span>
   </div>
   <Menu ref="userMenu" :model="userMenuItems" popup />
 </template>

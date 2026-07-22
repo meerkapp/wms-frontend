@@ -217,6 +217,9 @@
     }
   },
   "role": {
+    "names": {
+      "superadmin": "Суперадмин"
+    },
     "manager": {
       "title": "Роли",
       "createRole": "Создать роль"

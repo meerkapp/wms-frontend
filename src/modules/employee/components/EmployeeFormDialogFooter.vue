@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n'
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
 import type { Employee } from '@meerkapp/wms-contracts'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { SUPERADMIN_ROLE_NAME } from '@/modules/employee/role.constants'
 import EmployeeAvatarMenuButton from './EmployeeAvatarMenuButton.vue'
 import EmployeeChangePasswordDialog from './EmployeeChangePasswordDialog.vue'
 
@@ -20,7 +21,9 @@ const employee = computed<Employee | undefined>(() => dialogRef?.value.data?.emp
 
 const isOwnProfile = computed(() => employee.value?.id === authStore.user?.sub)
 const isProtectedProfile = computed(() =>
-  employee.value?.roleAssignments.some(({ employeeRole }) => employeeRole.name === 'superadmin'),
+  employee.value?.roleAssignments.some(
+    ({ employeeRole }) => employeeRole.name === SUPERADMIN_ROLE_NAME,
+  ),
 )
 
 const canEditAvatar = computed(
