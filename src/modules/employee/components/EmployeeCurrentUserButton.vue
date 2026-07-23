@@ -4,7 +4,7 @@ import { Menu } from 'primevue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import type { MenuItem } from 'primevue/menuitem'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useAccountAvatarStore } from '@/modules/auth/stores/account-avatar.store'
@@ -18,7 +18,7 @@ import EmployeeFormDialogFooter from './EmployeeFormDialogFooter.vue'
 const router = useRouter()
 const { t } = useI18n()
 const dialog = useAppDialog()
-const toast = useToast()
+const toast = useAppToast()
 
 const authStore = useAuthStore()
 const accountAvatarStore = useAccountAvatarStore()
@@ -56,7 +56,7 @@ async function openProfileDialog() {
       { type: 'extended', disableContentBackground: true },
     )
   } catch {
-    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+    toast.error(t('common.error.network'))
   }
 }
 
@@ -80,7 +80,7 @@ async function openEditDialog() {
       { type: 'extended', disableContentBackground: true },
     )
   } catch {
-    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+    toast.error(t('common.error.network'))
   }
 }
 

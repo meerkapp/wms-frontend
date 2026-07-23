@@ -4,7 +4,7 @@ import { Button } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useI18n } from 'vue-i18n'
 import { useMutation, useQueryCache } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 
 import BaseCard from '@/core/components/BaseCard.vue'
 import AppEmptyState from '@/core/components/AppEmptyState.vue'
@@ -20,7 +20,7 @@ type OrganizationCreateFormResult = CreateOrganizationDto & { priceListId?: numb
 
 const { t } = useI18n()
 const dialog = useDialog()
-const toast = useToast()
+const toast = useAppToast()
 const authStore = useAuthStore()
 const queryCache = useQueryCache()
 const { checkUserPermissions } = authStore
@@ -39,7 +39,7 @@ const { mutate: create } = useMutation({
     }
     return organization
   },
-  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+  onError: () => toast.error(t('common.error.network')),
 })
 
 const organizations = useOrganizations()

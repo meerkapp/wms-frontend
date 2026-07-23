@@ -3,9 +3,9 @@ import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { ContextMenu } from 'primevue'
 import type { MenuItem } from 'primevue/menuitem'
-import { useToast } from 'primevue/usetoast'
-import { useConfirm } from 'primevue/useconfirm'
 import { useI18n } from 'vue-i18n'
+import { useAppConfirm } from '@/core/composables/useAppConfirm'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { StaleAccountRequestError } from '@/core/api/stale-account-request.error'
 import { useConnectivityStore } from '@/core/stores/connectivity.store'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
@@ -16,8 +16,8 @@ import { useProductTableStore } from '@/modules/product-table/stores/product-tab
 import type { ProductTableItem } from '@/modules/product-table/types/product-table.type'
 
 const { t } = useI18n()
-const toast = useToast()
-const confirm = useConfirm()
+const toast = useAppToast()
+const confirm = useAppConfirm()
 const authStore = useAuthStore()
 const { isAuthenticated, user } = storeToRefs(authStore)
 const { status: connectivityStatus } = storeToRefs(useConnectivityStore())
@@ -35,10 +35,7 @@ const canManageArchive = computed(
   () => canUpdateFavorites.value && authStore.checkUserPermissions('product_item:archive'),
 )
 
-watch(
-  [() => user.value?.sub, connectivityStatus],
-  () => contextMenu.value?.hide(),
-)
+watch([() => user.value?.sub, connectivityStatus], () => contextMenu.value?.hide())
 
 async function updateFavorite(productItemId: ProductTableItem['id'], favorite: boolean) {
   try {
@@ -47,18 +44,12 @@ async function updateFavorite(productItemId: ProductTableItem['id'], favorite: b
     if (!favorite && selectedItem.value?.type === 'product_favorites') {
       setSelectedProductItemId(null, false)
     }
-    toast.add({
-      severity: 'success',
-      summary: t(favorite ? 'product.table.favorites.added' : 'product.table.favorites.removed'),
-      life: 2500,
-    })
+    toast.success(
+      t(favorite ? 'product.table.favorites.added' : 'product.table.favorites.removed'),
+    )
   } catch (error) {
     if (error instanceof StaleAccountRequestError) return
-    toast.add({
-      severity: 'error',
-      summary: t('product.table.favorites.updateError'),
-      life: 3000,
-    })
+    toast.error(t('product.table.favorites.updateError'))
   }
 }
 
@@ -69,34 +60,28 @@ async function updateArchive(productItem: ProductTableItem, archived: boolean) {
       : await productItemArchiveStore.restore(productItem.id)
     if (!updated) return
     setSelectedProductItemId(null, false)
-    toast.add({
-      severity: 'success',
-      summary: t(
-        archived ? 'product.table.archive.archived' : 'product.table.archive.restored',
-      ),
-      life: 2500,
-    })
+    toast.success(
+      t(archived ? 'product.table.archive.archived' : 'product.table.archive.restored'),
+    )
   } catch (error) {
     if (error instanceof StaleAccountRequestError) return
     const status = (error as { status?: number }).status
-    toast.add({
-      severity: 'error',
-      summary: t(
+    toast.error(
+      t(
         status === 409
           ? 'product.table.archive.stockConflict'
           : 'product.table.archive.updateError',
       ),
-      life: 3500,
-    })
+    )
   }
 }
 
 function confirmArchive(productItem: ProductTableItem) {
-  confirm.require({
+  confirm.open({
     header: t('product.table.archive.confirmTitle'),
     message: t('product.table.archive.confirmMessage', { name: productItem.name }),
     icon: 'iconify tabler--archive',
-    rejectProps: { label: t('common.cancel'), severity: 'secondary', variant: 'text' },
+    showReject: false,
     acceptProps: { label: t('product.table.archive.archiveAction'), severity: 'danger' },
     accept: () => void updateArchive(productItem, true),
   })
@@ -133,8 +118,7 @@ function show(event: MouseEvent, productItem: ProductTableItem) {
           {
             label: t('product.table.archive.archiveAction'),
             icon: 'iconify tabler--archive',
-            disabled:
-              !canManageArchive.value || productItemArchiveStore.isPending(productItem.id),
+            disabled: !canManageArchive.value || productItemArchiveStore.isPending(productItem.id),
             command: () => confirmArchive(productItem),
           },
         ]

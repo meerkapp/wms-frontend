@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button, Tag } from 'primevue'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import BaseTile from '@/core/components/BaseTile.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useAppDialog } from '@/core/composables/useAppDialog'
@@ -18,7 +18,7 @@ const { checkUserPermissions } = authStore
 
 const { t } = useI18n()
 const dialog = useAppDialog()
-const toast = useToast()
+const toast = useAppToast()
 
 const strategyLabel = computed(() => {
   const map: Record<string, string> = {
@@ -46,7 +46,7 @@ const characteristicCount = computed(() =>
 
 const { mutate: update } = useMutation({
   mutation: (dto: UpdateProductTypeDto) => productTypeApi.update(props.productType.id, dto),
-  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+  onError: () => toast.error(t('common.error.network')),
 })
 
 function openEditDialog() {

@@ -1,6 +1,6 @@
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { useAppDialog } from '@/core/composables/useAppDialog'
 import { useNavigationStore } from '../stores/navigation.store'
 import { folderApi } from '../api/folder.api'
@@ -19,11 +19,11 @@ import ProductCollectionFormDialog from '../components/ProductCollectionFormDial
 export function useNavigationActions() {
   const { t } = useI18n()
   const dialog = useAppDialog()
-  const toast = useToast()
+  const toast = useAppToast()
   const navigationStore = useNavigationStore()
 
   const onError = () =>
-    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+    toast.error(t('common.error.network'))
 
   const { mutate: createFolder } = useMutation({
     mutation: (dto: CreateFolderDto) => folderApi.create(dto),

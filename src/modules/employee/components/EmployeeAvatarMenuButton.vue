@@ -2,8 +2,6 @@
 import { computed, ref } from 'vue'
 import { Button, Menu } from 'primevue'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
-import { useConfirm } from 'primevue/useconfirm'
 import { useI18n } from 'vue-i18n'
 import type { Employee } from '@meerkapp/wms-contracts'
 import EmployeeAvatar from './EmployeeAvatar.vue'
@@ -12,6 +10,8 @@ import { useEmployeeStore } from '@/modules/employee/stores/employee.store'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useAccountAvatarStore } from '@/modules/auth/stores/account-avatar.store'
 import { parseApiError } from '@/core/api/errors'
+import { useAppConfirm } from '@/core/composables/useAppConfirm'
+import { useAppToast } from '@/core/composables/useAppToast'
 
 const props = defineProps<{
   employee: Employee
@@ -19,8 +19,8 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const toast = useToast()
-const confirm = useConfirm()
+const toast = useAppToast()
+const confirm = useAppConfirm()
 const employeeStore = useEmployeeStore()
 const authStore = useAuthStore()
 const accountAvatarStore = useAccountAvatarStore()
@@ -32,14 +32,11 @@ const localAvatarUrl = ref<string | null>(props.employee.avatarUrl ?? null)
 
 function handleAvatarError(error: unknown) {
   selectedAvatarFile.value = null
-  toast.add({
-    severity: 'error',
-    summary:
-      parseApiError(error)?.status === 403
-        ? t('common.error.forbidden')
-        : t('common.error.network'),
-    life: 3000,
-  })
+  toast.error(
+    parseApiError(error)?.status === 403
+      ? t('common.error.forbidden')
+      : t('common.error.network'),
+  )
 }
 
 const { mutate: uploadAvatar, asyncStatus: uploadStatus } = useMutation({
@@ -60,7 +57,7 @@ const { mutate: uploadAvatar, asyncStatus: uploadStatus } = useMutation({
       await authStore.refresh()
     }
     selectedAvatarFile.value = null
-    toast.add({ severity: 'success', summary: t('employee.form.avatarUploaded'), life: 3000 })
+    toast.success(t('employee.form.avatarUploaded'))
   },
   onError: handleAvatarError,
 })
@@ -79,7 +76,7 @@ const { mutate: deleteAvatar, asyncStatus: deleteStatus } = useMutation({
         .catch((error) => console.error('[account-avatar:remove]', error))
       await authStore.refresh()
     }
-    toast.add({ severity: 'success', summary: t('employee.form.avatarDeleted'), life: 3000 })
+    toast.success(t('employee.form.avatarDeleted'))
   },
   onError: handleAvatarError,
 })
@@ -95,7 +92,7 @@ function onFileSelected(event: Event) {
 }
 
 function confirmDeleteAvatar() {
-  confirm.require({
+  confirm.open({
     message: t('employee.form.deleteAvatarConfirm'),
     icon: 'iconify tabler--alert-triangle',
     acceptProps: { severity: 'danger' },

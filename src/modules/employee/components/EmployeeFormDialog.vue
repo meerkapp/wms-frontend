@@ -2,7 +2,7 @@
 import { computed, inject, ref, type Ref } from 'vue'
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { useI18n } from 'vue-i18n'
 import type { CreateEmployeeDto, Employee, UpdateEmployeeDto } from '@meerkapp/wms-contracts'
 import EmployeeDialog from './EmployeeDialog.vue'
@@ -15,7 +15,7 @@ import { useAuthStore } from '@/modules/auth/stores/auth.store'
 const dialogRef = inject<Ref<DynamicDialogInstance>>('dialogRef')
 
 const { t } = useI18n()
-const toast = useToast()
+const toast = useAppToast()
 const authStore = useAuthStore()
 
 const employee = computed<Employee | undefined>(() => dialogRef?.value.data?.employee)
@@ -37,9 +37,9 @@ function handleEmployeeError(error: unknown) {
   if (apiError?.status === 409) {
     formRef.value?.setFieldError('email', t('employee.form.validation.emailInUse'))
   } else if (apiError?.status === 403) {
-    toast.add({ severity: 'error', summary: t('common.error.forbidden'), life: 3000 })
+    toast.error(t('common.error.forbidden'))
   } else {
-    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+    toast.error(t('common.error.network'))
   }
 }
 

@@ -3,7 +3,7 @@ import { computed, useId } from 'vue'
 import { Button, FloatLabel, MultiSelect, Select } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { useI18n } from 'vue-i18n'
 import { useCountries, useLocalities } from '@/modules/sync/composables/read-model.composables'
 import { getCountryFlag, getCountryName } from '@/modules/country/utils/country.utils'
@@ -38,7 +38,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const dialog = useDialog()
-const toast = useToast()
+const toast = useAppToast()
 const authStore = useAuthStore()
 const { checkUserPermissions } = authStore
 
@@ -82,7 +82,7 @@ const localityOptions = computed(() => {
 
 const { mutate: createLocality } = useMutation({
   mutation: (dto: CreateLocalityDto) => localityApi.create(dto),
-  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+  onError: () => toast.error(t('common.error.network')),
   onSuccess: (locality) => {
     if (!localities.value.some((l) => l.id === locality.id)) {
       localities.value = [...localities.value, locality]

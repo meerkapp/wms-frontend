@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { Button } from 'primevue'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 
 import BaseCard from '@/core/components/BaseCard.vue'
 import AppEmptyState from '@/core/components/AppEmptyState.vue'
@@ -18,13 +18,13 @@ import { useProductTypes } from '@/modules/sync/composables/read-model.composabl
 
 const { t } = useI18n()
 const dialog = useAppDialog()
-const toast = useToast()
+const toast = useAppToast()
 const authStore = useAuthStore()
 const { checkUserPermissions } = authStore
 
 const { mutate: create } = useMutation({
   mutation: (dto: CreateProductTypeDto) => productTypeApi.create(dto),
-  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+  onError: () => toast.error(t('common.error.network')),
 })
 
 function openCreateDialog() {

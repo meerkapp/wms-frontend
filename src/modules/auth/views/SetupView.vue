@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { Button, Fieldset, FloatLabel, InputText, Message, Password } from 'primevue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -16,7 +16,7 @@ import { useAuthStore } from '@/modules/auth/stores/auth.store'
 
 const { t } = useI18n()
 const router = useRouter()
-const toast = useToast()
+const toast = useAppToast()
 const auth = useAuthStore()
 
 const validationSchema = computed(() =>
@@ -64,7 +64,7 @@ const { mutate: setup, asyncStatus } = useMutation({
       lastName: lastName.value!,
     }),
   onError() {
-    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+    toast.error(t('common.error.network'))
   },
   async onSuccess(tokens) {
     if (await auth.activateSession(tokens.access_token)) {

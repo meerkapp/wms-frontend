@@ -11,9 +11,9 @@ import {
   Tag,
   Divider,
 } from 'primevue'
-import { useConfirm } from 'primevue/useconfirm'
 import { useI18n } from 'vue-i18n'
 import type { Characteristic } from '@meerkapp/wms-contracts'
+import { useAppConfirm } from '@/core/composables/useAppConfirm'
 
 type CharacteristicWithOptionIds = Characteristic & {
   options?: { label: string; value: string; _id?: string }[]
@@ -35,14 +35,13 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const confirm = useConfirm()
+const confirm = useAppConfirm()
 
 function confirmRemove() {
-  confirm.require({
+  confirm.open({
     message: t('product.type.form.characteristic.deleteConfirm'),
     header: t('product.type.form.characteristic.deleteTitle'),
     icon: 'iconify tabler--trash',
-    rejectProps: { label: t('common.cancel'), severity: 'secondary', variant: 'text' },
     acceptProps: { label: t('common.delete'), severity: 'danger' },
     accept: () => emit('remove'),
   })

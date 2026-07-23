@@ -3,7 +3,7 @@ import { inject, ref, nextTick, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { Message, IconField, InputIcon, InputText, Button, Checkbox } from 'primevue'
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { useI18n } from 'vue-i18n'
 import {
   productBarcodeRepository,
@@ -25,7 +25,7 @@ const productTableStore = useProductTableStore()
 const { setSelectedProductItemId, setSelectedFilterPresetKey } = productTableStore
 const { quickFilterValue, selectedFilterPresetKey } = storeToRefs(productTableStore)
 const { t } = useI18n()
-const toast = useToast()
+const toast = useAppToast()
 const authStore = useAuthStore()
 const productItemArchiveStore = useProductItemArchiveStore()
 
@@ -89,7 +89,7 @@ async function findByBarcode() {
       isInvalid.value = true
       return
     }
-    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+    toast.error(t('common.error.network'))
   } finally {
     isSearching.value = false
   }
@@ -117,12 +117,12 @@ async function findByBarcode() {
         {{ t('product.table.barcodeSearch.notFound') }}
       </Message>
     </div>
-    <div class="flex items-center gap-2">
+    <!-- <div class="flex items-center gap-2">
       <Checkbox v-model="openProductProfile" input-id="open_product_profile" binary />
       <label for="open_product_profile" class="cursor-pointer">
         {{ t('product.table.barcodeSearch.openProductProfile') }}
       </label>
-    </div>
+    </div> -->
     <Message v-if="selectedFilterPresetKey !== 'all'" size="small" severity="info">
       {{ t('product.table.barcodeSearch.resetFiltersHint') }}
     </Message>

@@ -4,9 +4,10 @@ import { onBeforeUnmount, onMounted, ref, watch, watchEffect } from 'vue'
 import { storeToRefs } from 'pinia'
 import { usePrimeVue } from 'primevue/config'
 import { useI18n } from 'vue-i18n'
-import { useToast } from 'primevue/usetoast'
 import { useRouter } from 'vue-router'
 import AppStatusBar from '@/core/components/AppStatusBar.vue'
+import { APP_CONFIRM_GROUP } from '@/core/composables/useAppConfirm'
+import { APP_TOAST_GROUP, useAppToast } from '@/core/composables/useAppToast'
 import { useConnectivityStore } from '@/core/stores/connectivity.store'
 import { useThemeStore } from '@/core/stores/theme.store'
 import { useAccountAvatarStore } from '@/modules/auth/stores/account-avatar.store'
@@ -22,11 +23,12 @@ const connectivityStore = useConnectivityStore()
 const accountAvatarStore = useAccountAvatarStore()
 const authStore = useAuthStore()
 const router = useRouter()
-const toast = useToast()
+const toast = useAppToast()
 const primevue = usePrimeVue()
 const { locale, t, tm } = useI18n()
 const { isDarkTheme } = storeToRefs(themeStore)
 const { status, statusColor } = storeToRefs(connectivityStore)
+const ACCOUNT_SESSION_TOAST_LIFE_MS = 4000
 
 // Tailwind v4 no longer exposes --tw-gradient-stops, so the connection
 // gradient is applied as plain CSS while the composition root owns both stores.
@@ -56,10 +58,8 @@ async function applyAccountTransition(transition: CrossTabAccountTransition) {
     await router.replace({
       name: accountIds.length > 0 ? 'account-selection' : 'login',
     })
-    toast.add({
-      severity: 'info',
-      summary: t('auth.accounts.signedOutInAnotherTab'),
-      life: 4000,
+    toast.info(t('auth.accounts.signedOutInAnotherTab'), {
+      life: ACCOUNT_SESSION_TOAST_LIFE_MS,
     })
     return
   }
@@ -67,10 +67,8 @@ async function applyAccountTransition(transition: CrossTabAccountTransition) {
   await router.replace({
     name: transition === 'activated-offline' ? 'workspace' : 'sync',
   })
-  toast.add({
-    severity: 'info',
-    summary: t('auth.accounts.switchedInAnotherTab'),
-    life: 4000,
+  toast.info(t('auth.accounts.switchedInAnotherTab'), {
+    life: ACCOUNT_SESSION_TOAST_LIFE_MS,
   })
 }
 
@@ -192,8 +190,40 @@ watch(
 <template>
   <div class="h-dvh flex flex-col overflow-hidden">
     <DynamicDialog :key="authStore.user?.sub ?? 'anonymous'" />
-    <ConfirmDialog :key="authStore.user?.sub ?? 'anonymous'" />
-    <Toast position="top-center" />
+    <ConfirmDialog
+      :key="authStore.user?.sub ?? 'anonymous'"
+      :group="APP_CONFIRM_GROUP"
+      :draggable="false"
+      style="width: min(34rem, calc(100vw - 2rem))"
+      :pt="{
+        root: { class: 'overflow-hidden rounded-2xl!' },
+        header: { class: 'px-5! pt-5! pb-3!' },
+        title: { class: 'text-xl!' },
+        content: { class: 'min-w-0 items-start! gap-4! px-5! py-3!' },
+        icon: { class: 'mt-0.5 shrink-0 text-3xl!' },
+        message: { class: 'min-w-0 whitespace-normal text-base! leading-relaxed' },
+        footer: { class: 'gap-2 px-5! pt-2! pb-5!' },
+        pcRejectButton: { root: { class: 'rounded-full!' } },
+        pcAcceptButton: { root: { class: 'rounded-full!' } },
+      }"
+    />
+    <Toast
+      :key="authStore.user?.sub ?? 'anonymous'"
+      :group="APP_TOAST_GROUP"
+      position="center"
+      :pt="{
+        root: { class: 'min-w-0! w-max! max-w-[calc(100vw-2rem)]!' },
+        message: {
+          class: 'm-0! w-max! max-w-full! shadow-lg!',
+        },
+        messageContent: { class: 'w-max! max-w-full! items-center! gap-3! px-4! py-2.5!' },
+        messageIcon: { class: 'shrink-0 text-xl! text-current!' },
+        messageText: { class: 'w-max! min-w-0 max-w-full!' },
+        summary: { class: 'whitespace-normal break-words text-sm! font-medium! leading-snug!' },
+        detail: { class: 'mt-0.5! text-sm! opacity-80' },
+        closeButton: { class: 'hidden!' },
+      }"
+    />
     <div class="flex-1 min-h-0">
       <router-view v-slot="{ Component }">
         <Transition

@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { Button } from 'primevue'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{ email: string; password: string }>()
 
 const { t } = useI18n()
-const toast = useToast()
+const toast = useAppToast()
 
 const copied = ref(false)
 const showPassword = ref(false)
@@ -19,7 +19,7 @@ async function copyCredentials() {
     copied.value = true
     setTimeout(() => (copied.value = false), 2000)
   } catch {
-    toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+    toast.error(t('common.error.network'))
   }
 }
 </script>

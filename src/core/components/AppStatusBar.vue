@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { Button, Tag } from 'primevue'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { useAppDialog } from '@/core/composables/useAppDialog'
 import { useAppUpdate } from '@/core/composables/useAppUpdate'
 import { useConnectivityStore } from '@/core/stores/connectivity.store'
@@ -13,7 +13,7 @@ import AppUpdateDialog from '@/core/components/AppUpdateDialog.vue'
 
 const { t } = useI18n()
 const dialog = useAppDialog()
-const toast = useToast()
+const toast = useAppToast()
 const connectivityStore = useConnectivityStore()
 const themeStore = useThemeStore()
 const { status } = storeToRefs(connectivityStore)
@@ -52,7 +52,7 @@ async function updateApplication() {
   try {
     await installUpdate()
   } catch {
-    toast.add({ severity: 'error', summary: t('app.update.failed'), life: 5000 })
+    toast.error(t('app.update.failed'))
   }
 }
 

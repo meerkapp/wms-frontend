@@ -7,7 +7,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { employeeApi } from '../api/employee.api'
 import EmployeePasswordInput from './EmployeePasswordInput.vue'
 import { parseApiError } from '@/core/api/errors'
@@ -15,7 +15,7 @@ import { parseApiError } from '@/core/api/errors'
 const dialogRef = inject<Ref<DynamicDialogInstance>>('dialogRef')
 
 const { t } = useI18n()
-const toast = useToast()
+const toast = useAppToast()
 
 const validationSchema = toTypedSchema(
   z.object({
@@ -37,7 +37,7 @@ const { mutate, asyncStatus } = useMutation({
   mutation: (dto: { currentPassword: string; newPassword: string }) =>
     employeeApi.updateMePassword(dto),
   onSuccess: () => {
-    toast.add({ severity: 'success', summary: t('employee.changePassword.success'), life: 3000 })
+    toast.success(t('employee.changePassword.success'))
     dialogRef?.value.close()
   },
   onError: (error) => {
@@ -45,7 +45,7 @@ const { mutate, asyncStatus } = useMutation({
     if (apiError?.status === 401) {
       setFieldError('currentPassword', t('employee.changePassword.validation.incorrectPassword'))
     } else {
-      toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+      toast.error(t('common.error.network'))
     }
   },
 })

@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { Button, Fieldset, FloatLabel, InputText, Message, Password } from 'primevue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -17,7 +17,7 @@ import { useAuthStore } from '@/modules/auth/stores/auth.store'
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
-const toast = useToast()
+const toast = useAppToast()
 const auth = useAuthStore()
 const isAddingAccount = computed(() => route.query.intent === 'add-account')
 
@@ -45,9 +45,9 @@ const { mutate: login, asyncStatus } = useMutation({
   onError(error: unknown) {
     const status = (error as { response?: { status?: number } })?.response?.status
     if (status === 401) {
-      toast.add({ severity: 'error', summary: t('auth.login.error'), life: 3000 })
+      toast.error(t('auth.login.error'))
     } else {
-      toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+      toast.error(t('common.error.network'))
     }
   },
   async onSuccess(tokens) {

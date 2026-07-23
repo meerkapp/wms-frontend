@@ -7,7 +7,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { useI18n } from 'vue-i18n'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import type { Role } from '@meerkapp/wms-contracts'
 import { roleApi } from '@/modules/employee/api/role.api'
 import EmployeeRoleColorSelect from './EmployeeRoleColorSelect.vue'
@@ -15,7 +15,7 @@ import EmployeeRoleColorSelect from './EmployeeRoleColorSelect.vue'
 const dialogRef = inject<Ref<DynamicDialogInstance>>('dialogRef')
 
 const { t } = useI18n()
-const toast = useToast()
+const toast = useAppToast()
 
 const existingRole = dialogRef?.value.data?.role as Role | undefined
 const isEdit = !!existingRole
@@ -39,7 +39,7 @@ const [name, nameAttrs] = defineField('name')
 const [color] = defineField('color')
 
 const onNetworkError = () =>
-  toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+  toast.error(t('common.error.network'))
 
 const { mutate: createRole } = useMutation({
   mutation: (dto: Parameters<typeof roleApi.create>[0]) => roleApi.create(dto),

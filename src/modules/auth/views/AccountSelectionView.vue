@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { Button, Fieldset, Listbox } from 'primevue'
 import BaseCard from '@/core/components/BaseCard.vue'
 import AppLogo from '@/core/components/AppLogo.vue'
@@ -22,7 +22,7 @@ interface AccountOption extends DeviceAccountSummary {
 
 const router = useRouter()
 const { t } = useI18n()
-const toast = useToast()
+const toast = useAppToast()
 const authStore = useAuthStore()
 const connectivityStore = useConnectivityStore()
 const { deviceAccounts, user, isOffline } = storeToRefs(authStore)
@@ -67,7 +67,7 @@ async function switchAccount() {
       await router.replace({ name: isOffline.value ? 'workspace' : 'sync' })
       return
     }
-    toast.add({ severity: 'error', summary: t('auth.accounts.switchFailed'), life: 3000 })
+    toast.error(t('auth.accounts.switchFailed'))
   } finally {
     switching.value = false
   }

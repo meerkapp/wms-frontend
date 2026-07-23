@@ -1,6 +1,6 @@
 import { toValue, type MaybeRefOrGetter } from 'vue'
 import { useMutation } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { useI18n } from 'vue-i18n'
 import type { Employee, UpdateEmployeeDto } from '@meerkapp/wms-contracts'
 import { employeeApi } from '../api/employee.api'
@@ -16,7 +16,7 @@ export function useEmployeeUpdate(
   onError?: (error: unknown) => void,
 ) {
   const { t } = useI18n()
-  const toast = useToast()
+  const toast = useAppToast()
   const employeeStore = useEmployeeStore()
   const authStore = useAuthStore()
 
@@ -36,7 +36,7 @@ export function useEmployeeUpdate(
       if (onError) {
         onError(error)
       } else {
-        toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 })
+        toast.error(t('common.error.network'))
       }
     },
   })

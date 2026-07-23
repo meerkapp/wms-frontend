@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { Button, Accordion, AccordionPanel, AccordionHeader, AccordionContent } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useMutation, useQueryCache } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { useI18n } from 'vue-i18n'
 import BaseCard from '@/core/components/BaseCard.vue'
 import AppEmptyState from '@/core/components/AppEmptyState.vue'
@@ -20,7 +20,7 @@ type WarehouseCreateFormResult = CreateWarehouseDto & { priceListId?: number | n
 
 const { t } = useI18n()
 const dialog = useDialog()
-const toast = useToast()
+const toast = useAppToast()
 const queryCache = useQueryCache()
 
 const authStore = useAuthStore()
@@ -65,7 +65,7 @@ const { mutate: createWarehouse } = useMutation({
     }
     return warehouse
   },
-  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+  onError: () => toast.error(t('common.error.network')),
 })
 
 function openCreateDialog() {

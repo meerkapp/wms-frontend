@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { Button, Message, Skeleton } from 'primevue'
 import { useI18n } from 'vue-i18n'
 import { useMutation, useQuery } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import type { FetchError } from 'ofetch'
 import type {
   CreatePriceListDto,
@@ -20,7 +20,7 @@ import PriceListFormDialog from './PriceListFormDialog.vue'
 
 const { t } = useI18n()
 const dialog = useAppDialog()
-const toast = useToast()
+const toast = useAppToast()
 const { checkUserPermissions } = useAuthStore()
 
 const {
@@ -44,15 +44,13 @@ function showMutationError(error: unknown) {
   const message = fetchError.data?.message ?? ''
   const isCurrencyConflict = message.includes('currency')
   const isAssignmentConflict = fetchError.response?.status === 409 && !isCurrencyConflict
-  toast.add({
-    severity: 'error',
-    summary: isCurrencyConflict
+  toast.error(
+    isCurrencyConflict
       ? t('price.list.error.currencyLocked')
       : isAssignmentConflict
         ? t('price.list.error.targetConflict')
         : t('common.error.network'),
-    life: 4000,
-  })
+  )
 }
 
 function retryLoad() {

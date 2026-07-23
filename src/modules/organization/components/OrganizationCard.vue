@@ -3,7 +3,7 @@ import { Button } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useI18n } from 'vue-i18n'
 import { useMutation, useQueryCache } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import BaseTile from '@/core/components/BaseTile.vue'
 import OrganizationFormDialog from './OrganizationFormDialog.vue'
 import OrganizationIcon from './OrganizationIcon.vue'
@@ -19,7 +19,7 @@ const props = defineProps<{ organization: Organization }>()
 
 const { t } = useI18n()
 const dialog = useDialog()
-const toast = useToast()
+const toast = useAppToast()
 const authStore = useAuthStore()
 const queryCache = useQueryCache()
 const { checkUserPermissions } = authStore
@@ -41,7 +41,7 @@ const { mutate: update } = useMutation({
     }
     return organization
   },
-  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+  onError: () => toast.error(t('common.error.network')),
 })
 
 function openEditDialog() {

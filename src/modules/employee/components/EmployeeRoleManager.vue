@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { Button } from 'primevue'
 import { useQuery, useMutation } from '@pinia/colada'
 import { useAppDialog } from '@/core/composables/useAppDialog'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import { useI18n } from 'vue-i18n'
 import type { Role, Permission } from '@meerkapp/wms-contracts'
 import { roleApi } from '@/modules/employee/api/role.api'
@@ -14,7 +14,7 @@ import { SUPERADMIN_ROLE_NAME } from '@/modules/employee/role.constants'
 
 const { t } = useI18n()
 const dialog = useAppDialog()
-const toast = useToast()
+const toast = useAppToast()
 const { checkUserPermissions } = useAuthStore()
 
 const { data: roles, refetch: refetchRoles } = useQuery({
@@ -63,7 +63,7 @@ const { mutate: updateRole } = useMutation({
     isEditing.value = false
     refetchRoles()
   },
-  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+  onError: () => toast.error(t('common.error.network')),
 })
 
 function savePermissions() {

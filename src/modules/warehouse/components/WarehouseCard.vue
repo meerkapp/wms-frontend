@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { Button } from 'primevue'
 import { useDialog } from 'primevue/usedialog'
 import { useMutation, useQueryCache } from '@pinia/colada'
-import { useToast } from 'primevue/usetoast'
+import { useAppToast } from '@/core/composables/useAppToast'
 import BaseTile from '@/core/components/BaseTile.vue'
 import WarehouseInfo from './WarehouseInfo.vue'
 import WarehouseFormDialog from './WarehouseFormDialog.vue'
@@ -21,7 +21,7 @@ const { checkUserPermissions } = authStore
 
 const { t } = useI18n()
 const dialog = useDialog()
-const toast = useToast()
+const toast = useAppToast()
 const queryCache = useQueryCache()
 
 const { mutate: updateWarehouse } = useMutation({
@@ -41,7 +41,7 @@ const { mutate: updateWarehouse } = useMutation({
     }
     return warehouse
   },
-  onError: () => toast.add({ severity: 'error', summary: t('common.error.network'), life: 3000 }),
+  onError: () => toast.error(t('common.error.network')),
 })
 
 function openEditDialog() {
