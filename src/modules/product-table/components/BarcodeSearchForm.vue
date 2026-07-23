@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject, ref, nextTick, type Ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { Message, IconField, InputIcon, InputText, Button, Checkbox } from 'primevue'
+import { Message, IconField, InputIcon, InputText, Button } from 'primevue'
 import type { DynamicDialogInstance } from 'primevue/dynamicdialogoptions'
 import { useAppToast } from '@/core/composables/useAppToast'
 import { useI18n } from 'vue-i18n'
@@ -32,8 +32,6 @@ const productItemArchiveStore = useProductItemArchiveStore()
 const barcode = ref('')
 const isInvalid = ref(false)
 const isSearching = ref(false)
-// TODO(product-profile): honor this option once the product profile is implemented.
-const openProductProfile = ref(false)
 
 async function findByBarcode() {
   const normalizedBarcode = barcode.value.trim()
@@ -117,12 +115,6 @@ async function findByBarcode() {
         {{ t('product.table.barcodeSearch.notFound') }}
       </Message>
     </div>
-    <!-- <div class="flex items-center gap-2">
-      <Checkbox v-model="openProductProfile" input-id="open_product_profile" binary />
-      <label for="open_product_profile" class="cursor-pointer">
-        {{ t('product.table.barcodeSearch.openProductProfile') }}
-      </label>
-    </div> -->
     <Message v-if="selectedFilterPresetKey !== 'all'" size="small" severity="info">
       {{ t('product.table.barcodeSearch.resetFiltersHint') }}
     </Message>
