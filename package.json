@@ -38,7 +38,7 @@
     "jwt-decode": "^4.0.0",
     "ofetch": "^1.5.1",
     "pinia": "^3.0.4",
-    "primevue": "^4.5.4",
+    "primevue": "4.5.4",
     "socket.io-client": "^4.8.3",
     "vee-validate": "^4.15.1",
     "vue": "^3.5.29",
