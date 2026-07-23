@@ -126,7 +126,7 @@
     "preparing": "Preparing synchronization…",
     "currentTable": "Synchronizing: {table}",
     "errorTitle": "Could not synchronize data",
-    "errorHint": "Check your connection and try again.",
+    "errorHint": "Try again. If the error persists, contact your administrator.",
     "technicalDetails": "Technical details",
     "tables": {
       "country": "Countries",
